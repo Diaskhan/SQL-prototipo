@@ -32,11 +32,11 @@
             panel1 = new Panel();
             tabControl1 = new TabControl();
             tabPage1 = new TabPage();
+            richTextBox2 = new RichTextBox();
             richTextBox1 = new RichTextBox();
             panel3 = new Panel();
             button1 = new Button();
             tabPage2 = new TabPage();
-            richTextBox2 = new RichTextBox();
             panel1.SuspendLayout();
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
@@ -50,6 +50,7 @@
             treeView1.Name = "treeView1";
             treeView1.Size = new Size(324, 577);
             treeView1.TabIndex = 0;
+            treeView1.AfterSelect += treeView1_AfterSelect;
             // 
             // panel1
             // 
@@ -84,6 +85,16 @@
             tabPage1.TabIndex = 0;
             tabPage1.Text = "tabPage1";
             tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // richTextBox2
+            // 
+            richTextBox2.BackColor = SystemColors.Info;
+            richTextBox2.Dock = DockStyle.Bottom;
+            richTextBox2.Location = new Point(3, 404);
+            richTextBox2.Name = "richTextBox2";
+            richTextBox2.Size = new Size(758, 142);
+            richTextBox2.TabIndex = 2;
+            richTextBox2.Text = "";
             // 
             // richTextBox1
             // 
@@ -123,16 +134,6 @@
             tabPage2.TabIndex = 1;
             tabPage2.Text = "tabPage2";
             tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // richTextBox2
-            // 
-            richTextBox2.BackColor = SystemColors.Info;
-            richTextBox2.Dock = DockStyle.Bottom;
-            richTextBox2.Location = new Point(3, 404);
-            richTextBox2.Name = "richTextBox2";
-            richTextBox2.Size = new Size(758, 142);
-            richTextBox2.TabIndex = 2;
-            richTextBox2.Text = "";
             // 
             // MainForm
             // 

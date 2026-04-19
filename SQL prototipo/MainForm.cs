@@ -7,9 +7,14 @@ public partial class MainForm : Form
     public MainForm()
     {
         InitializeComponent();
+        treeView1.NodeMouseDoubleClick += treeView1_NodeMouseDoubleClick;
     }
 
-  
+    private void treeView1_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
+    {
+        richTextBox1.Text = $"Select * from {e.Node.Text}";
+    }
+
     private void button1_Click_1(object sender, EventArgs e)
     {
         var dbService = new DatabaseService("Data Source=chinook.sqlite");
