@@ -30,8 +30,14 @@
         {
             treeView1 = new TreeView();
             panel1 = new Panel();
+            panel2 = new Panel();
             button1 = new Button();
+            tabControl1 = new TabControl();
+            tabPage1 = new TabPage();
+            tabPage2 = new TabPage();
             panel1.SuspendLayout();
+            panel2.SuspendLayout();
+            tabControl1.SuspendLayout();
             SuspendLayout();
             // 
             // treeView1
@@ -45,22 +51,65 @@
             // panel1
             // 
             panel1.BackColor = SystemColors.ButtonFace;
-            panel1.Controls.Add(button1);
+            panel1.Controls.Add(tabControl1);
+            panel1.Controls.Add(panel2);
             panel1.Dock = DockStyle.Fill;
             panel1.Location = new Point(324, 0);
             panel1.Name = "panel1";
             panel1.Size = new Size(772, 577);
             panel1.TabIndex = 1;
             // 
+            // panel2
+            // 
+            panel2.Controls.Add(button1);
+            panel2.Dock = DockStyle.Top;
+            panel2.Location = new Point(0, 0);
+            panel2.Name = "panel2";
+            panel2.Padding = new Padding(5);
+            panel2.Size = new Size(772, 68);
+            panel2.TabIndex = 2;
+            // 
             // button1
             // 
-            button1.Location = new Point(6, 12);
+            button1.Dock = DockStyle.Left;
+            button1.Location = new Point(5, 5);
             button1.Name = "button1";
-            button1.Size = new Size(138, 46);
-            button1.TabIndex = 0;
+            button1.Size = new Size(138, 58);
+            button1.TabIndex = 1;
             button1.Text = "Connect to localdb";
             button1.UseVisualStyleBackColor = true;
-            button1.Click += this.button1_Click_1;
+            button1.Click += button1_Click;
+            // 
+            // tabControl1
+            // 
+            tabControl1.Controls.Add(tabPage1);
+            tabControl1.Controls.Add(tabPage2);
+            tabControl1.Dock = DockStyle.Fill;
+            tabControl1.Location = new Point(0, 68);
+            tabControl1.Name = "tabControl1";
+            tabControl1.SelectedIndex = 0;
+            tabControl1.Size = new Size(772, 509);
+            tabControl1.TabIndex = 3;
+            // 
+            // tabPage1
+            // 
+            tabPage1.Location = new Point(4, 24);
+            tabPage1.Name = "tabPage1";
+            tabPage1.Padding = new Padding(3);
+            tabPage1.Size = new Size(764, 481);
+            tabPage1.TabIndex = 0;
+            tabPage1.Text = "tabPage1";
+            tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // tabPage2
+            // 
+            tabPage2.Location = new Point(4, 24);
+            tabPage2.Name = "tabPage2";
+            tabPage2.Padding = new Padding(3);
+            tabPage2.Size = new Size(764, 481);
+            tabPage2.TabIndex = 1;
+            tabPage2.Text = "tabPage2";
+            tabPage2.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
@@ -72,6 +121,8 @@
             Name = "MainForm";
             Text = "MainForm";
             panel1.ResumeLayout(false);
+            panel2.ResumeLayout(false);
+            tabControl1.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -80,6 +131,10 @@
 
         private TreeView treeView1;
         private Panel panel1;
+        private Panel panel2;
         private Button button1;
+        private TabControl tabControl1;
+        private TabPage tabPage1;
+        private TabPage tabPage2;
     }
 }

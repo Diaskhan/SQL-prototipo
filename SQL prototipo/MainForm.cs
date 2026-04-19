@@ -10,12 +10,24 @@ public partial class MainForm : Form
     }
 
 
-    private void button1_Click_1(object sender, EventArgs e)
+
+
+    private void button1_Click(object sender, EventArgs e)
     {
-        var dbService = new DatabaseService("chinook.sqlite");
+        var dbService = new DatabaseService("Data Source=chinook.sqlite");
         dbService.OpenLocalDBConnection();
         var tables = dbService.GetAllTables();
-        MessageBox.Show("Tables: " + string.Join(", ", tables));
-    }
 
+        treeView1.Nodes.Clear();
+        TreeNode rootNode = new TreeNode("Tables");
+        foreach (var table in tables)
+        {
+            rootNode.Nodes.Add(table);
+        }
+        treeView1.Nodes.Add(rootNode);
+        treeView1.ExpandAll();
+
+        //MessageBox.Show("Tables loaded: " + string.Join(", ", tables));
+
+    }
 }
