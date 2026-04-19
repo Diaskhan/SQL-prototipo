@@ -9,7 +9,8 @@ public partial class MainForm : Form
         InitializeComponent();
     }
 
-    private void button1_Click(object sender, EventArgs e)
+  
+    private void button1_Click_1(object sender, EventArgs e)
     {
         var dbService = new DatabaseService("Data Source=chinook.sqlite");
         dbService.OpenLocalDBConnection();
