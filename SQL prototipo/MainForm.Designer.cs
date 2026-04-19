@@ -30,6 +30,8 @@
         {
             treeView1 = new TreeView();
             panel1 = new Panel();
+            button1 = new Button();
+            panel1.SuspendLayout();
             SuspendLayout();
             // 
             // treeView1
@@ -43,11 +45,22 @@
             // panel1
             // 
             panel1.BackColor = SystemColors.ButtonFace;
+            panel1.Controls.Add(button1);
             panel1.Dock = DockStyle.Fill;
             panel1.Location = new Point(324, 0);
             panel1.Name = "panel1";
             panel1.Size = new Size(772, 577);
             panel1.TabIndex = 1;
+            // 
+            // button1
+            // 
+            button1.Location = new Point(6, 12);
+            button1.Name = "button1";
+            button1.Size = new Size(138, 46);
+            button1.TabIndex = 0;
+            button1.Text = "Connect to localdb";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += this.button1_Click_1;
             // 
             // MainForm
             // 
@@ -58,12 +71,15 @@
             Controls.Add(treeView1);
             Name = "MainForm";
             Text = "MainForm";
+            panel1.ResumeLayout(false);
             ResumeLayout(false);
         }
+
 
         #endregion
 
         private TreeView treeView1;
         private Panel panel1;
+        private Button button1;
     }
 }

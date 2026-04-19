@@ -10,20 +10,12 @@ public partial class MainForm : Form
     }
 
 
-    private void OpenLocalDBConnection()
+    private void button1_Click_1(object sender, EventArgs e)
     {
-        string connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=YourDatabaseName;Trusted_Connection=True;";
-        using (SqlConnection connection = new SqlConnection(connectionString))
-        {
-            try
-            {
-                connection.Open();
-                MessageBox.Show("Соединение открыто!");
-            }
-            catch (SqlException ex)
-            {
-                MessageBox.Show($"Ошибка при открытии соединения: {ex.Message}");
-            }
-        }
+        var dbService = new DatabaseService("chinook.sqlite");
+        dbService.OpenLocalDBConnection();
+        var tables = dbService.GetAllTables();
+        MessageBox.Show("Tables: " + string.Join(", ", tables));
     }
+
 }
