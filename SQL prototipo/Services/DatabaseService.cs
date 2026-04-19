@@ -40,7 +40,7 @@ public class DatabaseService
         return tables;
     }
 
-    public List<string> ExecuteQuery(string query)
+    public List<string> ExecuteQuery(string query, bool includeColumnNames = false)
     {
         var results = new List<string>();
         using (var connection = new SqliteConnection(_connectionString))
@@ -51,6 +51,12 @@ public class DatabaseService
 
             using (var reader = command.ExecuteReader())
             {
+                if (includeColumnNames)
+                {
+                    var columnNames = string.Join(" | ", Enumerable.Range(0, reader.FieldCount).Select(i => reader.GetName(i)));
+                    results.Add(columnNames);
+                }
+
                 while (reader.Read())
                 {
                     var row = string.Join(" | ", Enumerable.Range(0, reader.FieldCount).Select(i => reader.GetValue(i).ToString()));

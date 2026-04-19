@@ -19,7 +19,7 @@ public partial class MainForm : Form
     private void button2_Click(object sender, EventArgs e)
     {
         var dbService = new DatabaseService("Data Source=chinook.sqlite");
-        var results = dbService.ExecuteQuery(richTextBox1.Text);
+        var results = dbService.ExecuteQuery(richTextBox1.Text,true);
         richTextBox2.Text = string.Join(Environment.NewLine, results);
     }
 
