@@ -1,6 +1,6 @@
 using Microsoft.Data.Sqlite;
 
-namespace SQL_prototipo;
+namespace SQL_prototipo.Services;
 
 public class DatabaseService
 {
