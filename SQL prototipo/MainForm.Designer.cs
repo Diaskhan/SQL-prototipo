@@ -36,6 +36,7 @@
             richTextBox1 = new RichTextBox();
             panel3 = new Panel();
             button1 = new Button();
+            button2 = new Button();
             tabPage2 = new TabPage();
             panel1.SuspendLayout();
             tabControl1.SuspendLayout();
@@ -106,6 +107,7 @@
             // 
             // panel3
             // 
+            panel3.Controls.Add(button2);
             panel3.Controls.Add(button1);
             panel3.Dock = DockStyle.Top;
             panel3.Location = new Point(3, 3);
@@ -123,6 +125,17 @@
             button1.Text = "Connect to localdb";
             button1.UseVisualStyleBackColor = true;
             button1.Click += button1_Click_1;
+            // 
+            // button2
+            // 
+            button2.Dock = DockStyle.Left;
+            button2.Location = new Point(142, 0);
+            button2.Name = "button2";
+            button2.Size = new Size(142, 50);
+            button2.TabIndex = 3;
+            button2.Text = "Execute Query";
+            button2.UseVisualStyleBackColor = true;
+            button2.Click += button2_Click;
             // 
             // tabPage2
             // 
@@ -161,6 +174,7 @@
         private RichTextBox richTextBox1;
         private Panel panel3;
         private Button button1;
+        private Button button2;
         private RichTextBox richTextBox2;
     }
 }

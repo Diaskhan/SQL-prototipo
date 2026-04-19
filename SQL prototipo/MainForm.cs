@@ -16,6 +16,13 @@ public partial class MainForm : Form
         richTextBox1.Text = $"Select * from {e.Node.Text}";
     }
 
+    private void button2_Click(object sender, EventArgs e)
+    {
+        var dbService = new DatabaseService("Data Source=chinook.sqlite");
+        var results = dbService.ExecuteQuery(richTextBox1.Text);
+        richTextBox2.Text = string.Join(Environment.NewLine, results);
+    }
+
     private void button1_Click_1(object sender, EventArgs e)
     {
         var dbService = new DatabaseService("Data Source=chinook.sqlite");

@@ -39,4 +39,26 @@ public class DatabaseService
         }
         return tables;
     }
+
+    public List<string> ExecuteQuery(string query)
+    {
+        var results = new List<string>();
+        using (var connection = new SqliteConnection(_connectionString))
+        {
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = query;
+
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var row = string.Join(" | ", Enumerable.Range(0, reader.FieldCount).Select(i => reader.GetValue(i).ToString()));
+                    results.Add(row);
+                }
+            }
+        }
+        return results;
+    }
 }
+
