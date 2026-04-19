@@ -28,18 +28,42 @@
         /// </summary>
         private void InitializeComponent()
         {
+            treeView1 = new TreeView();
+            panel1 = new Panel();
             SuspendLayout();
+            // 
+            // treeView1
+            // 
+            treeView1.Dock = DockStyle.Left;
+            treeView1.Location = new Point(0, 0);
+            treeView1.Name = "treeView1";
+            treeView1.Size = new Size(324, 577);
+            treeView1.TabIndex = 0;
+            // 
+            // panel1
+            // 
+            panel1.BackColor = SystemColors.ButtonFace;
+            panel1.Dock = DockStyle.Fill;
+            panel1.Location = new Point(324, 0);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(772, 577);
+            panel1.TabIndex = 1;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1096, 577);
+            Controls.Add(panel1);
+            Controls.Add(treeView1);
             Name = "MainForm";
             Text = "MainForm";
             ResumeLayout(false);
         }
 
         #endregion
+
+        private TreeView treeView1;
+        private Panel panel1;
     }
 }
