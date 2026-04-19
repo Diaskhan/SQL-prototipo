@@ -9,9 +9,6 @@ public partial class MainForm : Form
         InitializeComponent();
     }
 
-
-
-
     private void button1_Click(object sender, EventArgs e)
     {
         var dbService = new DatabaseService("Data Source=chinook.sqlite");
@@ -26,8 +23,6 @@ public partial class MainForm : Form
         }
         treeView1.Nodes.Add(rootNode);
         treeView1.ExpandAll();
-
-        //MessageBox.Show("Tables loaded: " + string.Join(", ", tables));
 
     }
 }
