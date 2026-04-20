@@ -11,9 +11,12 @@ public partial class MainForm : Form
         treeView1.NodeMouseDoubleClick += treeView1_NodeMouseDoubleClick;
     }
 
-    private void treeView1_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
+    private void treeView1_NodeMouseDoubleClick(object? sender, TreeNodeMouseClickEventArgs e)
     {
-        richTextBox1.Text = $"Select * from {e.Node.Text}";
+        if (e.Node != null)
+        {
+            richTextBox1.Text = $"Select * from {e.Node.Text}";
+        }
     }
 
     private void button2_Click(object sender, EventArgs e)
