@@ -1,4 +1,5 @@
 using Microsoft.Data.Sqlite;
+using System.Data;
 
 namespace SQL_prototipo.Services;
 
@@ -65,6 +66,38 @@ public class DatabaseService
             }
         }
         return results;
+    }
+
+    public DataTable ExecuteQueryAsDataTable(string query)
+    {
+        var dataTable = new DataTable();
+        using (var connection = new SqliteConnection(_connectionString))
+        {
+            connection.Open();
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = query;
+                using (var reader = command.ExecuteReader())
+                {
+                    // Добавить колонки
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        dataTable.Columns.Add(reader.GetName(i), reader.GetFieldType(i));
+                    }
+                    // Добавить строки
+                    while (reader.Read())
+                    {
+                        var row = dataTable.NewRow();
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            row[i] = reader.GetValue(i);
+                        }
+                        dataTable.Rows.Add(row);
+                    }
+                }
+            }
+        }
+        return dataTable;
     }
 }
 
