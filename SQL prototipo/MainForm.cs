@@ -25,16 +25,10 @@ public partial class MainForm : Form
 
     private void button2_Click(object sender, EventArgs e)
     {
-        try
-        {
             _dbService.OpenLocalDBConnection();
-            var results = _dbService.ExecuteQuery(richTextBox1.Text, true);
-            richTextBox2.Text = string.Join(Environment.NewLine, results);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Ошибка выполнения запроса: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
+            var results = _dbService.ExecuteQueryAsDataTable(richTextBox1.Text);
+            dataGridView1.DataSource = results;
+        
     }
 
     private void button1_Click_1(object sender, EventArgs e)

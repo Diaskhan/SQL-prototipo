@@ -32,15 +32,16 @@
             panel1 = new Panel();
             tabControl1 = new TabControl();
             tabPage1 = new TabPage();
-            richTextBox2 = new RichTextBox();
+            dataGridView1 = new DataGridView();
             richTextBox1 = new RichTextBox();
             panel3 = new Panel();
-            button1 = new Button();
             button2 = new Button();
+            button1 = new Button();
             tabPage2 = new TabPage();
             panel1.SuspendLayout();
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             panel3.SuspendLayout();
             SuspendLayout();
             // 
@@ -75,7 +76,7 @@
             // 
             // tabPage1
             // 
-            tabPage1.Controls.Add(richTextBox2);
+            tabPage1.Controls.Add(dataGridView1);
             tabPage1.Controls.Add(richTextBox1);
             tabPage1.Controls.Add(panel3);
             tabPage1.Location = new Point(4, 24);
@@ -86,15 +87,14 @@
             tabPage1.Text = "tabPage1";
             tabPage1.UseVisualStyleBackColor = true;
             // 
-            // richTextBox2
+            // dataGridView1
             // 
-            richTextBox2.BackColor = SystemColors.Info;
-            richTextBox2.Dock = DockStyle.Bottom;
-            richTextBox2.Location = new Point(3, 404);
-            richTextBox2.Name = "richTextBox2";
-            richTextBox2.Size = new Size(758, 142);
-            richTextBox2.TabIndex = 2;
-            richTextBox2.Text = "";
+            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView1.Dock = DockStyle.Bottom;
+            dataGridView1.Location = new Point(3, 404);
+            dataGridView1.Name = "dataGridView1";
+            dataGridView1.Size = new Size(758, 142);
+            dataGridView1.TabIndex = 2;
             // 
             // richTextBox1
             // 
@@ -115,17 +115,6 @@
             panel3.Size = new Size(758, 50);
             panel3.TabIndex = 1;
             // 
-            // button1
-            // 
-            button1.Dock = DockStyle.Left;
-            button1.Location = new Point(0, 0);
-            button1.Name = "button1";
-            button1.Size = new Size(142, 50);
-            button1.TabIndex = 2;
-            button1.Text = "Connect to localdb";
-            button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click_1;
-            // 
             // button2
             // 
             button2.Dock = DockStyle.Left;
@@ -136,6 +125,17 @@
             button2.Text = "Execute Query";
             button2.UseVisualStyleBackColor = true;
             button2.Click += button2_Click;
+            // 
+            // button1
+            // 
+            button1.Dock = DockStyle.Left;
+            button1.Location = new Point(0, 0);
+            button1.Name = "button1";
+            button1.Size = new Size(142, 50);
+            button1.TabIndex = 2;
+            button1.Text = "Connect to localdb";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click_1;
             // 
             // tabPage2
             // 
@@ -159,6 +159,7 @@
             panel1.ResumeLayout(false);
             tabControl1.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
             panel3.ResumeLayout(false);
             ResumeLayout(false);
         }
@@ -175,6 +176,6 @@
         private Panel panel3;
         private Button button1;
         private Button button2;
-        private RichTextBox richTextBox2;
+        private DataGridView dataGridView1;
     }
 }
