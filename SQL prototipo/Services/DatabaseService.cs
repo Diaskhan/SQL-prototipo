@@ -99,5 +99,76 @@ public class DatabaseService
         }
         return dataTable;
     }
+
+    public async Task<List<string>> ExecuteQueryAsync(string query)
+    {
+        var results = new List<string>();
+        try
+        {
+            using var connection = CreateConnection();
+            await connection.OpenAsync();
+            using var command = connection.CreateCommand();
+            command.CommandText = query;
+
+            using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                // Пример: собираем все колонки в строку
+                var row = Enumerable.Range(0, reader.FieldCount)
+                    .Select(i => $"{reader.GetName(i)}: {reader.GetValue(i)}")
+                    .ToList();
+                results.Add(string.Join(", ", row));
+            }
+        }
+        catch (Exception ex)
+        {
+            // Здесь должна быть ваша логика логирования (например, Serilog или NLog)
+            throw new Exception($"Ошибка при выполнении запроса: {ex.Message}", ex);
+        }
+        return results;
+    }
+
+    public async Task<DataTable> GetDataTableAsync(string query)
+    {
+        var dataTable = new DataTable();
+        try
+        {
+            using var connection = CreateConnection();
+            await connection.OpenAsync();
+            using var command = connection.CreateCommand();
+            command.CommandText = query;
+
+            using var reader = await command.ExecuteReaderAsync();
+            dataTable.Load(reader);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Ошибка при получении данных: {ex.Message}", ex);
+        }
+        return dataTable;
+    }
+
+    public async Task<List<string>> ExecuteQueryToListAsync(string query)
+    {
+        var results = new List<string>();
+        using var connection = CreateConnection();
+        await connection.OpenAsync();
+        using var command = connection.CreateCommand();
+        command.CommandText = query;
+
+        using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            var values = new List<object>();
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                values.Add(reader.GetValue(i));
+            }
+            results.Add(string.Join("|", values));
+        }
+        return results;
+    }
+
+    private SqliteConnection CreateConnection() => new SqliteConnection(_connectionString);
 }
 
