@@ -1,7 +1,9 @@
-using Microsoft.Data.Sqlite;
+using System;
+using System.Collections.Generic;
 using System.Data;
-
-namespace SQL_prototipo.Services;
+using System.Data.SqlClient;
+using System.Linq;
+using Microsoft.Data.SqlClient;
 
 public class DatabaseService
 {
@@ -14,21 +16,20 @@ public class DatabaseService
 
     public void OpenLocalDBConnection()
     {
-        using (var connection = new SqliteConnection(_connectionString))
+        using (var connection = new SqlConnection(_connectionString))
         {
             connection.Open();
-
         }
     }
 
     public List<string> GetAllTables()
     {
         var tables = new List<string>();
-        using (var connection = new SqliteConnection(_connectionString))
+        using (var connection = new SqlConnection(_connectionString))
         {
             connection.Open();
             var command = connection.CreateCommand();
-            command.CommandText = "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';";
+            command.CommandText = "SELECT name FROM sys.tables WHERE name NOT LIKE 'sys%'";
 
             using (var reader = command.ExecuteReader())
             {
@@ -44,7 +45,7 @@ public class DatabaseService
     public List<string> ExecuteQuery(string query, bool includeColumnNames = false)
     {
         var results = new List<string>();
-        using (var connection = new SqliteConnection(_connectionString))
+        using (var connection = new SqlConnection(_connectionString))
         {
             connection.Open();
             var command = connection.CreateCommand();
@@ -71,7 +72,7 @@ public class DatabaseService
     public DataTable ExecuteQueryAsDataTable(string query)
     {
         var dataTable = new DataTable();
-        using (var connection = new SqliteConnection(_connectionString))
+        using (var connection = new SqlConnection(_connectionString))
         {
             connection.Open();
             using (var command = connection.CreateCommand())
@@ -79,12 +80,10 @@ public class DatabaseService
                 command.CommandText = query;
                 using (var reader = command.ExecuteReader())
                 {
-                    // Добавить колонки
                     for (int i = 0; i < reader.FieldCount; i++)
                     {
                         dataTable.Columns.Add(reader.GetName(i), reader.GetFieldType(i));
                     }
-                    // Добавить строки
                     while (reader.Read())
                     {
                         var row = dataTable.NewRow();
@@ -105,7 +104,7 @@ public class DatabaseService
         var results = new List<string>();
         try
         {
-            using var connection = CreateConnection();
+            using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
             using var command = connection.CreateCommand();
             command.CommandText = query;
@@ -113,7 +112,6 @@ public class DatabaseService
             using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-            
                 var row = Enumerable.Range(0, reader.FieldCount)
                     .Select(i => $"{reader.GetName(i)}: {reader.GetValue(i)}")
                     .ToList();
@@ -122,7 +120,6 @@ public class DatabaseService
         }
         catch (Exception ex)
         {
-        
             throw new Exception($"Ошибка при выполнении запроса: {ex.Message}", ex);
         }
         return results;
@@ -133,7 +130,7 @@ public class DatabaseService
         var dataTable = new DataTable();
         try
         {
-            using var connection = CreateConnection();
+            using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
             using var command = connection.CreateCommand();
             command.CommandText = query;
@@ -151,7 +148,7 @@ public class DatabaseService
     public async Task<List<string>> ExecuteQueryToListAsync(string query)
     {
         var results = new List<string>();
-        using var connection = CreateConnection();
+        using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync();
         using var command = connection.CreateCommand();
         command.CommandText = query;
@@ -164,11 +161,8 @@ public class DatabaseService
             {
                 values.Add(reader.GetValue(i));
             }
-            results.Add(string.Join("|", values));
+            results.Add(string.Join(", ", values));
         }
         return results;
     }
-
-    private SqliteConnection CreateConnection() => new SqliteConnection(_connectionString);
 }
-
