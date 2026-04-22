@@ -124,7 +124,7 @@
             button2.TabIndex = 3;
             button2.Text = "Execute Query";
             button2.UseVisualStyleBackColor = true;
-            button2.Click += button2_Click;
+            button2.Click += btnExecuteQuery_Click;
             // 
             // button1
             // 
@@ -135,7 +135,7 @@
             button1.TabIndex = 2;
             button1.Text = "Connect to localdb";
             button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click_1;
+            button1.Click += btnLoadTables_Click;
             // 
             // tabPage2
             // 
