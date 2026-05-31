@@ -21,7 +21,23 @@ public partial class MainForm : Form
 
     private void LoadConnectionsToUI()
     {
-        // Load connections into listbox
+        // Load connections into treeView1
+        treeView1.Nodes.Clear();
+        TreeNode connectionsRoot = new TreeNode("Connections");
+
+        foreach (var connection in _connectionManager.Connections)
+        {
+            TreeNode connectionNode = new TreeNode(connection.Name)
+            {
+                Tag = connection
+            };
+            connectionsRoot.Nodes.Add(connectionNode);
+        }
+
+        treeView1.Nodes.Add(connectionsRoot);
+        treeView1.ExpandAll();
+
+        // Also load into listbox and combobox for the Connections tab
         listBoxConnections.Items.Clear();
         cmbConnections.Items.Clear();
 
@@ -46,11 +62,85 @@ public partial class MainForm : Form
         LoadConnectionsToUI();
     }
 
-    private void TreeView1_NodeMouseDoubleClick(object? sender, TreeNodeMouseClickEventArgs e)
+    private async void TreeView1_NodeMouseDoubleClick(object? sender, TreeNodeMouseClickEventArgs e)
     {
-        if (e.Node != null && e.Node.Parent != null)
+        if (e.Node == null) return;
+
+        // If clicked on a table (child of Tables node), generate SELECT query
+        if (e.Node.Parent != null && e.Node.Parent.Text == "Tables")
         {
             richTextBox1.Text = $"SELECT * FROM {e.Node.Text};";
+            return;
+        }
+
+        // If clicked on a connection node, load its tables
+        if (e.Node.Tag is ConnectionInfo connection)
+        {
+            await LoadTablesForConnection(connection);
+            return;
+        }
+
+        // If clicked on Connections root, do nothing
+        if (e.Node.Text == "Connections")
+        {
+            return;
+        }
+    }
+
+    private async Task LoadTablesForConnection(ConnectionInfo connection)
+    {
+        try
+        {
+            ToggleUiState(false);
+
+            // Switch to the selected connection
+            _currentConnectionString = connection.ConnectionString;
+            _dbService = new DatabaseService(_currentConnectionString);
+
+            // Load tables from this connection
+            var tables = await _dbService.GetAllTablesAsync();
+
+            // Update treeView1 to show connection with its tables
+            treeView1.Nodes.Clear();
+            TreeNode connectionsRoot = new TreeNode("Connections");
+
+            foreach (var conn in _connectionManager.Connections)
+            {
+                TreeNode connectionNode = new TreeNode(conn.Name)
+                {
+                    Tag = conn
+                };
+
+                // If this is the current connection, add its tables
+                if (conn.Name == connection.Name)
+                {
+                    TreeNode tablesNode = new TreeNode("Tables");
+                    foreach (var table in tables)
+                    {
+                        tablesNode.Nodes.Add(table);
+                    }
+                    connectionNode.Nodes.Add(tablesNode);
+                }
+
+                connectionsRoot.Nodes.Add(connectionNode);
+            }
+
+            treeView1.Nodes.Add(connectionsRoot);
+            treeView1.ExpandAll();
+
+            // Also update the Connections tab combobox
+            if (cmbConnections.Items.Count > 0)
+            {
+                cmbConnections.SelectedItem = connection;
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Ошибка загрузки таблиц: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        finally
+        {
+            ToggleUiState(true);
         }
     }
 
@@ -137,6 +227,7 @@ public partial class MainForm : Form
             txtConnectionString.Clear();
             cmbConnectionType.SelectedIndex = 0;
             RefreshConnectionsList();
+            LoadConnectionsToUI();
         }
         catch (InvalidOperationException ex)
         {
@@ -166,6 +257,7 @@ public partial class MainForm : Form
                 _connectionManager.DeleteConnection(selectedConnection.Name);
                 MessageBox.Show("Connection deleted successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 RefreshConnectionsList();
+                LoadConnectionsToUI();
 
                 // Clear inputs
                 txtConnectionName.Clear();
@@ -197,8 +289,9 @@ public partial class MainForm : Form
             {
                 _currentConnectionString = connection.ConnectionString;
                 _dbService = new DatabaseService(_currentConnectionString);
-                treeView1.Nodes.Clear();
-                MessageBox.Show($"Switched to connection: {connection.Name}", "Connection Changed", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                // Load tables for this connection
+                LoadTablesForConnection(connection);
             }
             catch (Exception ex)
             {
