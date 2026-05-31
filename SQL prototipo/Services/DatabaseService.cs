@@ -5,14 +5,14 @@ namespace SQL_prototipo.Services;
 
 public class DatabaseService
 {
-    private readonly string _сonnectionString;
+    private readonly string _connectionString;
 
     public DatabaseService(string connectionString)
     {
-        _сonnectionString = connectionString;
+        _connectionString = connectionString;
     }
 
-    private SqliteConnection CreateConnection() => new SqliteConnection(_сonnectionString);
+    private SqliteConnection CreateConnection() => new SqliteConnection(_connectionString);
 
     public async Task<List<string>> GetAllTablesAsync()
     {

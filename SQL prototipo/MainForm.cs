@@ -16,7 +16,7 @@ public partial class MainForm : Form
 
     private void TreeView1_NodeMouseDoubleClick(object? sender, TreeNodeMouseClickEventArgs e)
     {
-        if (e.Node != null)
+        if (e.Node != null && e.Node.Parent != null)
         {
             richTextBox1.Text = $"SELECT * FROM {e.Node.Text};";
         }
