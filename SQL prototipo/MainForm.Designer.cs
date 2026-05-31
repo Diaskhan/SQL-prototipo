@@ -1,4 +1,4 @@
-﻿namespace SQL_prototipo
+namespace SQL_prototipo
 {
     partial class MainForm
     {
@@ -38,11 +38,25 @@
             button2 = new Button();
             button1 = new Button();
             tabPage2 = new TabPage();
+            panel4 = new Panel();
+            label4 = new Label();
+            cmbConnectionType = new ComboBox();
+            label3 = new Label();
+            cmbConnections = new ComboBox();
+            txtConnectionString = new TextBox();
+            label2 = new Label();
+            txtConnectionName = new TextBox();
+            label1 = new Label();
+            btnDeleteConnection = new Button();
+            btnAddConnection = new Button();
+            listBoxConnections = new ListBox();
             panel1.SuspendLayout();
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             panel3.SuspendLayout();
+            tabPage2.SuspendLayout();
+            panel4.SuspendLayout();
             SuspendLayout();
             // 
             // treeView1
@@ -84,7 +98,7 @@
             tabPage1.Padding = new Padding(3);
             tabPage1.Size = new Size(764, 549);
             tabPage1.TabIndex = 0;
-            tabPage1.Text = "tabPage1";
+            tabPage1.Text = "Query";
             tabPage1.UseVisualStyleBackColor = true;
             // 
             // dataGridView1
@@ -101,7 +115,7 @@
             richTextBox1.Dock = DockStyle.Fill;
             richTextBox1.Location = new Point(3, 53);
             richTextBox1.Name = "richTextBox1";
-            richTextBox1.Size = new Size(758, 493);
+            richTextBox1.Size = new Size(758, 348);
             richTextBox1.TabIndex = 0;
             richTextBox1.Text = "";
             // 
@@ -133,19 +147,143 @@
             button1.Name = "button1";
             button1.Size = new Size(142, 50);
             button1.TabIndex = 2;
-            button1.Text = "Connect to localdb";
+            button1.Text = "Load Tables";
             button1.UseVisualStyleBackColor = true;
             button1.Click += btnLoadTables_Click;
             // 
             // tabPage2
             // 
+            tabPage2.Controls.Add(panel4);
+            tabPage2.Controls.Add(listBoxConnections);
             tabPage2.Location = new Point(4, 24);
             tabPage2.Name = "tabPage2";
             tabPage2.Padding = new Padding(3);
             tabPage2.Size = new Size(764, 549);
             tabPage2.TabIndex = 1;
-            tabPage2.Text = "tabPage2";
+            tabPage2.Text = "Connections";
             tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // panel4
+            // 
+            panel4.Controls.Add(label4);
+            panel4.Controls.Add(cmbConnectionType);
+            panel4.Controls.Add(label3);
+            panel4.Controls.Add(cmbConnections);
+            panel4.Controls.Add(txtConnectionString);
+            panel4.Controls.Add(label2);
+            panel4.Controls.Add(txtConnectionName);
+            panel4.Controls.Add(label1);
+            panel4.Controls.Add(btnDeleteConnection);
+            panel4.Controls.Add(btnAddConnection);
+            panel4.Dock = DockStyle.Right;
+            panel4.Location = new Point(400, 3);
+            panel4.Name = "panel4";
+            panel4.Size = new Size(361, 543);
+            panel4.TabIndex = 1;
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Location = new Point(10, 110);
+            label4.Name = "label4";
+            label4.Size = new Size(79, 15);
+            label4.TabIndex = 9;
+            label4.Text = "Database Type";
+            // 
+            // cmbConnectionType
+            // 
+            cmbConnectionType.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbConnectionType.FormattingEnabled = true;
+            cmbConnectionType.Items.AddRange(new object[] { "SQLite", "SqlServer", "MySQL", "PostgreSQL" });
+            cmbConnectionType.Location = new Point(10, 130);
+            cmbConnectionType.Name = "cmbConnectionType";
+            cmbConnectionType.Size = new Size(341, 23);
+            cmbConnectionType.TabIndex = 8;
+            cmbConnectionType.SelectedIndex = 0;
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Location = new Point(10, 160);
+            label3.Name = "label3";
+            label3.Size = new Size(113, 15);
+            label3.TabIndex = 7;
+            label3.Text = "Switch Connection";
+            // 
+            // cmbConnections
+            // 
+            cmbConnections.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbConnections.FormattingEnabled = true;
+            cmbConnections.Location = new Point(10, 180);
+            cmbConnections.Name = "cmbConnections";
+            cmbConnections.Size = new Size(341, 23);
+            cmbConnections.TabIndex = 6;
+            cmbConnections.SelectedIndexChanged += cmbConnections_SelectedIndexChanged;
+            // 
+            // txtConnectionString
+            // 
+            txtConnectionString.Location = new Point(10, 70);
+            txtConnectionString.Name = "txtConnectionString";
+            txtConnectionString.PlaceholderText = "e.g., Data Source=mydb.sqlite";
+            txtConnectionString.Size = new Size(341, 23);
+            txtConnectionString.TabIndex = 5;
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Location = new Point(10, 50);
+            label2.Name = "label2";
+            label2.Size = new Size(100, 15);
+            label2.TabIndex = 4;
+            label2.Text = "Connection String";
+            // 
+            // txtConnectionName
+            // 
+            txtConnectionName.Location = new Point(10, 25);
+            txtConnectionName.Name = "txtConnectionName";
+            txtConnectionName.PlaceholderText = "Connection name";
+            txtConnectionName.Size = new Size(341, 23);
+            txtConnectionName.TabIndex = 3;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(10, 5);
+            label1.Name = "label1";
+            label1.Size = new Size(68, 15);
+            label1.TabIndex = 2;
+            label1.Text = "Conn. Name";
+            // 
+            // btnDeleteConnection
+            // 
+            btnDeleteConnection.Location = new Point(186, 210);
+            btnDeleteConnection.Name = "btnDeleteConnection";
+            btnDeleteConnection.Size = new Size(165, 40);
+            btnDeleteConnection.TabIndex = 1;
+            btnDeleteConnection.Text = "Delete Connection";
+            btnDeleteConnection.UseVisualStyleBackColor = true;
+            btnDeleteConnection.Click += btnDeleteConnection_Click;
+            // 
+            // btnAddConnection
+            // 
+            btnAddConnection.Location = new Point(10, 210);
+            btnAddConnection.Name = "btnAddConnection";
+            btnAddConnection.Size = new Size(165, 40);
+            btnAddConnection.TabIndex = 0;
+            btnAddConnection.Text = "Add Connection";
+            btnAddConnection.UseVisualStyleBackColor = true;
+            btnAddConnection.Click += btnAddConnection_Click;
+            // 
+            // listBoxConnections
+            // 
+            listBoxConnections.Dock = DockStyle.Fill;
+            listBoxConnections.FormattingEnabled = true;
+            listBoxConnections.ItemHeight = 15;
+            listBoxConnections.Location = new Point(3, 3);
+            listBoxConnections.Name = "listBoxConnections";
+            listBoxConnections.Size = new Size(397, 543);
+            listBoxConnections.TabIndex = 0;
+            listBoxConnections.SelectedIndexChanged += listBoxConnections_SelectedIndexChanged;
             // 
             // MainForm
             // 
@@ -155,12 +293,15 @@
             Controls.Add(panel1);
             Controls.Add(treeView1);
             Name = "MainForm";
-            Text = "MainForm";
+            Text = "Database Manager";
             panel1.ResumeLayout(false);
             tabControl1.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
             panel3.ResumeLayout(false);
+            tabPage2.ResumeLayout(false);
+            panel4.ResumeLayout(false);
+            panel4.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -177,5 +318,17 @@
         private Button button1;
         private Button button2;
         private DataGridView dataGridView1;
+        private Panel panel4;
+        private Label label4;
+        private ComboBox cmbConnectionType;
+        private Label label3;
+        private ComboBox cmbConnections;
+        private TextBox txtConnectionString;
+        private Label label2;
+        private TextBox txtConnectionName;
+        private Label label1;
+        private Button btnDeleteConnection;
+        private Button btnAddConnection;
+        private ListBox listBoxConnections;
     }
 }
