@@ -105,9 +105,9 @@ namespace SQL_prototipo
             // 
             dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridView1.Dock = DockStyle.Bottom;
-            dataGridView1.Location = new Point(3, 404);
+            dataGridView1.Location = new Point(3, 296);
             dataGridView1.Name = "dataGridView1";
-            dataGridView1.Size = new Size(758, 142);
+            dataGridView1.Size = new Size(758, 250);
             dataGridView1.TabIndex = 2;
             // 
             // richTextBox1
@@ -115,7 +115,7 @@ namespace SQL_prototipo
             richTextBox1.Dock = DockStyle.Fill;
             richTextBox1.Location = new Point(3, 53);
             richTextBox1.Name = "richTextBox1";
-            richTextBox1.Size = new Size(758, 348);
+            richTextBox1.Size = new Size(758, 493);
             richTextBox1.TabIndex = 0;
             richTextBox1.Text = "";
             // 
@@ -186,7 +186,7 @@ namespace SQL_prototipo
             label4.AutoSize = true;
             label4.Location = new Point(10, 110);
             label4.Name = "label4";
-            label4.Size = new Size(79, 15);
+            label4.Size = new Size(83, 15);
             label4.TabIndex = 9;
             label4.Text = "Database Type";
             // 
@@ -199,14 +199,13 @@ namespace SQL_prototipo
             cmbConnectionType.Name = "cmbConnectionType";
             cmbConnectionType.Size = new Size(341, 23);
             cmbConnectionType.TabIndex = 8;
-            cmbConnectionType.SelectedIndex = 0;
             // 
             // label3
             // 
             label3.AutoSize = true;
             label3.Location = new Point(10, 160);
             label3.Name = "label3";
-            label3.Size = new Size(113, 15);
+            label3.Size = new Size(107, 15);
             label3.TabIndex = 7;
             label3.Text = "Switch Connection";
             // 
@@ -233,7 +232,7 @@ namespace SQL_prototipo
             label2.AutoSize = true;
             label2.Location = new Point(10, 50);
             label2.Name = "label2";
-            label2.Size = new Size(100, 15);
+            label2.Size = new Size(103, 15);
             label2.TabIndex = 4;
             label2.Text = "Connection String";
             // 
@@ -250,7 +249,7 @@ namespace SQL_prototipo
             label1.AutoSize = true;
             label1.Location = new Point(10, 5);
             label1.Name = "label1";
-            label1.Size = new Size(68, 15);
+            label1.Size = new Size(74, 15);
             label1.TabIndex = 2;
             label1.Text = "Conn. Name";
             // 
@@ -278,10 +277,9 @@ namespace SQL_prototipo
             // 
             listBoxConnections.Dock = DockStyle.Fill;
             listBoxConnections.FormattingEnabled = true;
-            listBoxConnections.ItemHeight = 15;
             listBoxConnections.Location = new Point(3, 3);
             listBoxConnections.Name = "listBoxConnections";
-            listBoxConnections.Size = new Size(397, 543);
+            listBoxConnections.Size = new Size(758, 543);
             listBoxConnections.TabIndex = 0;
             listBoxConnections.SelectedIndexChanged += listBoxConnections_SelectedIndexChanged;
             // 
