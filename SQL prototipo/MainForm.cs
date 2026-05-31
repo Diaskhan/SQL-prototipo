@@ -12,6 +12,7 @@ public partial class MainForm : Form
     private ConnectionManager _connectionManager;
     private string _currentConnectionString = "Data Source=chinook.sqlite";
     private ConnectionInfo? _activeConnection;
+    private bool _isLoadingUI = false;
 
     public MainForm()
     {
@@ -75,11 +76,20 @@ public partial class MainForm : Form
         }
 
         // If there are connections, select the first one
-        if (cmbConnections.Items.Count > 0)
+        // Use _isLoadingUI flag to prevent SelectedIndexChanged from triggering a table load
+        _isLoadingUI = true;
+        try
         {
-            cmbConnections.SelectedIndex = 0;
-            if (listBoxConnections.Items.Count > 0)
-                listBoxConnections.SelectedIndex = 0;
+            if (cmbConnections.Items.Count > 0)
+            {
+                cmbConnections.SelectedIndex = 0;
+                if (listBoxConnections.Items.Count > 0)
+                    listBoxConnections.SelectedIndex = 0;
+            }
+        }
+        finally
+        {
+            _isLoadingUI = false;
         }
     }
 
@@ -337,6 +347,7 @@ public partial class MainForm : Form
 
     private void listBoxConnections_SelectedIndexChanged(object sender, EventArgs e)
     {
+        if (_isLoadingUI) return;
         if (listBoxConnections.SelectedItem is ConnectionInfo connection)
         {
             txtConnectionName.Text = connection.Name;
@@ -348,6 +359,7 @@ public partial class MainForm : Form
 
     private async void cmbConnections_SelectedIndexChanged(object sender, EventArgs e)
     {
+        if (_isLoadingUI) return;
         if (cmbConnections.SelectedItem is ConnectionInfo connection)
         {
             try
