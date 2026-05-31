@@ -93,10 +93,10 @@ public partial class MainForm : Form
     {
         if (e.Node == null) return;
 
-        // If clicked on a table (child of Tables node), generate SELECT query
+        // If clicked on a table (child of Tables node), open a new query tab
         if (e.Node.Parent != null && e.Node.Parent.Text == "Tables")
         {
-            richTextBox1.Text = $"SELECT * FROM {e.Node.Text};";
+            OpenNewQueryTab($"SELECT * FROM {e.Node.Text};", e.Node.Text);
             return;
         }
 
@@ -104,12 +104,6 @@ public partial class MainForm : Form
         if (e.Node.Tag is ConnectionInfo connection)
         {
             await LoadTablesForConnection(connection);
-            return;
-        }
-
-        // If clicked on Connections root, do nothing
-        if (e.Node.Text == "Connections")
-        {
             return;
         }
     }
@@ -641,7 +635,116 @@ public partial class MainForm : Form
         if (e.KeyCode == Keys.F5)
         {
             e.Handled = true;
-            btnExecuteQuery_Click(this, EventArgs.Empty);
+            // Execute query in the currently active query tab
+            var activeTab = tabControl1.SelectedTab;
+            if (activeTab?.Tag is (RichTextBox rtb, DataGridView dgv))
+            {
+                ExecuteQueryInTab(rtb, dgv);
+            }
+            else
+            {
+                // Fallback to the static first tab
+                btnExecuteQuery_Click(this, EventArgs.Empty);
+            }
+        }
+    }
+
+    private void OpenNewQueryTab(string query, string tableName)
+    {
+        // Build a unique tab title
+        int tabCount = tabControl1.TabPages.Cast<TabPage>()
+            .Count(tp => tp.Tag is (RichTextBox, DataGridView));
+        string title = $"{tableName} ({tabCount + 1})";
+
+        // --- RichTextBox (query editor) ---
+        var rtb = new RichTextBox
+        {
+            Dock = DockStyle.Fill,
+            Text = query,
+            Font = richTextBox1.Font,
+            ScrollBars = RichTextBoxScrollBars.Both
+        };
+
+        // --- DataGridView (results) ---
+        var dgv = new DataGridView
+        {
+            Dock = DockStyle.Bottom,
+            Height = 250,
+            ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
+            ReadOnly = true,
+            AllowUserToAddRows = false
+        };
+
+        // --- Execute button ---
+        var btnExec = new Button
+        {
+            Text = "Execute Query",
+            Dock = DockStyle.Left,
+            Width = 142,
+            Height = 50
+        };
+
+        // --- Close tab button ---
+        var btnClose = new Button
+        {
+            Text = "✕ Close Tab",
+            Dock = DockStyle.Right,
+            Width = 100,
+            Height = 50
+        };
+
+        // --- Toolbar panel ---
+        var toolbar = new Panel { Dock = DockStyle.Top, Height = 50 };
+        toolbar.Controls.Add(btnExec);
+        toolbar.Controls.Add(btnClose);
+
+        // --- New TabPage ---
+        var newTab = new TabPage(title)
+        {
+            Padding = new Padding(3),
+            UseVisualStyleBackColor = true
+        };
+        // Store references so F5 can find the right rtb/dgv
+        newTab.Tag = (rtb, dgv);
+
+        newTab.Controls.Add(dgv);
+        newTab.Controls.Add(rtb);
+        newTab.Controls.Add(toolbar);
+
+        tabControl1.TabPages.Add(newTab);
+        tabControl1.SelectedTab = newTab;
+
+        // Wire up events
+        btnExec.Click += (_, _) => ExecuteQueryInTab(rtb, dgv);
+        btnClose.Click += (_, _) =>
+        {
+            tabControl1.TabPages.Remove(newTab);
+            newTab.Dispose();
+        };
+
+        // Auto-execute on open
+        ExecuteQueryInTab(rtb, dgv);
+    }
+
+    private async void ExecuteQueryInTab(RichTextBox rtb, DataGridView dgv)
+    {
+        try
+        {
+            ToggleUiState(false);
+            var query = rtb.Text.Trim();
+            if (string.IsNullOrEmpty(query)) return;
+
+            var results = await _dbService.ExecuteQueryAsync(query);
+            dgv.DataSource = results;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Ошибка выполнения запроса: {ex.Message}", "Ошибка",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        finally
+        {
+            ToggleUiState(true);
         }
     }
 }
