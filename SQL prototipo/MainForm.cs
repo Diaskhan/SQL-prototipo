@@ -20,6 +20,10 @@ public partial class MainForm : Form
         _dbService = new DatabaseService(_currentConnectionString);
         treeView1.NodeMouseDoubleClick += TreeView1_NodeMouseDoubleClick;
 
+        // F5 shortcut to execute queries
+        this.KeyPreview = true;
+        this.KeyDown += MainForm_KeyDown;
+
         InitializeImageList();
         LoadConnectionsToUI();
     }
@@ -630,5 +634,14 @@ public partial class MainForm : Form
             }
         }
         return bmp;
+    }
+
+    private void MainForm_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.KeyCode == Keys.F5)
+        {
+            e.Handled = true;
+            btnExecuteQuery_Click(this, EventArgs.Empty);
+        }
     }
 }
