@@ -137,7 +137,7 @@ public class ConnectionManager
     /// <summary>
     /// Add a new connection
     /// </summary>
-    public void AddConnection(string name, string connectionString, string databaseType = "SQLite")
+    public void AddConnection(string name, string connectionString, string databaseType = "SQLite", string group = "Default")
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Connection name cannot be empty.", nameof(name));
@@ -148,14 +148,14 @@ public class ConnectionManager
         if (_connections.Any(c => c.Name == name))
             throw new InvalidOperationException($"Connection with name '{name}' already exists.");
 
-        _connections.Add(new ConnectionInfo(name, connectionString, databaseType));
+        _connections.Add(new ConnectionInfo(name, connectionString, databaseType, group));
         SaveConnections();
     }
 
     /// <summary>
     /// Update an existing connection
     /// </summary>
-    public void UpdateConnection(string name, string connectionString, string databaseType = "SQLite")
+    public void UpdateConnection(string name, string connectionString, string databaseType = "SQLite", string group = "Default")
     {
         var connection = _connections.FirstOrDefault(c => c.Name == name);
         if (connection == null)
@@ -163,6 +163,7 @@ public class ConnectionManager
 
         connection.ConnectionString = connectionString;
         connection.DatabaseType = databaseType;
+        connection.Group = string.IsNullOrWhiteSpace(group) ? "Default" : group;
         SaveConnections();
     }
 

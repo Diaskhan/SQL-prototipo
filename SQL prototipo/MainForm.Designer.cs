@@ -39,6 +39,8 @@ namespace SQL_prototipo
             button1 = new Button();
             tabPage2 = new TabPage();
             panel4 = new Panel();
+            labelGroup = new Label();
+            txtGroup = new TextBox();
             label4 = new Label();
             cmbConnectionType = new ComboBox();
             label3 = new Label();
@@ -165,6 +167,8 @@ namespace SQL_prototipo
             // 
             // panel4
             // 
+            panel4.Controls.Add(labelGroup);
+            panel4.Controls.Add(txtGroup);
             panel4.Controls.Add(label4);
             panel4.Controls.Add(cmbConnectionType);
             panel4.Controls.Add(label3);
@@ -181,10 +185,27 @@ namespace SQL_prototipo
             panel4.Size = new Size(361, 543);
             panel4.TabIndex = 1;
             // 
+            // labelGroup
+            // 
+            labelGroup.AutoSize = true;
+            labelGroup.Location = new Point(10, 95);
+            labelGroup.Name = "labelGroup";
+            labelGroup.Size = new Size(40, 15);
+            labelGroup.TabIndex = 11;
+            labelGroup.Text = "Group";
+            // 
+            // txtGroup
+            // 
+            txtGroup.Location = new Point(10, 115);
+            txtGroup.Name = "txtGroup";
+            txtGroup.PlaceholderText = "e.g., Development, Production";
+            txtGroup.Size = new Size(341, 23);
+            txtGroup.TabIndex = 10;
+            // 
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(10, 110);
+            label4.Location = new Point(10, 145);
             label4.Name = "label4";
             label4.Size = new Size(83, 15);
             label4.TabIndex = 9;
@@ -195,7 +216,7 @@ namespace SQL_prototipo
             cmbConnectionType.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbConnectionType.FormattingEnabled = true;
             cmbConnectionType.Items.AddRange(new object[] { "SQLite", "SqlServer", "MySQL", "PostgreSQL" });
-            cmbConnectionType.Location = new Point(10, 130);
+            cmbConnectionType.Location = new Point(10, 165);
             cmbConnectionType.Name = "cmbConnectionType";
             cmbConnectionType.Size = new Size(341, 23);
             cmbConnectionType.TabIndex = 8;
@@ -203,7 +224,7 @@ namespace SQL_prototipo
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(10, 160);
+            label3.Location = new Point(10, 195);
             label3.Name = "label3";
             label3.Size = new Size(107, 15);
             label3.TabIndex = 7;
@@ -213,7 +234,7 @@ namespace SQL_prototipo
             // 
             cmbConnections.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbConnections.FormattingEnabled = true;
-            cmbConnections.Location = new Point(10, 180);
+            cmbConnections.Location = new Point(10, 215);
             cmbConnections.Name = "cmbConnections";
             cmbConnections.Size = new Size(341, 23);
             cmbConnections.TabIndex = 6;
@@ -255,7 +276,7 @@ namespace SQL_prototipo
             // 
             // btnDeleteConnection
             // 
-            btnDeleteConnection.Location = new Point(186, 210);
+            btnDeleteConnection.Location = new Point(186, 245);
             btnDeleteConnection.Name = "btnDeleteConnection";
             btnDeleteConnection.Size = new Size(165, 40);
             btnDeleteConnection.TabIndex = 1;
@@ -265,7 +286,7 @@ namespace SQL_prototipo
             // 
             // btnAddConnection
             // 
-            btnAddConnection.Location = new Point(10, 210);
+            btnAddConnection.Location = new Point(10, 245);
             btnAddConnection.Name = "btnAddConnection";
             btnAddConnection.Size = new Size(165, 40);
             btnAddConnection.TabIndex = 0;
@@ -327,6 +348,8 @@ namespace SQL_prototipo
         private Label label1;
         private Button btnDeleteConnection;
         private Button btnAddConnection;
+         private TextBox txtGroup;
+        private Label labelGroup;
         private ListBox listBoxConnections;
     }
 }

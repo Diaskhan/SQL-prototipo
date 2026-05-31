@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Linq;
 using SQL_prototipo.Models;
 using SQL_prototipo.Services;
 
@@ -10,6 +11,7 @@ public partial class MainForm : Form
     private DatabaseService _dbService;
     private ConnectionManager _connectionManager;
     private string _currentConnectionString = "Data Source=chinook.sqlite";
+    private ConnectionInfo? _activeConnection;
 
     public MainForm()
     {
@@ -26,25 +28,36 @@ public partial class MainForm : Form
     {
         // Load connections into treeView1
         treeView1.Nodes.Clear();
-        TreeNode connectionsRoot = new TreeNode("Connections")
-        {
-            ImageKey = "server",
-            SelectedImageKey = "server"
-        };
 
-        foreach (var connection in _connectionManager.Connections)
+        // Group connections by Group property
+        var groups = _connectionManager.Connections
+            .GroupBy(c => string.IsNullOrWhiteSpace(c.Group) ? "Default" : c.Group)
+            .OrderBy(g => g.Key);
+
+        foreach (var group in groups)
         {
-            string dbIconKey = GetDatabaseIconKey(connection.DatabaseType);
-            TreeNode connectionNode = new TreeNode(connection.Name)
+            TreeNode groupNode = new TreeNode(group.Key)
             {
-                Tag = connection,
-                ImageKey = dbIconKey,
-                SelectedImageKey = dbIconKey
+                ImageKey = "folder",
+                SelectedImageKey = "folder"
             };
-            connectionsRoot.Nodes.Add(connectionNode);
+
+            foreach (var connection in group)
+            {
+                bool isActive = _activeConnection != null && _activeConnection.Name == connection.Name;
+                string dbIconKey = GetDatabaseIconKey(connection.DatabaseType, isActive);
+                TreeNode connectionNode = new TreeNode(connection.Name)
+                {
+                    Tag = connection,
+                    ImageKey = dbIconKey,
+                    SelectedImageKey = dbIconKey
+                };
+                groupNode.Nodes.Add(connectionNode);
+            }
+
+            treeView1.Nodes.Add(groupNode);
         }
 
-        treeView1.Nodes.Add(connectionsRoot);
         treeView1.ExpandAll();
 
         // Also load into listbox and combobox for the Connections tab
@@ -110,47 +123,60 @@ public partial class MainForm : Form
             // Load tables from this connection
             var tables = await _dbService.GetAllTablesAsync();
 
+            _activeConnection = connection;
+
             // Update treeView1 to show connection with its tables
             treeView1.Nodes.Clear();
-            TreeNode connectionsRoot = new TreeNode("Connections")
-            {
-                ImageKey = "server",
-                SelectedImageKey = "server"
-            };
 
-            foreach (var conn in _connectionManager.Connections)
+            // Group connections by Group property
+            var groups = _connectionManager.Connections
+                .GroupBy(c => string.IsNullOrWhiteSpace(c.Group) ? "Default" : c.Group)
+                .OrderBy(g => g.Key);
+
+            foreach (var group in groups)
             {
-                string dbIconKey = GetDatabaseIconKey(conn.DatabaseType);
-                TreeNode connectionNode = new TreeNode(conn.Name)
+                TreeNode groupNode = new TreeNode(group.Key)
                 {
-                    Tag = conn,
-                    ImageKey = dbIconKey,
-                    SelectedImageKey = dbIconKey
+                    ImageKey = "folder",
+                    SelectedImageKey = "folder"
                 };
 
-                // If this is the current connection, add its tables
-                if (conn.Name == connection.Name)
+                foreach (var conn in group)
                 {
-                    TreeNode tablesNode = new TreeNode("Tables")
+                    bool isActive = _activeConnection != null && _activeConnection.Name == conn.Name;
+                    string dbIconKey = GetDatabaseIconKey(conn.DatabaseType, isActive);
+                    TreeNode connectionNode = new TreeNode(conn.Name)
                     {
-                        ImageKey = "folder",
-                        SelectedImageKey = "folder"
+                        Tag = conn,
+                        ImageKey = dbIconKey,
+                        SelectedImageKey = dbIconKey
                     };
-                    foreach (var table in tables)
+
+                    // If this is the current connection, add its tables
+                    if (conn.Name == connection.Name)
                     {
-                        tablesNode.Nodes.Add(new TreeNode(table)
+                        TreeNode tablesNode = new TreeNode("Tables")
                         {
-                            ImageKey = "table",
-                            SelectedImageKey = "table"
-                        });
+                            ImageKey = "folder",
+                            SelectedImageKey = "folder"
+                        };
+                        foreach (var table in tables)
+                        {
+                            tablesNode.Nodes.Add(new TreeNode(table)
+                            {
+                                ImageKey = "table",
+                                SelectedImageKey = "table"
+                            });
+                        }
+                        connectionNode.Nodes.Add(tablesNode);
                     }
-                    connectionNode.Nodes.Add(tablesNode);
+
+                    groupNode.Nodes.Add(connectionNode);
                 }
 
-                connectionsRoot.Nodes.Add(connectionNode);
+                treeView1.Nodes.Add(groupNode);
             }
 
-            treeView1.Nodes.Add(connectionsRoot);
             treeView1.ExpandAll();
 
             // Also update the Connections tab combobox
@@ -239,6 +265,7 @@ public partial class MainForm : Form
             var name = txtConnectionName.Text.Trim();
             var connectionString = txtConnectionString.Text.Trim();
             var databaseType = cmbConnectionType.SelectedItem?.ToString() ?? "SQLite";
+            var group = txtGroup.Text.Trim();
 
             if (string.IsNullOrEmpty(name))
             {
@@ -252,12 +279,13 @@ public partial class MainForm : Form
                 return;
             }
 
-            _connectionManager.AddConnection(name, connectionString, databaseType);
+            _connectionManager.AddConnection(name, connectionString, databaseType, group);
             MessageBox.Show("Connection added successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             // Clear inputs and refresh list
             txtConnectionName.Clear();
             txtConnectionString.Clear();
+            txtGroup.Clear();
             cmbConnectionType.SelectedIndex = 0;
             RefreshConnectionsList();
             LoadConnectionsToUI();
@@ -289,12 +317,17 @@ public partial class MainForm : Form
             {
                 _connectionManager.DeleteConnection(selectedConnection.Name);
                 MessageBox.Show("Connection deleted successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (_activeConnection != null && _activeConnection.Name == selectedConnection.Name)
+                {
+                    _activeConnection = null;
+                }
                 RefreshConnectionsList();
                 LoadConnectionsToUI();
 
                 // Clear inputs
                 txtConnectionName.Clear();
                 txtConnectionString.Clear();
+                txtGroup.Clear();
                 cmbConnectionType.SelectedIndex = 0;
             }
         }
@@ -311,6 +344,7 @@ public partial class MainForm : Form
             txtConnectionName.Text = connection.Name;
             txtConnectionString.Text = connection.ConnectionString;
             cmbConnectionType.SelectedItem = connection.DatabaseType;
+            txtGroup.Text = connection.Group;
         }
     }
 
@@ -340,26 +374,37 @@ public partial class MainForm : Form
         imageList.ColorDepth = ColorDepth.Depth32Bit;
 
         imageList.Images.Add("server", CreateServerIcon());
-        imageList.Images.Add("database", CreateDatabaseIcon(Color.FromArgb(43, 87, 151)));
-        imageList.Images.Add("database_sqlite", CreateDatabaseIcon(Color.FromArgb(0, 100, 150)));
-        imageList.Images.Add("database_sqlserver", CreateDatabaseIcon(Color.FromArgb(186, 12, 47)));
-        imageList.Images.Add("database_mysql", CreateDatabaseIcon(Color.FromArgb(242, 145, 17)));
-        imageList.Images.Add("database_postgresql", CreateDatabaseIcon(Color.FromArgb(51, 102, 153)));
+        
+        // Active Icons
+        imageList.Images.Add("database_active", CreateDatabaseIcon(Color.FromArgb(43, 87, 151), true));
+        imageList.Images.Add("database_sqlite_active", CreateDatabaseIcon(Color.FromArgb(0, 100, 150), true));
+        imageList.Images.Add("database_sqlserver_active", CreateDatabaseIcon(Color.FromArgb(186, 12, 47), true));
+        imageList.Images.Add("database_mysql_active", CreateDatabaseIcon(Color.FromArgb(242, 145, 17), true));
+        imageList.Images.Add("database_postgresql_active", CreateDatabaseIcon(Color.FromArgb(51, 102, 153), true));
+
+        // Inactive Icons
+        imageList.Images.Add("database_inactive", CreateDatabaseIcon(Color.FromArgb(150, 155, 160), false));
+        imageList.Images.Add("database_sqlite_inactive", CreateDatabaseIcon(Color.FromArgb(150, 155, 160), false));
+        imageList.Images.Add("database_sqlserver_inactive", CreateDatabaseIcon(Color.FromArgb(150, 155, 160), false));
+        imageList.Images.Add("database_mysql_inactive", CreateDatabaseIcon(Color.FromArgb(150, 155, 160), false));
+        imageList.Images.Add("database_postgresql_inactive", CreateDatabaseIcon(Color.FromArgb(150, 155, 160), false));
+
         imageList.Images.Add("folder", CreateFolderIcon());
         imageList.Images.Add("table", CreateTableIcon());
 
         treeView1.ImageList = imageList;
     }
 
-    private string GetDatabaseIconKey(string databaseType)
+    private string GetDatabaseIconKey(string databaseType, bool isActive)
     {
+        string suffix = isActive ? "_active" : "_inactive";
         return databaseType.ToLower() switch
         {
-            "sqlite" => "database_sqlite",
-            "sqlserver" => "database_sqlserver",
-            "mysql" => "database_mysql",
-            "postgresql" => "database_postgresql",
-            _ => "database"
+            "sqlite" => "database_sqlite" + suffix,
+            "sqlserver" => "database_sqlserver" + suffix,
+            "mysql" => "database_mysql" + suffix,
+            "postgresql" => "database_postgresql" + suffix,
+            _ => "database" + suffix
         };
     }
 
@@ -403,7 +448,7 @@ public partial class MainForm : Form
         return bmp;
     }
 
-    private Image CreateDatabaseIcon(Color color)
+    private Image CreateDatabaseIcon(Color color, bool isActive)
     {
         Bitmap bmp = new Bitmap(16, 16);
         using (Graphics g = Graphics.FromImage(bmp))
@@ -463,6 +508,34 @@ public partial class MainForm : Form
             {
                 g.DrawLine(borderPen, x, 3, x, 13);
                 g.DrawLine(borderPen, x + w, 3, x + w, 13);
+            }
+
+            // Status indicator badge in bottom-right corner
+            if (isActive)
+            {
+                // Draw white background circle for contrast
+                using (Brush whiteBrush = new SolidBrush(Color.White))
+                {
+                    g.FillEllipse(whiteBrush, 10, 10, 6, 6);
+                }
+                // Fill with green color
+                using (Brush greenBrush = new SolidBrush(Color.FromArgb(46, 204, 113)))
+                {
+                    g.FillEllipse(greenBrush, 11, 11, 4, 4);
+                }
+            }
+            else
+            {
+                // Draw white background circle for contrast
+                using (Brush whiteBrush = new SolidBrush(Color.White))
+                {
+                    g.FillEllipse(whiteBrush, 10, 10, 6, 6);
+                }
+                // Fill with muted gray color
+                using (Brush grayBrush = new SolidBrush(Color.FromArgb(180, 185, 190)))
+                {
+                    g.FillEllipse(grayBrush, 11, 11, 4, 4);
+                }
             }
         }
         return bmp;
