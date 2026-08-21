@@ -51,6 +51,8 @@ namespace SQL_prototipo
             label1 = new Label();
             btnDeleteConnection = new Button();
             btnAddConnection = new Button();
+            btnAddFolder = new Button();
+            treeViewConnections = new TreeView();
             menuStrip1 = new MenuStrip();
             fileMenuItem = new ToolStripMenuItem();
             newQueryMenuItem = new ToolStripMenuItem();
@@ -58,7 +60,6 @@ namespace SQL_prototipo
             exitMenuItem = new ToolStripMenuItem();
             helpMenuItem = new ToolStripMenuItem();
             aboutMenuItem = new ToolStripMenuItem();
-            listBoxConnections = new ListBox();
             menuStrip1.SuspendLayout();
             panel1.SuspendLayout();
             tabControl1.SuspendLayout();
@@ -164,7 +165,7 @@ namespace SQL_prototipo
             // tabPage2
             // 
             tabPage2.Controls.Add(panel4);
-            tabPage2.Controls.Add(listBoxConnections);
+            tabPage2.Controls.Add(treeViewConnections);
             tabPage2.Location = new Point(4, 24);
             tabPage2.Name = "tabPage2";
             tabPage2.Padding = new Padding(3);
@@ -187,6 +188,7 @@ namespace SQL_prototipo
             panel4.Controls.Add(label1);
             panel4.Controls.Add(btnDeleteConnection);
             panel4.Controls.Add(btnAddConnection);
+            panel4.Controls.Add(btnAddFolder);
             panel4.Dock = DockStyle.Right;
             panel4.Location = new Point(400, 3);
             panel4.Name = "panel4";
@@ -298,19 +300,30 @@ namespace SQL_prototipo
             btnAddConnection.Name = "btnAddConnection";
             btnAddConnection.Size = new Size(165, 40);
             btnAddConnection.TabIndex = 0;
-            btnAddConnection.Text = "Add Connection";
-            btnAddConnection.UseVisualStyleBackColor = true;
-            btnAddConnection.Click += btnAddConnection_Click;
-            // 
-            // listBoxConnections
-            // 
-            listBoxConnections.Dock = DockStyle.Fill;
-            listBoxConnections.FormattingEnabled = true;
-            listBoxConnections.Location = new Point(3, 3);
-            listBoxConnections.Name = "listBoxConnections";
-            listBoxConnections.Size = new Size(758, 543);
-            listBoxConnections.TabIndex = 0;
-            listBoxConnections.SelectedIndexChanged += listBoxConnections_SelectedIndexChanged;
+			btnAddConnection.Text = "Add Connection";
+			btnAddConnection.UseVisualStyleBackColor = true;
+			btnAddConnection.Click += btnAddConnection_Click;
+			// 
+			// btnAddFolder
+			// 
+			btnAddFolder.Location = new Point(10, 295);
+			btnAddFolder.Name = "btnAddFolder";
+			btnAddFolder.Size = new Size(341, 40);
+			btnAddFolder.TabIndex = 12;
+			btnAddFolder.Text = "Add Folder";
+			btnAddFolder.UseVisualStyleBackColor = true;
+			btnAddFolder.Click += btnAddFolder_Click;
+			// 
+			// treeViewConnections
+			// 
+			treeViewConnections.Dock = DockStyle.Fill;
+			treeViewConnections.HideSelection = false;
+			treeViewConnections.Location = new Point(3, 3);
+			treeViewConnections.Name = "treeViewConnections";
+			treeViewConnections.Size = new Size(758, 543);
+			treeViewConnections.TabIndex = 0;
+			treeViewConnections.AfterSelect += treeViewConnections_AfterSelect;
+			treeViewConnections.NodeMouseDoubleClick += treeViewConnections_NodeMouseDoubleClick;
 			// 
 			// menuStrip1
 			// 
@@ -414,9 +427,10 @@ namespace SQL_prototipo
         private Label label1;
         private Button btnDeleteConnection;
         private Button btnAddConnection;
+        private Button btnAddFolder;
          private TextBox txtGroup;
         private Label labelGroup;
-        private ListBox listBoxConnections;
+        private TreeView treeViewConnections;
         private MenuStrip menuStrip1;
         private ToolStripMenuItem fileMenuItem;
         private ToolStripMenuItem newQueryMenuItem;

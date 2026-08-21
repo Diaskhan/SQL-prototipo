@@ -138,13 +138,12 @@ public partial class MainForm : Form
 
         treeView1.ExpandAll();
 
-        // Also load into listbox and combobox for the Connections tab
-        listBoxConnections.Items.Clear();
+        // Populate the Connections tab tree (folders -> connections) and the combobox
+        PopulateConnectionsTree();
         cmbConnections.Items.Clear();
 
         foreach (var connection in _connectionManager.Connections)
         {
-            listBoxConnections.Items.Add(connection);
             cmbConnections.Items.Add(connection);
         }
 
@@ -156,12 +155,65 @@ public partial class MainForm : Form
             if (cmbConnections.Items.Count > 0)
             {
                 cmbConnections.SelectedIndex = 0;
-                if (listBoxConnections.Items.Count > 0)
-                    listBoxConnections.SelectedIndex = 0;
             }
         }
         finally
         {
+            _isLoadingUI = false;
+        }
+    }
+
+    /// <summary>
+    /// Populates the Connections tab tree with a strict two-level hierarchy:
+    /// folders at the root and their connections as children.
+    /// </summary>
+    private void PopulateConnectionsTree()
+    {
+        _isLoadingUI = true;
+        try
+        {
+            treeViewConnections.BeginUpdate();
+            treeViewConnections.Nodes.Clear();
+
+            var connectionsByGroup = _connectionManager.Connections
+                .GroupBy(c => string.IsNullOrWhiteSpace(c.Group) ? "Default" : c.Group);
+
+            foreach (var folderName in _connectionManager.Folders)
+            {
+                TreeNode folderNode = new TreeNode(folderName)
+                {
+                    Name = folderName,
+                    Tag = folderName,
+                    ImageKey = "folder",
+                    SelectedImageKey = "folder"
+                };
+
+                var group = connectionsByGroup
+                    .FirstOrDefault(g => string.Equals(g.Key, folderName, StringComparison.OrdinalIgnoreCase));
+
+                if (group != null)
+                {
+                    foreach (var connection in group)
+                    {
+                        bool isActive = _activeConnection != null && _activeConnection.Name == connection.Name;
+                        string dbIconKey = GetDatabaseIconKey(connection.DatabaseType, isActive);
+                        folderNode.Nodes.Add(new TreeNode(connection.Name)
+                        {
+                            Tag = connection,
+                            ImageKey = dbIconKey,
+                            SelectedImageKey = dbIconKey
+                        });
+                    }
+                }
+
+                treeViewConnections.Nodes.Add(folderNode);
+            }
+
+            treeViewConnections.ExpandAll();
+        }
+        finally
+        {
+            treeViewConnections.EndUpdate();
             _isLoadingUI = false;
         }
     }
@@ -468,11 +520,58 @@ public partial class MainForm : Form
         }
     }
 
+    private void btnAddFolder_Click(object sender, EventArgs e)
+    {
+        using var dialog = new Form
+        {
+            Text = "Add Folder",
+            FormBorderStyle = FormBorderStyle.FixedDialog,
+            StartPosition = FormStartPosition.CenterParent,
+            MinimizeBox = false,
+            MaximizeBox = false,
+            ClientSize = new Size(320, 110)
+        };
+
+        var label = new Label { Text = "Folder name:", Location = new Point(12, 15), AutoSize = true };
+        var textBox = new TextBox { Location = new Point(12, 38), Size = new Size(296, 23) };
+        var btnOk = new Button { Text = "OK", DialogResult = DialogResult.OK, Location = new Point(152, 72), Size = new Size(75, 26) };
+        var btnCancel = new Button { Text = "Cancel", DialogResult = DialogResult.Cancel, Location = new Point(233, 72), Size = new Size(75, 26) };
+
+        dialog.Controls.AddRange(new Control[] { label, textBox, btnOk, btnCancel });
+        dialog.AcceptButton = btnOk;
+        dialog.CancelButton = btnCancel;
+
+        if (dialog.ShowDialog(this) != DialogResult.OK)
+            return;
+
+        var folderName = textBox.Text.Trim();
+        if (string.IsNullOrEmpty(folderName))
+        {
+            MessageBox.Show("Please enter a folder name.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        try
+        {
+            _connectionManager.AddFolder(folderName);
+            LoadConnectionsToUI();
+            SetStatus($"Folder '{folderName}' added.");
+        }
+        catch (InvalidOperationException ex)
+        {
+            MessageBox.Show(ex.Message, "Duplicate Folder", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error adding folder: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
     private void btnDeleteConnection_Click(object sender, EventArgs e)
     {
         try
         {
-            if (listBoxConnections.SelectedItem is not ConnectionInfo selectedConnection)
+            if (treeViewConnections.SelectedNode?.Tag is not ConnectionInfo selectedConnection)
             {
                 MessageBox.Show("Please select a connection to delete.", "Selection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
@@ -577,15 +676,40 @@ public partial class MainForm : Form
         }
     }
 
-    private void listBoxConnections_SelectedIndexChanged(object sender, EventArgs e)
+    private void treeViewConnections_AfterSelect(object? sender, TreeViewEventArgs e)
     {
         if (_isLoadingUI) return;
-        if (listBoxConnections.SelectedItem is ConnectionInfo connection)
+
+        if (e.Node?.Tag is ConnectionInfo connection)
         {
             txtConnectionName.Text = connection.Name;
             txtConnectionString.Text = connection.ConnectionString;
             cmbConnectionType.SelectedItem = connection.DatabaseType;
             txtGroup.Text = connection.Group;
+        }
+        else if (e.Node?.Tag is string folderName)
+        {
+            // A folder is selected: prefill the group so a new connection lands here.
+            txtGroup.Text = folderName;
+        }
+    }
+
+    private async void treeViewConnections_NodeMouseDoubleClick(object? sender, TreeNodeMouseClickEventArgs e)
+    {
+        // Double-clicking a connection switches to it and loads its tables.
+        if (e.Node?.Tag is ConnectionInfo connection)
+        {
+            try
+            {
+                _currentConnectionString = connection.ConnectionString;
+                _currentDatabaseType = connection.DatabaseType;
+                _dbService = new DatabaseService(connection);
+                await LoadTablesForConnection(connection);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error switching connection: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 
@@ -636,6 +760,7 @@ public partial class MainForm : Form
         imageList.Images.Add("table", CreateTableIcon());
 
         treeView1.ImageList = imageList;
+        treeViewConnections.ImageList = imageList;
     }
 
     private string GetDatabaseIconKey(string databaseType, bool isActive)
