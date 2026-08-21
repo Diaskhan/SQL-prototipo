@@ -1,8 +1,6 @@
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Linq;
 using SQL_prototipo.Models;
 using SQL_prototipo.Services;
+using System.Drawing.Drawing2D;
 
 namespace SQL_prototipo;
 
@@ -875,6 +873,38 @@ public partial class MainForm : Form
             }
         }
         return bmp;
+    }
+
+    private void newQueryMenuItem_Click(object? sender, EventArgs e)
+    {
+        OpenNewQueryTab("SELECT ", "Query");
+    }
+
+    private void executeQueryMenuItem_Click(object? sender, EventArgs e)
+    {
+        var activeTab = tabControl1.SelectedTab;
+        if (activeTab?.Tag is QueryTabContext ctx)
+        {
+            ExecuteQueryInTab(ctx);
+        }
+        else
+        {
+            btnExecuteQuery_Click(this, EventArgs.Empty);
+        }
+    }
+
+    private void exitMenuItem_Click(object? sender, EventArgs e)
+    {
+        Close();
+    }
+
+    private void aboutMenuItem_Click(object? sender, EventArgs e)
+    {
+        MessageBox.Show(
+            "SQL prototipo\nA simple multi-database SQL query tool.",
+            "About",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
     }
 
     private void MainForm_KeyDown(object? sender, KeyEventArgs e)

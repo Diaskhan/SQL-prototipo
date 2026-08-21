@@ -51,7 +51,15 @@ namespace SQL_prototipo
             label1 = new Label();
             btnDeleteConnection = new Button();
             btnAddConnection = new Button();
+            menuStrip1 = new MenuStrip();
+            fileMenuItem = new ToolStripMenuItem();
+            newQueryMenuItem = new ToolStripMenuItem();
+            executeQueryMenuItem = new ToolStripMenuItem();
+            exitMenuItem = new ToolStripMenuItem();
+            helpMenuItem = new ToolStripMenuItem();
+            aboutMenuItem = new ToolStripMenuItem();
             listBoxConnections = new ListBox();
+            menuStrip1.SuspendLayout();
             panel1.SuspendLayout();
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
@@ -303,6 +311,59 @@ namespace SQL_prototipo
             listBoxConnections.Size = new Size(758, 543);
             listBoxConnections.TabIndex = 0;
             listBoxConnections.SelectedIndexChanged += listBoxConnections_SelectedIndexChanged;
+			// 
+			// menuStrip1
+			// 
+			menuStrip1.Items.AddRange(new ToolStripItem[] { fileMenuItem, helpMenuItem });
+			menuStrip1.Location = new Point(0, 0);
+			menuStrip1.Name = "menuStrip1";
+			menuStrip1.Size = new Size(1096, 24);
+			menuStrip1.TabIndex = 2;
+			menuStrip1.Text = "menuStrip1";
+			// 
+			// fileMenuItem
+			// 
+			fileMenuItem.DropDownItems.AddRange(new ToolStripItem[] { newQueryMenuItem, executeQueryMenuItem, new ToolStripSeparator(), exitMenuItem });
+			fileMenuItem.Name = "fileMenuItem";
+			fileMenuItem.Size = new Size(37, 20);
+			fileMenuItem.Text = "&File";
+			// 
+			// newQueryMenuItem
+			// 
+			newQueryMenuItem.Name = "newQueryMenuItem";
+			newQueryMenuItem.ShortcutKeys = Keys.Control | Keys.N;
+			newQueryMenuItem.Size = new Size(180, 22);
+			newQueryMenuItem.Text = "&New Query";
+			newQueryMenuItem.Click += newQueryMenuItem_Click;
+			// 
+			// executeQueryMenuItem
+			// 
+			executeQueryMenuItem.Name = "executeQueryMenuItem";
+			executeQueryMenuItem.ShortcutKeys = Keys.F5;
+			executeQueryMenuItem.Size = new Size(180, 22);
+			executeQueryMenuItem.Text = "&Execute Query";
+			executeQueryMenuItem.Click += executeQueryMenuItem_Click;
+			// 
+			// exitMenuItem
+			// 
+			exitMenuItem.Name = "exitMenuItem";
+			exitMenuItem.Size = new Size(180, 22);
+			exitMenuItem.Text = "E&xit";
+			exitMenuItem.Click += exitMenuItem_Click;
+			// 
+			// helpMenuItem
+			// 
+			helpMenuItem.DropDownItems.AddRange(new ToolStripItem[] { aboutMenuItem });
+			helpMenuItem.Name = "helpMenuItem";
+			helpMenuItem.Size = new Size(44, 20);
+			helpMenuItem.Text = "&Help";
+			// 
+			// aboutMenuItem
+			// 
+			aboutMenuItem.Name = "aboutMenuItem";
+			aboutMenuItem.Size = new Size(180, 22);
+			aboutMenuItem.Text = "&About";
+			aboutMenuItem.Click += aboutMenuItem_Click;
             // 
             // MainForm
             // 
@@ -311,6 +372,8 @@ namespace SQL_prototipo
             ClientSize = new Size(1096, 577);
             Controls.Add(panel1);
             Controls.Add(treeView1);
+            Controls.Add(menuStrip1);
+            MainMenuStrip = menuStrip1;
             Name = "MainForm";
             Text = "Database Manager";
             panel1.ResumeLayout(false);
@@ -321,7 +384,10 @@ namespace SQL_prototipo
             tabPage2.ResumeLayout(false);
             panel4.ResumeLayout(false);
             panel4.PerformLayout();
+            menuStrip1.ResumeLayout(false);
+            menuStrip1.PerformLayout();
             ResumeLayout(false);
+            PerformLayout();
         }
 
 
@@ -351,5 +417,12 @@ namespace SQL_prototipo
          private TextBox txtGroup;
         private Label labelGroup;
         private ListBox listBoxConnections;
+        private MenuStrip menuStrip1;
+        private ToolStripMenuItem fileMenuItem;
+        private ToolStripMenuItem newQueryMenuItem;
+        private ToolStripMenuItem executeQueryMenuItem;
+        private ToolStripMenuItem exitMenuItem;
+        private ToolStripMenuItem helpMenuItem;
+        private ToolStripMenuItem aboutMenuItem;
     }
 }
