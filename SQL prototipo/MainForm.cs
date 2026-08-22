@@ -105,38 +105,46 @@ public partial class MainForm : Form
     private void LoadConnectionsToUI()
     {
         // Load connections into treeView1
-        treeView1.Nodes.Clear();
-
-        // Group connections by Group property
-        var groups = _connectionManager.Connections
-            .GroupBy(c => string.IsNullOrWhiteSpace(c.Group) ? "Default" : c.Group)
-            .OrderBy(g => g.Key);
-
-        foreach (var group in groups)
+        treeView1.BeginUpdate();
+        try
         {
-            TreeNode groupNode = new TreeNode(group.Key)
-            {
-                ImageKey = "folder",
-                SelectedImageKey = "folder"
-            };
+            treeView1.Nodes.Clear();
 
-            foreach (var connection in group)
+            // Group connections by Group property
+            var groups = _connectionManager.Connections
+                .GroupBy(c => string.IsNullOrWhiteSpace(c.Group) ? "Default" : c.Group)
+                .OrderBy(g => g.Key);
+
+            foreach (var group in groups)
             {
-                bool isActive = _activeConnection != null && _activeConnection.Name == connection.Name;
-                string dbIconKey = TreeIconProvider.GetDatabaseIconKey(connection.DatabaseType, isActive);
-                TreeNode connectionNode = new TreeNode(connection.Name)
+                TreeNode groupNode = new TreeNode(group.Key)
                 {
-                    Tag = connection,
-                    ImageKey = dbIconKey,
-                    SelectedImageKey = dbIconKey
+                    ImageKey = "folder",
+                    SelectedImageKey = "folder"
                 };
-                groupNode.Nodes.Add(connectionNode);
+
+                foreach (var connection in group)
+                {
+                    bool isActive = _activeConnection != null && _activeConnection.Name == connection.Name;
+                    string dbIconKey = TreeIconProvider.GetDatabaseIconKey(connection.DatabaseType, isActive);
+                    TreeNode connectionNode = new TreeNode(connection.Name)
+                    {
+                        Tag = connection,
+                        ImageKey = dbIconKey,
+                        SelectedImageKey = dbIconKey
+                    };
+                    groupNode.Nodes.Add(connectionNode);
+                }
+
+                treeView1.Nodes.Add(groupNode);
             }
 
-            treeView1.Nodes.Add(groupNode);
+            treeView1.ExpandAll();
         }
-
-        treeView1.ExpandAll();
+        finally
+        {
+            treeView1.EndUpdate();
+        }
 
         // Populate the Connections tab tree (folders -> connections) and the combobox
         PopulateConnectionsTree();
@@ -298,61 +306,69 @@ public partial class MainForm : Form
             _activeConnection = connection;
 
             // Update treeView1 to show connection with its tables
-            treeView1.Nodes.Clear();
-
-            // Group connections by Group property
-            var groups = _connectionManager.Connections
-                .GroupBy(c => string.IsNullOrWhiteSpace(c.Group) ? "Default" : c.Group)
-                .OrderBy(g => g.Key);
-
-            foreach (var group in groups)
+            treeView1.BeginUpdate();
+            try
             {
-                TreeNode groupNode = new TreeNode(group.Key)
-                {
-                    ImageKey = "folder",
-                    SelectedImageKey = "folder"
-                };
+                treeView1.Nodes.Clear();
 
-                foreach (var conn in group)
+                // Group connections by Group property
+                var groups = _connectionManager.Connections
+                    .GroupBy(c => string.IsNullOrWhiteSpace(c.Group) ? "Default" : c.Group)
+                    .OrderBy(g => g.Key);
+
+                foreach (var group in groups)
                 {
-                    bool isActive = _activeConnection != null && _activeConnection.Name == conn.Name;
-                    string dbIconKey = TreeIconProvider.GetDatabaseIconKey(conn.DatabaseType, isActive);
-                    TreeNode connectionNode = new TreeNode(conn.Name)
+                    TreeNode groupNode = new TreeNode(group.Key)
                     {
-                        Tag = conn,
-                        ImageKey = dbIconKey,
-                        SelectedImageKey = dbIconKey
+                        ImageKey = "folder",
+                        SelectedImageKey = "folder"
                     };
 
-                    // If this is the current connection, add its tables
-                    if (conn.Name == connection.Name)
+                    foreach (var conn in group)
                     {
-                        TreeNode tablesNode = new TreeNode("Tables")
+                        bool isActive = _activeConnection != null && _activeConnection.Name == conn.Name;
+                        string dbIconKey = TreeIconProvider.GetDatabaseIconKey(conn.DatabaseType, isActive);
+                        TreeNode connectionNode = new TreeNode(conn.Name)
                         {
-                            ImageKey = "folder",
-                            SelectedImageKey = "folder"
+                            Tag = conn,
+                            ImageKey = dbIconKey,
+                            SelectedImageKey = dbIconKey
                         };
-                        foreach (var table in tables)
+
+                        // If this is the current connection, add its tables
+                        if (conn.Name == connection.Name)
                         {
-                            var tableNode = new TreeNode(table)
+                            TreeNode tablesNode = new TreeNode("Tables")
                             {
-                                ImageKey = "table",
-                                SelectedImageKey = "table"
+                                ImageKey = "folder",
+                                SelectedImageKey = "folder"
                             };
-                            // Placeholder so the node shows an expand [+] glyph
-                            tableNode.Nodes.Add(new TreeNode("Loading...") { Name = "__placeholder__" });
-                            tablesNode.Nodes.Add(tableNode);
+                            foreach (var table in tables)
+                            {
+                                var tableNode = new TreeNode(table)
+                                {
+                                    ImageKey = "table",
+                                    SelectedImageKey = "table"
+                                };
+                                // Placeholder so the node shows an expand [+] glyph
+                                tableNode.Nodes.Add(new TreeNode("Loading...") { Name = "__placeholder__" });
+                                tablesNode.Nodes.Add(tableNode);
+                            }
+                            connectionNode.Nodes.Add(tablesNode);
                         }
-                        connectionNode.Nodes.Add(tablesNode);
+
+                        groupNode.Nodes.Add(connectionNode);
                     }
 
-                    groupNode.Nodes.Add(connectionNode);
+                    treeView1.Nodes.Add(groupNode);
                 }
 
-                treeView1.Nodes.Add(groupNode);
+                treeView1.ExpandAll();
             }
-
-            treeView1.ExpandAll();
+            finally
+            {
+                treeView1.EndUpdate();
+            }
 
             // Also update the Connections tab combobox
             if (cmbConnections.Items.Count > 0)
@@ -432,24 +448,32 @@ public partial class MainForm : Form
             ToggleUiState(false);
             var tables = await _dbService.GetAllTablesAsync();
 
-            treeView1.Nodes.Clear();
-            TreeNode rootNode = new TreeNode("Tables")
+            treeView1.BeginUpdate();
+            try
             {
-                ImageKey = "folder",
-                SelectedImageKey = "folder"
-            };
-            foreach (var table in tables)
-            {
-                var tableNode = new TreeNode(table)
+                treeView1.Nodes.Clear();
+                TreeNode rootNode = new TreeNode("Tables")
                 {
-                    ImageKey = "table",
-                    SelectedImageKey = "table"
+                    ImageKey = "folder",
+                    SelectedImageKey = "folder"
                 };
-                tableNode.Nodes.Add(new TreeNode("Loading...") { Name = "__placeholder__" });
-                rootNode.Nodes.Add(tableNode);
+                foreach (var table in tables)
+                {
+                    var tableNode = new TreeNode(table)
+                    {
+                        ImageKey = "table",
+                        SelectedImageKey = "table"
+                    };
+                    tableNode.Nodes.Add(new TreeNode("Loading...") { Name = "__placeholder__" });
+                    rootNode.Nodes.Add(tableNode);
+                }
+                treeView1.Nodes.Add(rootNode);
+                treeView1.ExpandAll();
             }
-            treeView1.Nodes.Add(rootNode);
-            treeView1.ExpandAll();
+            finally
+            {
+                treeView1.EndUpdate();
+            }
         }
         catch (Exception ex)
         {
