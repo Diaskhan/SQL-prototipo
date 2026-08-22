@@ -58,6 +58,7 @@ namespace SQL_prototipo
             newQueryMenuItem = new ToolStripMenuItem();
             executeQueryMenuItem = new ToolStripMenuItem();
             exitMenuItem = new ToolStripMenuItem();
+            settingsMenuItem = new ToolStripMenuItem();
             helpMenuItem = new ToolStripMenuItem();
             aboutMenuItem = new ToolStripMenuItem();
             menuStrip1.SuspendLayout();
@@ -336,7 +337,7 @@ namespace SQL_prototipo
 			// 
 			// fileMenuItem
 			// 
-			fileMenuItem.DropDownItems.AddRange(new ToolStripItem[] { newQueryMenuItem, executeQueryMenuItem, new ToolStripSeparator(), exitMenuItem });
+			fileMenuItem.DropDownItems.AddRange(new ToolStripItem[] { newQueryMenuItem, executeQueryMenuItem, new ToolStripSeparator(), settingsMenuItem, new ToolStripSeparator(), exitMenuItem });
 			fileMenuItem.Name = "fileMenuItem";
 			fileMenuItem.Size = new Size(37, 20);
 			fileMenuItem.Text = "&File";
@@ -363,6 +364,13 @@ namespace SQL_prototipo
 			exitMenuItem.Size = new Size(180, 22);
 			exitMenuItem.Text = "E&xit";
 			exitMenuItem.Click += exitMenuItem_Click;
+			// 
+			// settingsMenuItem
+			// 
+			settingsMenuItem.Name = "settingsMenuItem";
+			settingsMenuItem.Size = new Size(180, 22);
+			settingsMenuItem.Text = "&Settings...";
+			settingsMenuItem.Click += settingsMenuItem_Click;
 			// 
 			// helpMenuItem
 			// 
@@ -436,6 +444,7 @@ namespace SQL_prototipo
         private ToolStripMenuItem newQueryMenuItem;
         private ToolStripMenuItem executeQueryMenuItem;
         private ToolStripMenuItem exitMenuItem;
+        private ToolStripMenuItem settingsMenuItem;
         private ToolStripMenuItem helpMenuItem;
         private ToolStripMenuItem aboutMenuItem;
     }

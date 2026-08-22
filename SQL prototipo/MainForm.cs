@@ -1,6 +1,5 @@
 using SQL_prototipo.Models;
 using SQL_prototipo.Services;
-using System.Drawing.Drawing2D;
 
 namespace SQL_prototipo;
 
@@ -9,6 +8,7 @@ public partial class MainForm : Form
     private DatabaseService _dbService;
     private ConnectionManager _connectionManager;
     private QueryHistoryManager _historyManager;
+    private SettingsManager _settingsManager;
     private string _currentConnectionString = "Data Source=chinook.sqlite";
     private string _currentDatabaseType = "SQLite";
     private ConnectionInfo? _activeConnection;
@@ -26,6 +26,7 @@ public partial class MainForm : Form
         InitializeComponent();
         _connectionManager = new ConnectionManager();
         _historyManager = new QueryHistoryManager();
+        _settingsManager = new SettingsManager();
         _dbService = new DatabaseService(_currentConnectionString, _currentDatabaseType);
         treeView1.NodeMouseDoubleClick += TreeView1_NodeMouseDoubleClick;
         treeView1.BeforeExpand += TreeView1_BeforeExpand;
@@ -351,7 +352,10 @@ public partial class MainForm : Form
                                     SelectedImageKey = "table"
                                 };
                                 // Placeholder so the node shows an expand [+] glyph
-                                tableNode.Nodes.Add(new TreeNode("Loading...") { Name = "__placeholder__" });
+                                if (_settingsManager.Settings.ShowTableColumnsInTree)
+                                {
+                                    tableNode.Nodes.Add(new TreeNode("Loading...") { Name = "__placeholder__" });
+                                }
                                 tablesNode.Nodes.Add(tableNode);
                             }
                             connectionNode.Nodes.Add(tablesNode);
@@ -464,7 +468,10 @@ public partial class MainForm : Form
                         ImageKey = "table",
                         SelectedImageKey = "table"
                     };
-                    tableNode.Nodes.Add(new TreeNode("Loading...") { Name = "__placeholder__" });
+                    if (_settingsManager.Settings.ShowTableColumnsInTree)
+                    {
+                        tableNode.Nodes.Add(new TreeNode("Loading...") { Name = "__placeholder__" });
+                    }
                     rootNode.Nodes.Add(tableNode);
                 }
                 treeView1.Nodes.Add(rootNode);
@@ -786,6 +793,23 @@ public partial class MainForm : Form
     private void exitMenuItem_Click(object? sender, EventArgs e)
     {
         Close();
+    }
+
+    private async void settingsMenuItem_Click(object? sender, EventArgs e)
+    {
+        bool previousShowColumns = _settingsManager.Settings.ShowTableColumnsInTree;
+
+        using var dialog = new SettingsForm(_settingsManager.Settings);
+        if (dialog.ShowDialog(this) != DialogResult.OK) return;
+
+        _settingsManager.Save();
+
+        // Rebuild the object tree if the column visibility setting changed
+        if (previousShowColumns != _settingsManager.Settings.ShowTableColumnsInTree
+            && _activeConnection != null)
+        {
+            await LoadTablesForConnection(_activeConnection);
+        }
     }
 
     private void aboutMenuItem_Click(object? sender, EventArgs e)
