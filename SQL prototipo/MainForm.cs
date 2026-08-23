@@ -72,21 +72,22 @@ public partial class MainForm : Form
         panel4.Controls.Add(_btnTestConnection);
         panel4.Controls.Add(_btnUpdateConnection);
 
-        // --- Query history list (Connections tab) ---
+        // --- Query history list (Queries tab) ---
         var historyLabel = new Label
         {
             Text = "Query History (double-click to load)",
-            AutoSize = true,
-            Location = new Point(10, 345)
+            Dock = DockStyle.Top,
+            AutoSize = false,
+            Height = 20,
+            TextAlign = ContentAlignment.MiddleLeft
         };
         _listBoxHistory = new ListBox
         {
-            Location = new Point(10, 365),
-            Size = new Size(341, 150)
+            Dock = DockStyle.Fill
         };
         _listBoxHistory.DoubleClick += listBoxHistory_DoubleClick;
-        panel4.Controls.Add(historyLabel);
-        panel4.Controls.Add(_listBoxHistory);
+        tabPageQueries.Controls.Add(_listBoxHistory);
+        tabPageQueries.Controls.Add(historyLabel);
     }
 
     private void SetStatus(string message)

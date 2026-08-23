@@ -28,6 +28,9 @@ namespace SQL_prototipo
         /// </summary>
         private void InitializeComponent()
         {
+            leftTabControl = new TabControl();
+            tabPageDatabase = new TabPage();
+            tabPageQueries = new TabPage();
             treeView1 = new TreeView();
             panel1 = new Panel();
             tabControl1 = new TabControl();
@@ -62,6 +65,8 @@ namespace SQL_prototipo
             helpMenuItem = new ToolStripMenuItem();
             aboutMenuItem = new ToolStripMenuItem();
             menuStrip1.SuspendLayout();
+            leftTabControl.SuspendLayout();
+            tabPageDatabase.SuspendLayout();
             panel1.SuspendLayout();
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
@@ -71,12 +76,44 @@ namespace SQL_prototipo
             panel4.SuspendLayout();
             SuspendLayout();
             // 
+            // leftTabControl
+            // 
+            leftTabControl.Controls.Add(tabPageDatabase);
+            leftTabControl.Controls.Add(tabPageQueries);
+            leftTabControl.Dock = DockStyle.Left;
+            leftTabControl.Location = new Point(0, 0);
+            leftTabControl.Name = "leftTabControl";
+            leftTabControl.SelectedIndex = 0;
+            leftTabControl.Size = new Size(324, 577);
+            leftTabControl.TabIndex = 0;
+            // 
+            // tabPageDatabase
+            // 
+            tabPageDatabase.Controls.Add(treeView1);
+            tabPageDatabase.Location = new Point(4, 24);
+            tabPageDatabase.Name = "tabPageDatabase";
+            tabPageDatabase.Padding = new Padding(3);
+            tabPageDatabase.Size = new Size(316, 549);
+            tabPageDatabase.TabIndex = 0;
+            tabPageDatabase.Text = "Database";
+            tabPageDatabase.UseVisualStyleBackColor = true;
+            // 
+            // tabPageQueries
+            // 
+            tabPageQueries.Location = new Point(4, 24);
+            tabPageQueries.Name = "tabPageQueries";
+            tabPageQueries.Padding = new Padding(3);
+            tabPageQueries.Size = new Size(316, 549);
+            tabPageQueries.TabIndex = 1;
+            tabPageQueries.Text = "Queries";
+            tabPageQueries.UseVisualStyleBackColor = true;
+            // 
             // treeView1
             // 
-            treeView1.Dock = DockStyle.Left;
-            treeView1.Location = new Point(0, 0);
+            treeView1.Dock = DockStyle.Fill;
+            treeView1.Location = new Point(3, 3);
             treeView1.Name = "treeView1";
-            treeView1.Size = new Size(324, 577);
+            treeView1.Size = new Size(310, 543);
             treeView1.TabIndex = 0;
             // 
             // panel1
@@ -392,11 +429,13 @@ namespace SQL_prototipo
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1096, 577);
             Controls.Add(panel1);
-            Controls.Add(treeView1);
+            Controls.Add(leftTabControl);
             Controls.Add(menuStrip1);
             MainMenuStrip = menuStrip1;
             Name = "MainForm";
             Text = "Database Manager";
+            leftTabControl.ResumeLayout(false);
+            tabPageDatabase.ResumeLayout(false);
             panel1.ResumeLayout(false);
             tabControl1.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
@@ -416,6 +455,9 @@ namespace SQL_prototipo
 
         private TreeView treeView1;
         private Panel panel1;
+        private TabControl leftTabControl;
+        private TabPage tabPageDatabase;
+        private TabPage tabPageQueries;
         private TabControl tabControl1;
         private TabPage tabPage1;
         private TabPage tabPage2;
