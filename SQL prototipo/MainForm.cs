@@ -39,6 +39,9 @@ public partial class MainForm : Form
         InitializeAdditionalUi();
         LoadConnectionsToUI();
         LoadHistoryToUI();
+
+        // Remove design-time placeholder tabs so the right panel starts empty.
+        tabControl1.TabPages.Clear();
     }
 
     private void InitializeAdditionalUi()
@@ -88,6 +91,37 @@ public partial class MainForm : Form
         _listBoxHistory.DoubleClick += listBoxHistory_DoubleClick;
         tabPageQueries.Controls.Add(_listBoxHistory);
         tabPageQueries.Controls.Add(historyLabel);
+
+        // Cancel any running query when a tab is closed via its close button.
+        tabControl1.TabClosing += (_, e) =>
+        {
+            // Keep the Connections tab alive so it can be reopened from the menu.
+            if (e.TabPage == tabPage2)
+            {
+                e.Cancel = true;
+                tabControl1.TabPages.Remove(tabPage2);
+                return;
+            }
+
+            if (e.TabPage.Tag is QueryTabContext ctx)
+            {
+                ctx.Cts?.Cancel();
+            }
+        };
+
+        // --- "Manage Connections" menu item ---
+        var manageConnectionsMenuItem = new ToolStripMenuItem("&Manage Connections");
+        manageConnectionsMenuItem.Click += (_, _) => OpenConnectionsTab();
+        menuStrip1.Items.Insert(menuStrip1.Items.Count - 1, manageConnectionsMenuItem);
+    }
+
+    private void OpenConnectionsTab()
+    {
+        if (!tabControl1.TabPages.Contains(tabPage2))
+        {
+            tabControl1.TabPages.Add(tabPage2);
+        }
+        tabControl1.SelectedTab = tabPage2;
     }
 
     private void SetStatus(string message)

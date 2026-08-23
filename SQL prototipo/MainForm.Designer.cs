@@ -30,10 +30,10 @@ namespace SQL_prototipo
         {
             leftTabControl = new TabControl();
             tabPageDatabase = new TabPage();
-            tabPageQueries = new TabPage();
             treeView1 = new TreeView();
+            tabPageQueries = new TabPage();
             panel1 = new Panel();
-            tabControl1 = new TabControl();
+            tabControl1 = new SQL_prototipo.Controls.ClosableTabControl();
             tabPage1 = new TabPage();
             dataGridView1 = new DataGridView();
             richTextBox1 = new RichTextBox();
@@ -60,11 +60,10 @@ namespace SQL_prototipo
             fileMenuItem = new ToolStripMenuItem();
             newQueryMenuItem = new ToolStripMenuItem();
             executeQueryMenuItem = new ToolStripMenuItem();
-            exitMenuItem = new ToolStripMenuItem();
             settingsMenuItem = new ToolStripMenuItem();
+            exitMenuItem = new ToolStripMenuItem();
             helpMenuItem = new ToolStripMenuItem();
             aboutMenuItem = new ToolStripMenuItem();
-            menuStrip1.SuspendLayout();
             leftTabControl.SuspendLayout();
             tabPageDatabase.SuspendLayout();
             panel1.SuspendLayout();
@@ -74,6 +73,7 @@ namespace SQL_prototipo
             panel3.SuspendLayout();
             tabPage2.SuspendLayout();
             panel4.SuspendLayout();
+            menuStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // leftTabControl
@@ -81,10 +81,10 @@ namespace SQL_prototipo
             leftTabControl.Controls.Add(tabPageDatabase);
             leftTabControl.Controls.Add(tabPageQueries);
             leftTabControl.Dock = DockStyle.Left;
-            leftTabControl.Location = new Point(0, 0);
+            leftTabControl.Location = new Point(0, 24);
             leftTabControl.Name = "leftTabControl";
             leftTabControl.SelectedIndex = 0;
-            leftTabControl.Size = new Size(324, 577);
+            leftTabControl.Size = new Size(324, 553);
             leftTabControl.TabIndex = 0;
             // 
             // tabPageDatabase
@@ -93,10 +93,18 @@ namespace SQL_prototipo
             tabPageDatabase.Location = new Point(4, 24);
             tabPageDatabase.Name = "tabPageDatabase";
             tabPageDatabase.Padding = new Padding(3);
-            tabPageDatabase.Size = new Size(316, 549);
+            tabPageDatabase.Size = new Size(316, 525);
             tabPageDatabase.TabIndex = 0;
             tabPageDatabase.Text = "Database";
             tabPageDatabase.UseVisualStyleBackColor = true;
+            // 
+            // treeView1
+            // 
+            treeView1.Dock = DockStyle.Fill;
+            treeView1.Location = new Point(3, 3);
+            treeView1.Name = "treeView1";
+            treeView1.Size = new Size(310, 519);
+            treeView1.TabIndex = 0;
             // 
             // tabPageQueries
             // 
@@ -108,22 +116,14 @@ namespace SQL_prototipo
             tabPageQueries.Text = "Queries";
             tabPageQueries.UseVisualStyleBackColor = true;
             // 
-            // treeView1
-            // 
-            treeView1.Dock = DockStyle.Fill;
-            treeView1.Location = new Point(3, 3);
-            treeView1.Name = "treeView1";
-            treeView1.Size = new Size(310, 543);
-            treeView1.TabIndex = 0;
-            // 
             // panel1
             // 
             panel1.BackColor = SystemColors.ButtonFace;
             panel1.Controls.Add(tabControl1);
             panel1.Dock = DockStyle.Fill;
-            panel1.Location = new Point(324, 0);
+            panel1.Location = new Point(324, 24);
             panel1.Name = "panel1";
-            panel1.Size = new Size(772, 577);
+            panel1.Size = new Size(772, 553);
             panel1.TabIndex = 1;
             // 
             // tabControl1
@@ -131,10 +131,12 @@ namespace SQL_prototipo
             tabControl1.Controls.Add(tabPage1);
             tabControl1.Controls.Add(tabPage2);
             tabControl1.Dock = DockStyle.Fill;
+            tabControl1.DrawMode = TabDrawMode.OwnerDrawFixed;
             tabControl1.Location = new Point(0, 0);
             tabControl1.Name = "tabControl1";
+            tabControl1.Padding = new Point(22, 3);
             tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(772, 577);
+            tabControl1.Size = new Size(772, 553);
             tabControl1.TabIndex = 3;
             // 
             // tabPage1
@@ -145,7 +147,7 @@ namespace SQL_prototipo
             tabPage1.Location = new Point(4, 24);
             tabPage1.Name = "tabPage1";
             tabPage1.Padding = new Padding(3);
-            tabPage1.Size = new Size(764, 549);
+            tabPage1.Size = new Size(764, 525);
             tabPage1.TabIndex = 0;
             tabPage1.Text = "Query";
             tabPage1.UseVisualStyleBackColor = true;
@@ -154,7 +156,7 @@ namespace SQL_prototipo
             // 
             dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridView1.Dock = DockStyle.Bottom;
-            dataGridView1.Location = new Point(3, 296);
+            dataGridView1.Location = new Point(3, 272);
             dataGridView1.Name = "dataGridView1";
             dataGridView1.Size = new Size(758, 250);
             dataGridView1.TabIndex = 2;
@@ -164,7 +166,7 @@ namespace SQL_prototipo
             richTextBox1.Dock = DockStyle.Fill;
             richTextBox1.Location = new Point(3, 53);
             richTextBox1.Name = "richTextBox1";
-            richTextBox1.Size = new Size(758, 493);
+            richTextBox1.Size = new Size(758, 469);
             richTextBox1.TabIndex = 0;
             richTextBox1.Text = "";
             // 
@@ -207,7 +209,7 @@ namespace SQL_prototipo
             tabPage2.Location = new Point(4, 24);
             tabPage2.Name = "tabPage2";
             tabPage2.Padding = new Padding(3);
-            tabPage2.Size = new Size(764, 549);
+            tabPage2.Size = new Size(764, 525);
             tabPage2.TabIndex = 1;
             tabPage2.Text = "Connections";
             tabPage2.UseVisualStyleBackColor = true;
@@ -230,7 +232,7 @@ namespace SQL_prototipo
             panel4.Dock = DockStyle.Right;
             panel4.Location = new Point(400, 3);
             panel4.Name = "panel4";
-            panel4.Size = new Size(361, 543);
+            panel4.Size = new Size(361, 519);
             panel4.TabIndex = 1;
             // 
             // labelGroup
@@ -338,90 +340,90 @@ namespace SQL_prototipo
             btnAddConnection.Name = "btnAddConnection";
             btnAddConnection.Size = new Size(165, 40);
             btnAddConnection.TabIndex = 0;
-			btnAddConnection.Text = "Add Connection";
-			btnAddConnection.UseVisualStyleBackColor = true;
-			btnAddConnection.Click += btnAddConnection_Click;
-			// 
-			// btnAddFolder
-			// 
-			btnAddFolder.Location = new Point(10, 295);
-			btnAddFolder.Name = "btnAddFolder";
-			btnAddFolder.Size = new Size(341, 40);
-			btnAddFolder.TabIndex = 12;
-			btnAddFolder.Text = "Add Folder";
-			btnAddFolder.UseVisualStyleBackColor = true;
-			btnAddFolder.Click += btnAddFolder_Click;
-			// 
-			// treeViewConnections
-			// 
-			treeViewConnections.Dock = DockStyle.Fill;
-			treeViewConnections.HideSelection = false;
-			treeViewConnections.Location = new Point(3, 3);
-			treeViewConnections.Name = "treeViewConnections";
-			treeViewConnections.Size = new Size(758, 543);
-			treeViewConnections.TabIndex = 0;
-			treeViewConnections.AfterSelect += treeViewConnections_AfterSelect;
-			treeViewConnections.NodeMouseDoubleClick += treeViewConnections_NodeMouseDoubleClick;
-			// 
-			// menuStrip1
-			// 
-			menuStrip1.Items.AddRange(new ToolStripItem[] { fileMenuItem, helpMenuItem });
-			menuStrip1.Location = new Point(0, 0);
-			menuStrip1.Name = "menuStrip1";
-			menuStrip1.Size = new Size(1096, 24);
-			menuStrip1.TabIndex = 2;
-			menuStrip1.Text = "menuStrip1";
-			// 
-			// fileMenuItem
-			// 
-			fileMenuItem.DropDownItems.AddRange(new ToolStripItem[] { newQueryMenuItem, executeQueryMenuItem, new ToolStripSeparator(), settingsMenuItem, new ToolStripSeparator(), exitMenuItem });
-			fileMenuItem.Name = "fileMenuItem";
-			fileMenuItem.Size = new Size(37, 20);
-			fileMenuItem.Text = "&File";
-			// 
-			// newQueryMenuItem
-			// 
-			newQueryMenuItem.Name = "newQueryMenuItem";
-			newQueryMenuItem.ShortcutKeys = Keys.Control | Keys.N;
-			newQueryMenuItem.Size = new Size(180, 22);
-			newQueryMenuItem.Text = "&New Query";
-			newQueryMenuItem.Click += newQueryMenuItem_Click;
-			// 
-			// executeQueryMenuItem
-			// 
-			executeQueryMenuItem.Name = "executeQueryMenuItem";
-			executeQueryMenuItem.ShortcutKeys = Keys.F5;
-			executeQueryMenuItem.Size = new Size(180, 22);
-			executeQueryMenuItem.Text = "&Execute Query";
-			executeQueryMenuItem.Click += executeQueryMenuItem_Click;
-			// 
-			// exitMenuItem
-			// 
-			exitMenuItem.Name = "exitMenuItem";
-			exitMenuItem.Size = new Size(180, 22);
-			exitMenuItem.Text = "E&xit";
-			exitMenuItem.Click += exitMenuItem_Click;
-			// 
-			// settingsMenuItem
-			// 
-			settingsMenuItem.Name = "settingsMenuItem";
-			settingsMenuItem.Size = new Size(180, 22);
-			settingsMenuItem.Text = "&Settings...";
-			settingsMenuItem.Click += settingsMenuItem_Click;
-			// 
-			// helpMenuItem
-			// 
-			helpMenuItem.DropDownItems.AddRange(new ToolStripItem[] { aboutMenuItem });
-			helpMenuItem.Name = "helpMenuItem";
-			helpMenuItem.Size = new Size(44, 20);
-			helpMenuItem.Text = "&Help";
-			// 
-			// aboutMenuItem
-			// 
-			aboutMenuItem.Name = "aboutMenuItem";
-			aboutMenuItem.Size = new Size(180, 22);
-			aboutMenuItem.Text = "&About";
-			aboutMenuItem.Click += aboutMenuItem_Click;
+            btnAddConnection.Text = "Add Connection";
+            btnAddConnection.UseVisualStyleBackColor = true;
+            btnAddConnection.Click += btnAddConnection_Click;
+            // 
+            // btnAddFolder
+            // 
+            btnAddFolder.Location = new Point(10, 295);
+            btnAddFolder.Name = "btnAddFolder";
+            btnAddFolder.Size = new Size(341, 40);
+            btnAddFolder.TabIndex = 12;
+            btnAddFolder.Text = "Add Folder";
+            btnAddFolder.UseVisualStyleBackColor = true;
+            btnAddFolder.Click += btnAddFolder_Click;
+            // 
+            // treeViewConnections
+            // 
+            treeViewConnections.Dock = DockStyle.Fill;
+            treeViewConnections.HideSelection = false;
+            treeViewConnections.Location = new Point(3, 3);
+            treeViewConnections.Name = "treeViewConnections";
+            treeViewConnections.Size = new Size(758, 519);
+            treeViewConnections.TabIndex = 0;
+            treeViewConnections.AfterSelect += treeViewConnections_AfterSelect;
+            treeViewConnections.NodeMouseDoubleClick += treeViewConnections_NodeMouseDoubleClick;
+            // 
+            // menuStrip1
+            // 
+            menuStrip1.Items.AddRange(new ToolStripItem[] { fileMenuItem, helpMenuItem });
+            menuStrip1.Location = new Point(0, 0);
+            menuStrip1.Name = "menuStrip1";
+            menuStrip1.Size = new Size(1096, 24);
+            menuStrip1.TabIndex = 2;
+            menuStrip1.Text = "menuStrip1";
+            // 
+            // fileMenuItem
+            // 
+            fileMenuItem.DropDownItems.AddRange(new ToolStripItem[] { newQueryMenuItem, executeQueryMenuItem, settingsMenuItem, exitMenuItem });
+            fileMenuItem.Name = "fileMenuItem";
+            fileMenuItem.Size = new Size(37, 20);
+            fileMenuItem.Text = "&File";
+            // 
+            // newQueryMenuItem
+            // 
+            newQueryMenuItem.Name = "newQueryMenuItem";
+            newQueryMenuItem.ShortcutKeys = Keys.Control | Keys.N;
+            newQueryMenuItem.Size = new Size(176, 22);
+            newQueryMenuItem.Text = "&New Query";
+            newQueryMenuItem.Click += newQueryMenuItem_Click;
+            // 
+            // executeQueryMenuItem
+            // 
+            executeQueryMenuItem.Name = "executeQueryMenuItem";
+            executeQueryMenuItem.ShortcutKeys = Keys.F5;
+            executeQueryMenuItem.Size = new Size(176, 22);
+            executeQueryMenuItem.Text = "&Execute Query";
+            executeQueryMenuItem.Click += executeQueryMenuItem_Click;
+            // 
+            // settingsMenuItem
+            // 
+            settingsMenuItem.Name = "settingsMenuItem";
+            settingsMenuItem.Size = new Size(176, 22);
+            settingsMenuItem.Text = "&Settings...";
+            settingsMenuItem.Click += settingsMenuItem_Click;
+            // 
+            // exitMenuItem
+            // 
+            exitMenuItem.Name = "exitMenuItem";
+            exitMenuItem.Size = new Size(176, 22);
+            exitMenuItem.Text = "E&xit";
+            exitMenuItem.Click += exitMenuItem_Click;
+            // 
+            // helpMenuItem
+            // 
+            helpMenuItem.DropDownItems.AddRange(new ToolStripItem[] { aboutMenuItem });
+            helpMenuItem.Name = "helpMenuItem";
+            helpMenuItem.Size = new Size(44, 20);
+            helpMenuItem.Text = "&Help";
+            // 
+            // aboutMenuItem
+            // 
+            aboutMenuItem.Name = "aboutMenuItem";
+            aboutMenuItem.Size = new Size(107, 22);
+            aboutMenuItem.Text = "&About";
+            aboutMenuItem.Click += aboutMenuItem_Click;
             // 
             // MainForm
             // 
@@ -458,7 +460,7 @@ namespace SQL_prototipo
         private TabControl leftTabControl;
         private TabPage tabPageDatabase;
         private TabPage tabPageQueries;
-        private TabControl tabControl1;
+        private SQL_prototipo.Controls.ClosableTabControl tabControl1;
         private TabPage tabPage1;
         private TabPage tabPage2;
         private RichTextBox richTextBox1;
