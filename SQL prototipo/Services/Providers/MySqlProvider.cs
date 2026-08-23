@@ -16,4 +16,6 @@ public class MySqlProvider : IDbProvider
     public string GetListColumnsSql(string tableName) =>
         "SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS " +
         $"WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{tableName.Replace("'", "''")}' ORDER BY ORDINAL_POSITION;";
+
+    public string GetNewQueryTemplate() => "SELECT ";
 }

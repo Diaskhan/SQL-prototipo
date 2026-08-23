@@ -774,7 +774,7 @@ public partial class MainForm : Form
 
     private void newQueryMenuItem_Click(object? sender, EventArgs e)
     {
-        OpenNewQueryTab("SELECT ", "Query");
+        OpenNewQueryTab(_dbService.GetNewQueryTemplate(), "Query", autoExecute: false);
     }
 
     private void executeQueryMenuItem_Click(object? sender, EventArgs e)
@@ -840,7 +840,7 @@ public partial class MainForm : Form
         }
     }
 
-    private void OpenNewQueryTab(string query, string tableName)
+    private void OpenNewQueryTab(string query, string tableName, bool autoExecute = true)
     {
         // Build a unique tab title
         int tabCount = tabControl1.TabPages.Cast<TabPage>()
@@ -929,7 +929,10 @@ public partial class MainForm : Form
         };
 
         // Auto-execute on open
-        ExecuteQueryInTab(ctx);
+        if (autoExecute)
+        {
+            ExecuteQueryInTab(ctx);
+        }
     }
 
     private async void ExecuteQueryInTab(QueryTabContext ctx)

@@ -17,4 +17,6 @@ public class PostgreSqlProvider : IDbProvider
     public string GetListColumnsSql(string tableName) =>
         "SELECT column_name, data_type FROM information_schema.columns " +
         $"WHERE table_name = '{tableName.Replace("'", "''")}' ORDER BY ordinal_position;";
+
+    public string GetNewQueryTemplate() => "SELECT ";
 }

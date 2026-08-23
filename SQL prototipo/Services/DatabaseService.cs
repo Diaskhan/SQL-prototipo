@@ -22,6 +22,12 @@ public class DatabaseService
 
     private System.Data.Common.DbConnection CreateConnection() => _provider.CreateConnection(_connectionString);
 
+    /// <summary>
+    /// Returns the starting text used when opening a new, empty query tab,
+    /// as defined by the active database provider.
+    /// </summary>
+    public string GetNewQueryTemplate() => _provider.GetNewQueryTemplate();
+
     public async Task<bool> TestConnectionAsync(CancellationToken cancellationToken = default)
     {
         using var connection = CreateConnection();

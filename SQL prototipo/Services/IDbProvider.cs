@@ -28,4 +28,9 @@ public interface IDbProvider
     /// The <paramref name="tableName"/> is expected to be a plain identifier.
     /// </summary>
     string GetListColumnsSql(string tableName);
+
+    /// <summary>
+    /// Returns the starting text used when opening a new, empty query tab.
+    /// </summary>
+    string GetNewQueryTemplate();
 }

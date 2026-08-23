@@ -14,4 +14,6 @@ public class SqliteProvider : IDbProvider
 
     public string GetListColumnsSql(string tableName) =>
         $"SELECT name, type FROM pragma_table_info('{tableName.Replace("'", "''")}');";
+
+    public string GetNewQueryTemplate() => "SELECT ";
 }

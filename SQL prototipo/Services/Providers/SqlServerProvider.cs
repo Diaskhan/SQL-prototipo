@@ -15,4 +15,6 @@ public class SqlServerProvider : IDbProvider
     public string GetListColumnsSql(string tableName) =>
         "SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS " +
         $"WHERE TABLE_NAME = '{tableName.Replace("'", "''")}' ORDER BY ORDINAL_POSITION;";
+
+    public string GetNewQueryTemplate() => "SELECT ";
 }
