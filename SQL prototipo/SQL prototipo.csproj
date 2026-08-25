@@ -10,6 +10,8 @@
     <Version>1.0.0</Version>
     <!-- InformationalVersion is overridden at publish time in CI with build date + commit hash -->
     <InformationalVersion>1.0.0+local</InformationalVersion>
+    <!-- Required so Microsoft.Data.SqlClient's native SNI DLL is extracted when publishing single-file -->
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
 
   <ItemGroup>

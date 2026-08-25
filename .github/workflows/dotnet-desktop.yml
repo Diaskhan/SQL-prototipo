@@ -44,7 +44,7 @@ jobs:
       run: dotnet build "$env:Solution_Name" --configuration ${{ matrix.configuration }} --no-restore -p:InformationalVersion=${{ steps.version.outputs.info }}
 
     - name: Publish single-file exe (framework-dependent win-x64)
-      run: dotnet publish "SQL prototipo/SQL prototipo.csproj" --configuration Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:InformationalVersion=${{ steps.version.outputs.info }} --output publish
+      run: dotnet publish "SQL prototipo/SQL prototipo.csproj" --configuration Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:InformationalVersion=${{ steps.version.outputs.info }} --output publish
 
     - name: Upload exe
       uses: actions/upload-artifact@v4
