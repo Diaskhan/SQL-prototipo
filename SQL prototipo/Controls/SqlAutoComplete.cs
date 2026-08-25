@@ -348,10 +348,16 @@ public sealed class SqlAutoComplete : IDisposable
             string kw = tokens[i].ToUpperInvariant();
             if (kw is "FROM" or "JOIN")
             {
-                string candidate = tokens[i + 1];
-                if (known.Contains(candidate))
+                // The table may be schema-qualified (e.g. [dbo].[Customer] ->
+                // tokens "dbo","Customer"), so scan a small window after the
+                // keyword for the first token that matches a known table.
+                for (int j = i + 1; j < tokens.Count && j <= i + 3; j++)
                 {
-                    yield return candidate;
+                    if (known.Contains(tokens[j]))
+                    {
+                        yield return tokens[j];
+                        break;
+                    }
                 }
             }
         }
