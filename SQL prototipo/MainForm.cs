@@ -508,6 +508,22 @@ public partial class MainForm : Form
         return text.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0;
     }
 
+    /// <summary>
+    /// Flattens an exception chain (including InnerException) into a readable
+    /// message so the real root cause is not hidden behind a wrapper exception.
+    /// </summary>
+    private static string DescribeException(Exception ex)
+    {
+        var sb = new System.Text.StringBuilder();
+        var current = ex;
+        while (current != null)
+        {
+            sb.AppendLine($"{current.GetType().Name}: {current.Message}");
+            current = current.InnerException;
+        }
+        return sb.ToString().TrimEnd();
+    }
+
     private async Task LoadTablesForConnection(ConnectionInfo connection)
     {
         try
@@ -589,7 +605,7 @@ public partial class MainForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error loading tables: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show($"Error loading tables:\n{DescribeException(ex)}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         finally
         {
@@ -681,7 +697,7 @@ public partial class MainForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error loading tables: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show($"Error loading tables:\n{DescribeException(ex)}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         finally
         {
