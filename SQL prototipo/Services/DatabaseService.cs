@@ -40,6 +40,16 @@ public class DatabaseService
     public string QualifyTableName(string schema, string tableName) =>
         _provider.QualifyTableName(schema, tableName);
 
+    /// <summary>
+    /// Builds a "select first N rows" query for the given table using the
+    /// active provider's row-limiting syntax (TOP vs LIMIT).
+    /// </summary>
+    public string BuildSelectTopQuery(string schema, string tableName, int rowCount)
+    {
+        var qualified = _provider.QualifyTableName(schema, tableName);
+        return _provider.BuildSelectTopQuery(qualified, rowCount);
+    }
+
     public async Task<bool> TestConnectionAsync(CancellationToken cancellationToken = default)
     {
         using var connection = CreateConnection();

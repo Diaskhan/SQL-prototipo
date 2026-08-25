@@ -19,5 +19,8 @@ public class SqliteProvider : IDbProvider
 
     public string QualifyTableName(string schema, string tableName) => $"\"{tableName}\"";
 
+    public string BuildSelectTopQuery(string qualifiedTableName, int rowCount) =>
+        $"SELECT * FROM {qualifiedTableName} LIMIT {rowCount}";
+
     public string GetNewQueryTemplate() => "SELECT ";
 }

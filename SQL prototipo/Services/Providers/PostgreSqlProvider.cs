@@ -32,5 +32,8 @@ public class PostgreSqlProvider : IDbProvider
             ? $"\"{tableName}\""
             : $"\"{schema}\".\"{tableName}\"";
 
+    public string BuildSelectTopQuery(string qualifiedTableName, int rowCount) =>
+        $"SELECT * FROM {qualifiedTableName} LIMIT {rowCount}";
+
     public string GetNewQueryTemplate() => "SELECT ";
 }

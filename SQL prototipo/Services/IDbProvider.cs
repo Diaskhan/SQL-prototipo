@@ -43,6 +43,12 @@ public interface IDbProvider
     string QualifyTableName(string schema, string tableName);
 
     /// <summary>
+    /// Builds a "select first N rows" query for the given (already qualified)
+    /// table, using the provider's row-limiting syntax (TOP vs LIMIT).
+    /// </summary>
+    string BuildSelectTopQuery(string qualifiedTableName, int rowCount);
+
+    /// <summary>
     /// Returns the starting text used when opening a new, empty query tab.
     /// </summary>
     string GetNewQueryTemplate();

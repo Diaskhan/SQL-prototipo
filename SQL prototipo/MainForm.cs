@@ -275,11 +275,11 @@ public partial class MainForm : Form
     {
         if (e.Node == null) return;
 
-        // If clicked on a table node, open a new query tab (schema-qualified)
+        // If clicked on a table node, open a new query tab (schema-qualified, limited to 1000 rows)
         if (e.Node.Tag is TableRef table)
         {
-            var qualified = _dbService.QualifyTableName(table.Schema, table.Name);
-            OpenNewQueryTab($"SELECT * FROM {qualified};", table.Name);
+            var query = _dbService.BuildSelectTopQuery(table.Schema, table.Name, 1000);
+            OpenNewQueryTab(query, table.Name);
             return;
         }
 

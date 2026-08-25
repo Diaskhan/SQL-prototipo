@@ -30,5 +30,8 @@ public class SqlServerProvider : IDbProvider
             ? $"[{tableName}]"
             : $"[{schema}].[{tableName}]";
 
+    public string BuildSelectTopQuery(string qualifiedTableName, int rowCount) =>
+        $"SELECT TOP {rowCount} * FROM {qualifiedTableName}";
+
     public string GetNewQueryTemplate() => "SELECT ";
 }
