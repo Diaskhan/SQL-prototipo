@@ -10,7 +10,7 @@ jobs:
   build:
     strategy:
       matrix:
-        configuration: [Debug, Release]
+        configuration: [Release]
 
     runs-on: windows-latest
 
@@ -34,13 +34,11 @@ jobs:
     - name: Build
       run: dotnet build "$env:Solution_Name" --configuration ${{ matrix.configuration }} --no-restore
 
-    - name: Publish (Release only)
-      if: matrix.configuration == 'Release'
-      run: dotnet publish "SQL prototipo/SQL prototipo.csproj" --configuration Release --no-build --output publish
+    - name: Publish single-file exe (self-contained win-x64)
+      run: dotnet publish "SQL prototipo/SQL prototipo.csproj" --configuration Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true --output publish
 
-    - name: Upload build artifacts (Release only)
-      if: matrix.configuration == 'Release'
+    - name: Upload exe
       uses: actions/upload-artifact@v4
       with:
-        name: SQL-prototipo
-        path: publish
+        name: SQL-prototipo-exe
+        path: publish/*.exe
