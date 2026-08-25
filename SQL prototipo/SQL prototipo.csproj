@@ -7,6 +7,9 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Version>1.0.0</Version>
+    <!-- InformationalVersion is overridden at publish time in CI with build date + commit hash -->
+    <InformationalVersion>1.0.0+local</InformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>

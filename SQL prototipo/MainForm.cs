@@ -1011,8 +1011,14 @@ public partial class MainForm : Form
 
     private void aboutMenuItem_Click(object? sender, EventArgs e)
     {
+        var version = BuildInfo.Version;
+        var metadata = BuildInfo.Metadata;
+        var buildLine = string.IsNullOrEmpty(metadata)
+            ? $"Version: {version}"
+            : $"Version: {version}\nBuild: {metadata}";
+
         MessageBox.Show(
-            "SQL prototipo\nA simple multi-database SQL query tool.",
+            $"SQL prototipo\nA simple multi-database SQL query tool.\n\n{buildLine}",
             "About",
             MessageBoxButtons.OK,
             MessageBoxIcon.Information);

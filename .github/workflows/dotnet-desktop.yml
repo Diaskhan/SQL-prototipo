@@ -28,14 +28,23 @@ jobs:
       with:
         dotnet-version: 10.0.x
 
+    - name: Compute build version
+      id: version
+      shell: pwsh
+      run: |
+        $date = Get-Date -Format 'yyyy.MM.dd'
+        $sha = "${{ github.sha }}".Substring(0,7)
+        $info = "1.0.0+$date.$sha"
+        echo "info=$info" >> $env:GITHUB_OUTPUT
+
     - name: Restore
       run: dotnet restore "$env:Solution_Name"
 
     - name: Build
-      run: dotnet build "$env:Solution_Name" --configuration ${{ matrix.configuration }} --no-restore
+      run: dotnet build "$env:Solution_Name" --configuration ${{ matrix.configuration }} --no-restore -p:InformationalVersion=${{ steps.version.outputs.info }}
 
-    - name: Publish single-file exe (self-contained win-x64)
-      run: dotnet publish "SQL prototipo/SQL prototipo.csproj" --configuration Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true --output publish
+    - name: Publish single-file exe (framework-dependent win-x64)
+      run: dotnet publish "SQL prototipo/SQL prototipo.csproj" --configuration Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:InformationalVersion=${{ steps.version.outputs.info }} --output publish
 
     - name: Upload exe
       uses: actions/upload-artifact@v4
