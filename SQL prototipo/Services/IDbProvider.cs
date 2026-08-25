@@ -14,20 +14,33 @@ public interface IDbProvider
     string DatabaseType { get; }
 
     /// <summary>
+    /// Indicates whether this database engine organizes tables into schemas
+    /// (e.g. SQL Server "dbo", PostgreSQL "public"). SQLite and MySQL do not.
+    /// </summary>
+    bool SupportsSchemas { get; }
+
+    /// <summary>
     /// Creates a new (unopened) ADO.NET connection for this provider.
     /// </summary>
     DbConnection CreateConnection(string connectionString);
 
     /// <summary>
-    /// Returns SQL that lists all user table names in a single column.
+    /// Returns SQL that lists all user tables. The first column is the schema
+    /// name (empty when not applicable) and the second column is the table name.
     /// </summary>
     string GetListTablesSql();
 
     /// <summary>
     /// Returns SQL that lists the columns (name, type) for the given table.
-    /// The <paramref name="tableName"/> is expected to be a plain identifier.
+    /// The <paramref name="schema"/> may be empty for schema-less databases.
     /// </summary>
-    string GetListColumnsSql(string tableName);
+    string GetListColumnsSql(string schema, string tableName);
+
+    /// <summary>
+    /// Returns the identifier used to reference a table inside a query,
+    /// schema-qualified and quoted appropriately for this provider.
+    /// </summary>
+    string QualifyTableName(string schema, string tableName);
 
     /// <summary>
     /// Returns the starting text used when opening a new, empty query tab.

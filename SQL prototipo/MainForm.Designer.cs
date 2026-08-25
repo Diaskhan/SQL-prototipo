@@ -32,11 +32,13 @@ namespace SQL_prototipo
             tabPageDatabase = new TabPage();
             treeView1 = new TreeView();
             tabPageQueries = new TabPage();
+            splitterMain = new Splitter();
+            splitterQuery = new Splitter();
             panel1 = new Panel();
             tabControl1 = new SQL_prototipo.Controls.ClosableTabControl();
             tabPage1 = new TabPage();
-            dataGridView1 = new DataGridView();
             richTextBox1 = new RichTextBox();
+            dataGridView1 = new DataGridView();
             panel3 = new Panel();
             button2 = new Button();
             button1 = new Button();
@@ -84,7 +86,7 @@ namespace SQL_prototipo
             leftTabControl.Location = new Point(0, 24);
             leftTabControl.Name = "leftTabControl";
             leftTabControl.SelectedIndex = 0;
-            leftTabControl.Size = new Size(324, 553);
+            leftTabControl.Size = new Size(324, 724);
             leftTabControl.TabIndex = 0;
             // 
             // tabPageDatabase
@@ -93,7 +95,7 @@ namespace SQL_prototipo
             tabPageDatabase.Location = new Point(4, 24);
             tabPageDatabase.Name = "tabPageDatabase";
             tabPageDatabase.Padding = new Padding(3);
-            tabPageDatabase.Size = new Size(316, 525);
+            tabPageDatabase.Size = new Size(316, 696);
             tabPageDatabase.TabIndex = 0;
             tabPageDatabase.Text = "Database";
             tabPageDatabase.UseVisualStyleBackColor = true;
@@ -103,7 +105,7 @@ namespace SQL_prototipo
             treeView1.Dock = DockStyle.Fill;
             treeView1.Location = new Point(3, 3);
             treeView1.Name = "treeView1";
-            treeView1.Size = new Size(310, 519);
+            treeView1.Size = new Size(310, 690);
             treeView1.TabIndex = 0;
             // 
             // tabPageQueries
@@ -111,19 +113,40 @@ namespace SQL_prototipo
             tabPageQueries.Location = new Point(4, 24);
             tabPageQueries.Name = "tabPageQueries";
             tabPageQueries.Padding = new Padding(3);
-            tabPageQueries.Size = new Size(316, 549);
+            tabPageQueries.Size = new Size(316, 525);
             tabPageQueries.TabIndex = 1;
             tabPageQueries.Text = "Queries";
             tabPageQueries.UseVisualStyleBackColor = true;
+            // 
+            // splitterMain
+            // 
+            splitterMain.Location = new Point(324, 24);
+            splitterMain.MinExtra = 200;
+            splitterMain.MinSize = 150;
+            splitterMain.Name = "splitterMain";
+            splitterMain.Size = new Size(4, 724);
+            splitterMain.TabIndex = 4;
+            splitterMain.TabStop = false;
+            // 
+            // splitterQuery
+            // 
+            splitterQuery.Dock = DockStyle.Bottom;
+            splitterQuery.Location = new Point(3, 248);
+            splitterQuery.MinExtra = 100;
+            splitterQuery.MinSize = 80;
+            splitterQuery.Name = "splitterQuery";
+            splitterQuery.Size = new Size(966, 14);
+            splitterQuery.TabIndex = 3;
+            splitterQuery.TabStop = false;
             // 
             // panel1
             // 
             panel1.BackColor = SystemColors.ButtonFace;
             panel1.Controls.Add(tabControl1);
             panel1.Dock = DockStyle.Fill;
-            panel1.Location = new Point(324, 24);
+            panel1.Location = new Point(328, 24);
             panel1.Name = "panel1";
-            panel1.Size = new Size(772, 553);
+            panel1.Size = new Size(980, 724);
             panel1.TabIndex = 1;
             // 
             // tabControl1
@@ -132,43 +155,45 @@ namespace SQL_prototipo
             tabControl1.Controls.Add(tabPage2);
             tabControl1.Dock = DockStyle.Fill;
             tabControl1.DrawMode = TabDrawMode.OwnerDrawFixed;
+            tabControl1.ItemSize = new Size(0, 26);
             tabControl1.Location = new Point(0, 0);
             tabControl1.Name = "tabControl1";
             tabControl1.Padding = new Point(22, 3);
             tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(772, 553);
+            tabControl1.Size = new Size(980, 724);
             tabControl1.TabIndex = 3;
             // 
             // tabPage1
             // 
-            tabPage1.Controls.Add(dataGridView1);
             tabPage1.Controls.Add(richTextBox1);
+            tabPage1.Controls.Add(splitterQuery);
+            tabPage1.Controls.Add(dataGridView1);
             tabPage1.Controls.Add(panel3);
-            tabPage1.Location = new Point(4, 24);
+            tabPage1.Location = new Point(4, 30);
             tabPage1.Name = "tabPage1";
             tabPage1.Padding = new Padding(3);
-            tabPage1.Size = new Size(764, 525);
+            tabPage1.Size = new Size(972, 690);
             tabPage1.TabIndex = 0;
             tabPage1.Text = "Query";
             tabPage1.UseVisualStyleBackColor = true;
-            // 
-            // dataGridView1
-            // 
-            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.Dock = DockStyle.Bottom;
-            dataGridView1.Location = new Point(3, 272);
-            dataGridView1.Name = "dataGridView1";
-            dataGridView1.Size = new Size(758, 250);
-            dataGridView1.TabIndex = 2;
             // 
             // richTextBox1
             // 
             richTextBox1.Dock = DockStyle.Fill;
             richTextBox1.Location = new Point(3, 53);
             richTextBox1.Name = "richTextBox1";
-            richTextBox1.Size = new Size(758, 469);
+            richTextBox1.Size = new Size(966, 195);
             richTextBox1.TabIndex = 0;
             richTextBox1.Text = "";
+            // 
+            // dataGridView1
+            // 
+            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView1.Dock = DockStyle.Bottom;
+            dataGridView1.Location = new Point(3, 262);
+            dataGridView1.Name = "dataGridView1";
+            dataGridView1.Size = new Size(966, 425);
+            dataGridView1.TabIndex = 2;
             // 
             // panel3
             // 
@@ -177,7 +202,7 @@ namespace SQL_prototipo
             panel3.Dock = DockStyle.Top;
             panel3.Location = new Point(3, 3);
             panel3.Name = "panel3";
-            panel3.Size = new Size(758, 50);
+            panel3.Size = new Size(966, 50);
             panel3.TabIndex = 1;
             // 
             // button2
@@ -206,10 +231,10 @@ namespace SQL_prototipo
             // 
             tabPage2.Controls.Add(panel4);
             tabPage2.Controls.Add(treeViewConnections);
-            tabPage2.Location = new Point(4, 24);
+            tabPage2.Location = new Point(4, 30);
             tabPage2.Name = "tabPage2";
             tabPage2.Padding = new Padding(3);
-            tabPage2.Size = new Size(764, 525);
+            tabPage2.Size = new Size(760, 519);
             tabPage2.TabIndex = 1;
             tabPage2.Text = "Connections";
             tabPage2.UseVisualStyleBackColor = true;
@@ -230,9 +255,9 @@ namespace SQL_prototipo
             panel4.Controls.Add(btnAddConnection);
             panel4.Controls.Add(btnAddFolder);
             panel4.Dock = DockStyle.Right;
-            panel4.Location = new Point(400, 3);
+            panel4.Location = new Point(396, 3);
             panel4.Name = "panel4";
-            panel4.Size = new Size(361, 519);
+            panel4.Size = new Size(361, 513);
             panel4.TabIndex = 1;
             // 
             // labelGroup
@@ -360,7 +385,7 @@ namespace SQL_prototipo
             treeViewConnections.HideSelection = false;
             treeViewConnections.Location = new Point(3, 3);
             treeViewConnections.Name = "treeViewConnections";
-            treeViewConnections.Size = new Size(758, 519);
+            treeViewConnections.Size = new Size(754, 513);
             treeViewConnections.TabIndex = 0;
             treeViewConnections.AfterSelect += treeViewConnections_AfterSelect;
             treeViewConnections.NodeMouseDoubleClick += treeViewConnections_NodeMouseDoubleClick;
@@ -370,7 +395,7 @@ namespace SQL_prototipo
             menuStrip1.Items.AddRange(new ToolStripItem[] { fileMenuItem, helpMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(1096, 24);
+            menuStrip1.Size = new Size(1308, 24);
             menuStrip1.TabIndex = 2;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -429,8 +454,9 @@ namespace SQL_prototipo
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1096, 577);
+            ClientSize = new Size(1308, 748);
             Controls.Add(panel1);
+            Controls.Add(splitterMain);
             Controls.Add(leftTabControl);
             Controls.Add(menuStrip1);
             MainMenuStrip = menuStrip1;
@@ -457,6 +483,8 @@ namespace SQL_prototipo
 
         private TreeView treeView1;
         private Panel panel1;
+        private Splitter splitterMain;
+        private Splitter splitterQuery;
         private TabControl leftTabControl;
         private TabPage tabPageDatabase;
         private TabPage tabPageQueries;

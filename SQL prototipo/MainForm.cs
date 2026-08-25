@@ -272,10 +272,11 @@ public partial class MainForm : Form
     {
         if (e.Node == null) return;
 
-        // If clicked on a table (child of Tables node), open a new query tab
-        if (e.Node.Parent != null && e.Node.Parent.Text == "Tables")
+        // If clicked on a table node, open a new query tab (schema-qualified)
+        if (e.Node.Tag is TableRef table)
         {
-            OpenNewQueryTab($"SELECT * FROM {e.Node.Text};", e.Node.Text);
+            var qualified = _dbService.QualifyTableName(table.Schema, table.Name);
+            OpenNewQueryTab($"SELECT * FROM {qualified};", table.Name);
             return;
         }
 
@@ -292,15 +293,15 @@ public partial class MainForm : Form
         var node = e.Node;
         if (node == null) return;
 
-        // Only handle table nodes (direct children of a "Tables" node)
-        if (node.Parent == null || node.Parent.Text != "Tables") return;
+        // Only handle table nodes (identified by a TableRef tag)
+        if (node.Tag is not TableRef table) return;
 
         // Already loaded (no placeholder) -> nothing to do
         if (node.Nodes.Count != 1 || node.Nodes[0].Name != "__placeholder__") return;
 
         try
         {
-            var columns = await _dbService.GetColumnsAsync(node.Text);
+            var columns = await _dbService.GetColumnsAsync(table.Schema, table.Name);
 
             node.Nodes.Clear();
             foreach (var (name, type) in columns)
@@ -323,6 +324,58 @@ public partial class MainForm : Form
             node.Nodes.Clear();
             node.Nodes.Add(new TreeNode($"Error: {ex.Message}"));
         }
+    }
+
+    /// <summary>
+    /// Populates the given "Tables" node with table nodes. When the active
+    /// provider supports schemas, tables are grouped under schema folder nodes.
+    /// </summary>
+    private void PopulateTablesNode(TreeNode tablesNode, IEnumerable<TableRef> tables)
+    {
+        bool useSchemas = _dbService.SupportsSchemas && tables.Any(t => t.HasSchema);
+
+        if (useSchemas)
+        {
+            var schemaGroups = tables
+                .GroupBy(t => t.HasSchema ? t.Schema : "(default)")
+                .OrderBy(g => g.Key);
+
+            foreach (var schemaGroup in schemaGroups)
+            {
+                var schemaNode = new TreeNode(schemaGroup.Key)
+                {
+                    ImageKey = "folder",
+                    SelectedImageKey = "folder"
+                };
+                foreach (var table in schemaGroup.OrderBy(t => t.Name))
+                {
+                    schemaNode.Nodes.Add(CreateTableNode(table));
+                }
+                tablesNode.Nodes.Add(schemaNode);
+            }
+        }
+        else
+        {
+            foreach (var table in tables)
+            {
+                tablesNode.Nodes.Add(CreateTableNode(table));
+            }
+        }
+    }
+
+    private TreeNode CreateTableNode(TableRef table)
+    {
+        var tableNode = new TreeNode(table.Name)
+        {
+            Tag = table,
+            ImageKey = "table",
+            SelectedImageKey = "table"
+        };
+        if (_settingsManager.Settings.ShowTableColumnsInTree)
+        {
+            tableNode.Nodes.Add(new TreeNode("Loading...") { Name = "__placeholder__" });
+        }
+        return tableNode;
     }
 
     private async Task LoadTablesForConnection(ConnectionInfo connection)
@@ -379,20 +432,7 @@ public partial class MainForm : Form
                                 ImageKey = "folder",
                                 SelectedImageKey = "folder"
                             };
-                            foreach (var table in tables)
-                            {
-                                var tableNode = new TreeNode(table)
-                                {
-                                    ImageKey = "table",
-                                    SelectedImageKey = "table"
-                                };
-                                // Placeholder so the node shows an expand [+] glyph
-                                if (_settingsManager.Settings.ShowTableColumnsInTree)
-                                {
-                                    tableNode.Nodes.Add(new TreeNode("Loading...") { Name = "__placeholder__" });
-                                }
-                                tablesNode.Nodes.Add(tableNode);
-                            }
+                            PopulateTablesNode(tablesNode, tables);
                             connectionNode.Nodes.Add(tablesNode);
                         }
 
@@ -496,19 +536,7 @@ public partial class MainForm : Form
                     ImageKey = "folder",
                     SelectedImageKey = "folder"
                 };
-                foreach (var table in tables)
-                {
-                    var tableNode = new TreeNode(table)
-                    {
-                        ImageKey = "table",
-                        SelectedImageKey = "table"
-                    };
-                    if (_settingsManager.Settings.ShowTableColumnsInTree)
-                    {
-                        tableNode.Nodes.Add(new TreeNode("Loading...") { Name = "__placeholder__" });
-                    }
-                    rootNode.Nodes.Add(tableNode);
-                }
+                PopulateTablesNode(rootNode, tables);
                 treeView1.Nodes.Add(rootNode);
                 treeView1.ExpandAll();
             }
@@ -901,6 +929,16 @@ public partial class MainForm : Form
             AllowUserToAddRows = false
         };
 
+        // --- Splitter between query editor and results grid ---
+        var splitter = new Splitter
+        {
+            Dock = DockStyle.Bottom,
+            Height = 4,
+            MinExtra = 100,
+            MinSize = 80,
+            TabStop = false
+        };
+
         // --- Execute button ---
         var btnExec = new Button
         {
@@ -946,12 +984,34 @@ public partial class MainForm : Form
         // Store references so F5 and ToggleUiState can find the right context
         newTab.Tag = ctx;
 
-        newTab.Controls.Add(dgv);
         newTab.Controls.Add(rtb);
+        newTab.Controls.Add(splitter);
+        newTab.Controls.Add(dgv);
         newTab.Controls.Add(toolbar);
 
         tabControl1.TabPages.Add(newTab);
         tabControl1.SelectedTab = newTab;
+
+        // Make the query editor and the results grid share the height 50/50.
+        void SizeGridToHalf()
+        {
+            int available = newTab.ClientSize.Height - toolbar.Height - splitter.Height;
+            if (available > 0)
+            {
+                dgv.Height = available / 2;
+            }
+        }
+
+        // Apply the initial 50/50 split once the tab has a real size, then stop
+        // so the user's manual splitter drags are preserved on later resizes.
+        void OnFirstSize(object? sender, EventArgs e)
+        {
+            if (newTab.ClientSize.Height <= 0) return;
+            SizeGridToHalf();
+            newTab.SizeChanged -= OnFirstSize;
+        }
+        newTab.SizeChanged += OnFirstSize;
+        SizeGridToHalf();
 
         // Wire up events
         btnExec.Click += (_, _) => ExecuteQueryInTab(ctx);

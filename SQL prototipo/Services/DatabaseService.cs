@@ -28,6 +28,18 @@ public class DatabaseService
     /// </summary>
     public string GetNewQueryTemplate() => _provider.GetNewQueryTemplate();
 
+    /// <summary>
+    /// Indicates whether the active database provider organizes tables into schemas.
+    /// </summary>
+    public bool SupportsSchemas => _provider.SupportsSchemas;
+
+    /// <summary>
+    /// Returns the schema-qualified, quoted identifier for a table, ready to be
+    /// embedded in a query for the active provider.
+    /// </summary>
+    public string QualifyTableName(string schema, string tableName) =>
+        _provider.QualifyTableName(schema, tableName);
+
     public async Task<bool> TestConnectionAsync(CancellationToken cancellationToken = default)
     {
         using var connection = CreateConnection();
@@ -35,9 +47,9 @@ public class DatabaseService
         return true;
     }
 
-    public async Task<List<string>> GetAllTablesAsync(CancellationToken cancellationToken = default)
+    public async Task<List<TableRef>> GetAllTablesAsync(CancellationToken cancellationToken = default)
     {
-        var tables = new List<string>();
+        var tables = new List<TableRef>();
         using var connection = CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
@@ -47,19 +59,25 @@ public class DatabaseService
         using var reader = await command.ExecuteReaderAsync(cancellationToken);
         while (await reader.ReadAsync(cancellationToken))
         {
-            tables.Add(reader.GetString(0));
+            var schema = reader.FieldCount > 1 && !reader.IsDBNull(0)
+                ? reader.GetValue(0)?.ToString() ?? string.Empty
+                : string.Empty;
+            var name = reader.FieldCount > 1
+                ? (reader.IsDBNull(1) ? string.Empty : reader.GetValue(1)?.ToString() ?? string.Empty)
+                : (reader.IsDBNull(0) ? string.Empty : reader.GetValue(0)?.ToString() ?? string.Empty);
+            tables.Add(new TableRef(schema, name));
         }
         return tables;
     }
 
-    public async Task<List<(string Name, string Type)>> GetColumnsAsync(string tableName, CancellationToken cancellationToken = default)
+    public async Task<List<(string Name, string Type)>> GetColumnsAsync(string schema, string tableName, CancellationToken cancellationToken = default)
     {
         var columns = new List<(string, string)>();
         using var connection = CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
         using var command = connection.CreateCommand();
-        command.CommandText = _provider.GetListColumnsSql(tableName);
+        command.CommandText = _provider.GetListColumnsSql(schema, tableName);
 
         using var reader = await command.ExecuteReaderAsync(cancellationToken);
         while (await reader.ReadAsync(cancellationToken))
