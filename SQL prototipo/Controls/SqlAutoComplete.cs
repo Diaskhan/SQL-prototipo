@@ -1,5 +1,28 @@
 namespace SQL_prototipo.Controls;
 
+/// <summary>The kind of a completion suggestion, used to pick its icon.</summary>
+public enum CompletionKind
+{
+    Keyword,
+    Table,
+    Column
+}
+
+/// <summary>A single suggestion shown in the autocomplete popup.</summary>
+public sealed class CompletionItem
+{
+    public CompletionItem(string text, CompletionKind kind)
+    {
+        Text = text;
+        Kind = kind;
+    }
+
+    public string Text { get; }
+    public CompletionKind Kind { get; }
+
+    public override string ToString() => Text;
+}
+
 /// <summary>
 /// Provides IntelliSense-like completion for a <see cref="RichTextBox"/> SQL
 /// editor. Suggestions combine SQL keywords with tables/columns pulled from a
@@ -38,7 +61,9 @@ public sealed class SqlAutoComplete : IDisposable
             IntegralHeight = false,
             Height = 140,
             Width = 220,
-            Font = editor.Font
+            Font = editor.Font,
+            DrawMode = DrawMode.OwnerDrawFixed,
+            ItemHeight = Math.Max(18, editor.Font.Height + 4)
         };
 
         _editor.KeyDown += Editor_KeyDown;
@@ -49,6 +74,7 @@ public sealed class SqlAutoComplete : IDisposable
 
         _list.Click += (_, _) => CommitSelection();
         _list.KeyDown += List_KeyDown;
+        _list.DrawItem += List_DrawItem;
     }
 
     private void EnsureListParented()
@@ -180,9 +206,9 @@ public sealed class SqlAutoComplete : IDisposable
         _editor.Focus();
     }
 
-    private List<string> BuildCandidates(string text, int caret, string prefix)
+    private List<CompletionItem> BuildCandidates(string text, int caret, string prefix)
     {
-        var results = new List<string>();
+        var results = new List<CompletionItem>();
         string preceding = GetPrecedingKeyword(text, _replaceStart);
 
         bool afterFrom = preceding is "FROM" or "JOIN" or "INTO" or "UPDATE";
@@ -196,19 +222,19 @@ public sealed class SqlAutoComplete : IDisposable
             var cols = _schema.GetColumnsIfLoaded(resolved);
             if (cols != null)
             {
-                AddMatching(results, cols, prefix);
+                AddMatching(results, cols, prefix, CompletionKind.Column);
             }
             return results;
         }
 
         if (afterFrom)
         {
-            AddMatching(results, _schema.TableNames, prefix);
+            AddMatching(results, _schema.TableNames, prefix, CompletionKind.Table);
             return results;
         }
 
         // General context: tables, columns of referenced tables, and keywords.
-        AddMatching(results, _schema.TableNames, prefix);
+        AddMatching(results, _schema.TableNames, prefix, CompletionKind.Table);
 
         foreach (var tableName in GetReferencedTables(text))
         {
@@ -216,15 +242,19 @@ public sealed class SqlAutoComplete : IDisposable
             var cols = _schema.GetColumnsIfLoaded(tableName);
             if (cols != null)
             {
-                AddMatching(results, cols, prefix);
+                AddMatching(results, cols, prefix, CompletionKind.Column);
             }
         }
 
-        AddMatching(results, Keywords, prefix);
-        return results.Distinct(StringComparer.OrdinalIgnoreCase).Take(50).ToList();
+        AddMatching(results, Keywords, prefix, CompletionKind.Keyword);
+        return results
+            .GroupBy(r => r.Text, StringComparer.OrdinalIgnoreCase)
+            .Select(g => g.First())
+            .Take(50)
+            .ToList();
     }
 
-    private static void AddMatching(List<string> target, IEnumerable<string> source, string prefix)
+    private static void AddMatching(List<CompletionItem> target, IEnumerable<string> source, string prefix, CompletionKind kind)
     {
         foreach (var item in source)
         {
@@ -234,19 +264,20 @@ public sealed class SqlAutoComplete : IDisposable
             }
             if (prefix.Length == 0 || item.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
             {
-                target.Add(item);
+                target.Add(new CompletionItem(item, kind));
             }
         }
     }
 
     private void CommitSelection()
     {
-        if (_list.SelectedItem is not string chosen)
+        if (_list.SelectedItem is not CompletionItem selected)
         {
             Hide();
             return;
         }
 
+        string chosen = selected.Text;
         _suppress = true;
         try
         {
@@ -270,6 +301,72 @@ public sealed class SqlAutoComplete : IDisposable
 
         Hide();
         _editor.Focus();
+    }
+
+    private void List_DrawItem(object? sender, DrawItemEventArgs e)
+    {
+        e.DrawBackground();
+
+        if (e.Index < 0 || e.Index >= _list.Items.Count)
+        {
+            e.DrawFocusRectangle();
+            return;
+        }
+
+        var item = (CompletionItem)_list.Items[e.Index];
+        var bounds = e.Bounds;
+
+        // --- Draw a small type icon on the left ---
+        int iconSize = Math.Min(bounds.Height - 4, 12);
+        var iconRect = new Rectangle(bounds.Left + 3, bounds.Top + (bounds.Height - iconSize) / 2, iconSize, iconSize);
+        DrawKindIcon(e.Graphics, iconRect, item.Kind);
+
+        // --- Draw the text after the icon ---
+        var textColor = (e.State & DrawItemState.Selected) == DrawItemState.Selected
+            ? SystemColors.HighlightText
+            : SystemColors.WindowText;
+        var textRect = new Rectangle(iconRect.Right + 5, bounds.Top, bounds.Width - iconRect.Right - 5, bounds.Height);
+        TextRenderer.DrawText(e.Graphics, item.Text, _list.Font, textRect, textColor,
+            TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+
+        e.DrawFocusRectangle();
+    }
+
+    private static void DrawKindIcon(Graphics g, Rectangle rect, CompletionKind kind)
+    {
+        switch (kind)
+        {
+            case CompletionKind.Table:
+                // Blue grid-like square representing a table.
+                using (var brush = new SolidBrush(Color.FromArgb(52, 120, 210)))
+                {
+                    g.FillRectangle(brush, rect);
+                }
+                using (var pen = new Pen(Color.White))
+                {
+                    int midY = rect.Top + rect.Height / 2;
+                    int midX = rect.Left + rect.Width / 2;
+                    g.DrawLine(pen, rect.Left, midY, rect.Right, midY);
+                    g.DrawLine(pen, midX, rect.Top, midX, rect.Bottom);
+                }
+                break;
+
+            case CompletionKind.Column:
+                // Green circle representing a column.
+                using (var brush = new SolidBrush(Color.FromArgb(60, 160, 90)))
+                {
+                    g.FillEllipse(brush, rect);
+                }
+                break;
+
+            default:
+                // Grey marker for keywords.
+                using (var brush = new SolidBrush(Color.FromArgb(150, 150, 150)))
+                {
+                    g.FillRectangle(brush, rect.Left, rect.Top + rect.Height / 4, rect.Width, rect.Height / 2);
+                }
+                break;
+        }
     }
 
     private void PositionListAtCaret()
