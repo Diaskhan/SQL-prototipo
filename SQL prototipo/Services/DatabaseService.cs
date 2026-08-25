@@ -53,7 +53,7 @@ public class DatabaseService
     public async Task<bool> TestConnectionAsync(CancellationToken cancellationToken = default)
     {
         using var connection = CreateConnection();
-        await connection.OpenAsync(cancellationToken);
+        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
         return true;
     }
 
@@ -61,13 +61,13 @@ public class DatabaseService
     {
         var tables = new List<TableRef>();
         using var connection = CreateConnection();
-        await connection.OpenAsync(cancellationToken);
+        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
         using var command = connection.CreateCommand();
         command.CommandText = _provider.GetListTablesSql();
 
-        using var reader = await command.ExecuteReaderAsync(cancellationToken);
-        while (await reader.ReadAsync(cancellationToken))
+        using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+        while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
         {
             var schema = reader.FieldCount > 1 && !reader.IsDBNull(0)
                 ? reader.GetValue(0)?.ToString() ?? string.Empty
@@ -84,13 +84,13 @@ public class DatabaseService
     {
         var columns = new List<(string, string)>();
         using var connection = CreateConnection();
-        await connection.OpenAsync(cancellationToken);
+        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
         using var command = connection.CreateCommand();
         command.CommandText = _provider.GetListColumnsSql(schema, tableName);
 
-        using var reader = await command.ExecuteReaderAsync(cancellationToken);
-        while (await reader.ReadAsync(cancellationToken))
+        using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+        while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
         {
             var name = reader.IsDBNull(0) ? string.Empty : reader.GetValue(0)?.ToString() ?? string.Empty;
             var type = reader.FieldCount > 1 && !reader.IsDBNull(1) ? reader.GetValue(1)?.ToString() ?? string.Empty : string.Empty;
@@ -103,12 +103,12 @@ public class DatabaseService
     {
         var stopwatch = Stopwatch.StartNew();
         using var connection = CreateConnection();
-        await connection.OpenAsync(cancellationToken);
+        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
         using var command = connection.CreateCommand();
         command.CommandText = query;
 
-        using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
 
         if (reader.FieldCount > 0)
         {
