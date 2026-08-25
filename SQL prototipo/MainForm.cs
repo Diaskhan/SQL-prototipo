@@ -30,6 +30,7 @@ public partial class MainForm : Form
         _dbService = new DatabaseService(_currentConnectionString, _currentDatabaseType);
         treeView1.NodeMouseDoubleClick += TreeView1_NodeMouseDoubleClick;
         treeView1.BeforeExpand += TreeView1_BeforeExpand;
+        txtTableFilter.TextChanged += (_, _) => ApplyTableFilter(txtTableFilter.Text);
 
         // F5 shortcut to execute queries
         this.KeyPreview = true;
@@ -181,6 +182,8 @@ public partial class MainForm : Form
         {
             treeView1.EndUpdate();
         }
+
+        CaptureTreeBackupAndFilter();
 
         // Populate the Connections tab tree (folders -> connections) and the combobox
         PopulateConnectionsTree();
@@ -378,6 +381,133 @@ public partial class MainForm : Form
         return tableNode;
     }
 
+    // Holds an unfiltered snapshot of the Database tree so the table filter
+    // can be applied and cleared without reloading from the database.
+    private List<TreeNode> _treeBackup = new();
+
+    /// <summary>
+    /// Takes a snapshot of the freshly built Database tree and re-applies the
+    /// current table filter (if any). Call this after (re)building treeView1.
+    /// </summary>
+    private void CaptureTreeBackupAndFilter()
+    {
+        _treeBackup = treeView1.Nodes.Cast<TreeNode>()
+            .Select(n => (TreeNode)n.Clone())
+            .ToList();
+
+        if (!string.IsNullOrWhiteSpace(txtTableFilter.Text))
+        {
+            ApplyTableFilter(txtTableFilter.Text);
+        }
+    }
+
+    /// <summary>
+    /// Filters the Database tree by table name. An empty filter restores the
+    /// full tree. A '*'/'?' pattern is matched as a wildcard; otherwise the
+    /// filter is treated as a "contains" (i.e. *filter*) match.
+    /// </summary>
+    private void ApplyTableFilter(string? filter)
+    {
+        filter = filter?.Trim() ?? string.Empty;
+
+        treeView1.BeginUpdate();
+        try
+        {
+            treeView1.Nodes.Clear();
+
+            if (string.IsNullOrEmpty(filter))
+            {
+                foreach (var node in _treeBackup)
+                {
+                    treeView1.Nodes.Add((TreeNode)node.Clone());
+                }
+            }
+            else
+            {
+                foreach (var node in _treeBackup)
+                {
+                    var filtered = FilterNode(node, filter);
+                    if (filtered != null)
+                    {
+                        treeView1.Nodes.Add(filtered);
+                    }
+                }
+            }
+
+            treeView1.ExpandAll();
+        }
+        finally
+        {
+            treeView1.EndUpdate();
+        }
+    }
+
+    /// <summary>
+    /// Returns a clone of <paramref name="source"/> if it is a matching table
+    /// node or a container that has at least one matching descendant; otherwise null.
+    /// </summary>
+    private TreeNode? FilterNode(TreeNode source, string filter)
+    {
+        if (source.Tag is TableRef)
+        {
+            if (!MatchesFilter(source.Text, filter))
+            {
+                return null;
+            }
+
+            var tableClone = CloneShallow(source);
+            foreach (TreeNode child in source.Nodes)
+            {
+                tableClone.Nodes.Add((TreeNode)child.Clone());
+            }
+            return tableClone;
+        }
+
+        var matchingChildren = new List<TreeNode>();
+        foreach (TreeNode child in source.Nodes)
+        {
+            var filteredChild = FilterNode(child, filter);
+            if (filteredChild != null)
+            {
+                matchingChildren.Add(filteredChild);
+            }
+        }
+
+        if (matchingChildren.Count == 0)
+        {
+            return null;
+        }
+
+        var clone = CloneShallow(source);
+        foreach (var child in matchingChildren)
+        {
+            clone.Nodes.Add(child);
+        }
+        return clone;
+    }
+
+    private static TreeNode CloneShallow(TreeNode source) => new TreeNode(source.Text)
+    {
+        Name = source.Name,
+        Tag = source.Tag,
+        ImageKey = source.ImageKey,
+        SelectedImageKey = source.SelectedImageKey
+    };
+
+    private static bool MatchesFilter(string text, string filter)
+    {
+        if (filter.Contains('*') || filter.Contains('?'))
+        {
+            var pattern = "^" + System.Text.RegularExpressions.Regex.Escape(filter)
+                .Replace("\\*", ".*")
+                .Replace("\\?", ".") + "$";
+            return System.Text.RegularExpressions.Regex.IsMatch(
+                text, pattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        }
+
+        return text.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
     private async Task LoadTablesForConnection(ConnectionInfo connection)
     {
         try
@@ -448,6 +578,8 @@ public partial class MainForm : Form
             {
                 treeView1.EndUpdate();
             }
+
+            CaptureTreeBackupAndFilter();
 
             // Also update the Connections tab combobox
             if (cmbConnections.Items.Count > 0)
@@ -544,6 +676,8 @@ public partial class MainForm : Form
             {
                 treeView1.EndUpdate();
             }
+
+            CaptureTreeBackupAndFilter();
         }
         catch (Exception ex)
         {

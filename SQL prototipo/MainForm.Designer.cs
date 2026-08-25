@@ -31,6 +31,7 @@ namespace SQL_prototipo
             leftTabControl = new TabControl();
             tabPageDatabase = new TabPage();
             treeView1 = new TreeView();
+            txtTableFilter = new TextBox();
             tabPageQueries = new TabPage();
             splitterMain = new Splitter();
             splitterQuery = new Splitter();
@@ -92,6 +93,7 @@ namespace SQL_prototipo
             // tabPageDatabase
             // 
             tabPageDatabase.Controls.Add(treeView1);
+            tabPageDatabase.Controls.Add(txtTableFilter);
             tabPageDatabase.Location = new Point(4, 24);
             tabPageDatabase.Name = "tabPageDatabase";
             tabPageDatabase.Padding = new Padding(3);
@@ -107,6 +109,15 @@ namespace SQL_prototipo
             treeView1.Name = "treeView1";
             treeView1.Size = new Size(310, 690);
             treeView1.TabIndex = 0;
+            // 
+            // txtTableFilter
+            // 
+            txtTableFilter.Dock = DockStyle.Top;
+            txtTableFilter.Location = new Point(3, 3);
+            txtTableFilter.Name = "txtTableFilter";
+            txtTableFilter.PlaceholderText = "Filter tables... (e.g. *invoice*)";
+            txtTableFilter.Size = new Size(310, 23);
+            txtTableFilter.TabIndex = 1;
             // 
             // tabPageQueries
             // 
@@ -482,6 +493,7 @@ namespace SQL_prototipo
         #endregion
 
         private TreeView treeView1;
+        private TextBox txtTableFilter;
         private Panel panel1;
         private Splitter splitterMain;
         private Splitter splitterQuery;
