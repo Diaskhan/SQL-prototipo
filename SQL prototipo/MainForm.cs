@@ -669,6 +669,7 @@ public partial class MainForm : Form
         if (result.HasResultSet)
         {
             grid.DataSource = result.Data;
+            ConfigureBinaryColumns(grid, result.Data);
             SetStatus($"{result.RowCount} row(s) returned in {result.ElapsedMilliseconds} ms.");
         }
         else
@@ -677,6 +678,57 @@ public partial class MainForm : Form
             SetStatus($"{result.RecordsAffected} row(s) affected in {result.ElapsedMilliseconds} ms.");
         }
         RecordHistory(query, true);
+    }
+
+    // Replaces auto-generated image columns (for byte[] data) with text columns
+    // showing a "binary data" placeholder. Otherwise DataGridView tries to render
+    // raw bytes as an image and throws "Parameter is not valid" (GDI+ ArgumentException).
+    private void ConfigureBinaryColumns(DataGridView grid, System.Data.DataTable? data)
+    {
+        if (data == null) return;
+
+        var binaryColumns = data.Columns.Cast<System.Data.DataColumn>()
+            .Where(c => c.DataType == typeof(byte[]))
+            .Select(c => c.ColumnName)
+            .ToHashSet(StringComparer.Ordinal);
+
+        if (binaryColumns.Count == 0) return;
+
+        foreach (var colName in binaryColumns)
+        {
+            var existing = grid.Columns[colName];
+            if (existing == null) continue;
+
+            int index = existing.Index;
+            var textColumn = new DataGridViewTextBoxColumn
+            {
+                Name = existing.Name,
+                HeaderText = existing.HeaderText,
+                DataPropertyName = existing.DataPropertyName,
+                ReadOnly = true
+            };
+
+            grid.Columns.RemoveAt(index);
+            grid.Columns.Insert(index, textColumn);
+        }
+
+        // Detach any previous handler to avoid stacking on re-execution.
+        grid.CellFormatting -= BinaryCellFormatting;
+        grid.CellFormatting += BinaryCellFormatting;
+
+        void BinaryCellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.ColumnIndex < 0 || e.RowIndex < 0) return;
+            var colName = grid.Columns[e.ColumnIndex].DataPropertyName;
+            if (string.IsNullOrEmpty(colName)) colName = grid.Columns[e.ColumnIndex].Name;
+            if (!binaryColumns.Contains(colName)) return;
+
+            if (e.Value is byte[] bytes)
+            {
+                e.Value = $"binary data ({bytes.Length} bytes)";
+                e.FormattingApplied = true;
+            }
+        }
     }
 
     private void RecordHistory(string query, bool success)
