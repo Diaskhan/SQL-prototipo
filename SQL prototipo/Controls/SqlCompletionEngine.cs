@@ -1,3 +1,7 @@
+using Antlr4.Runtime;
+using Antlr4C3;
+using Antlr4C3.Grammars;
+
 namespace SQL_prototipo.Controls;
 
 /// <summary>The kind of a completion suggestion, used to pick its icon.</summary>
@@ -24,69 +28,121 @@ public sealed class CompletionItem
 }
 
 /// <summary>
-/// Thin, UI-agnostic wrapper over the antlr4-c3 <see cref="CodeCompletionCore"/>
-/// (through <see cref="AntlrSqlAnalyzer"/>). It exposes only the grammar-derived
-/// keyword candidates for a given text + caret position; it does not merge in any
-/// schema data or apply hand-written completion heuristics.
+/// UI-agnostic SQL completion engine driven purely by the antlr4-c3
+/// <see cref="CodeCompletionCore"/> over the generated SQLite grammar.
+/// For a given text and caret it lexes/parses the input, asks the core which
+/// tokens are valid at the caret and returns the matching SQL keywords.
 /// </summary>
 public sealed class SqlCompletionEngine
 {
-    private readonly AntlrSqlAnalyzer _analyzer = new();
-
     /// <summary>
-    /// Returns completion candidates for the given text and caret position.
-    /// <paramref name="replaceStart"/> is the offset where the current token
-    /// begins (i.e. where a chosen suggestion should replace text up to caret).
-    /// When <paramref name="force"/> is false and there is no current token,
-    /// an empty list is returned.
+    /// Returns keyword completion candidates for the given text and caret.
+    /// <paramref name="replaceStart"/> is the offset where the current word begins
+    /// (where a chosen suggestion replaces text up to the caret). When
+    /// <paramref name="force"/> is false and there is no current word, an empty
+    /// list is returned.
     /// </summary>
     public IReadOnlyList<CompletionItem> GetSuggestions(string text, int caret, bool force, out int replaceStart)
     {
-        string prefix = GetCurrentToken(text, caret, out replaceStart);
+        string prefix = GetCurrentWord(text, caret, out replaceStart);
         if (!force && prefix.Length == 0)
         {
             return Array.Empty<CompletionItem>();
         }
 
-        var analysis = _analyzer.Analyze(text, caret);
-        if (analysis == null)
-        {
-            return Array.Empty<CompletionItem>();
-        }
-
-        var results = new List<CompletionItem>();
-        AddMatching(results, analysis.Keywords, prefix, CompletionKind.Keyword);
-
-        return results
-            .GroupBy(r => r.Text, StringComparer.OrdinalIgnoreCase)
-            .Select(g => g.First())
+        return CollectKeywords(text ?? string.Empty, caret)
+            .Where(k => prefix.Length == 0 || k.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
             .Take(50)
+            .Select(k => new CompletionItem(k, CompletionKind.Keyword))
             .ToList();
     }
 
-    private static void AddMatching(List<CompletionItem> target, IEnumerable<string> source, string prefix, CompletionKind kind)
+    /// <summary>Runs CodeCompletionCore and returns the valid SQL keyword literals.</summary>
+    private static IReadOnlyList<string> CollectKeywords(string text, int caret)
     {
-        foreach (var item in source)
+        try
         {
-            if (string.IsNullOrEmpty(item))
+            var lexer = new SQLiteLexer(new AntlrInputStream(text));
+            lexer.RemoveErrorListeners();
+
+            var tokens = new CommonTokenStream(lexer);
+            tokens.Fill();
+
+            var parser = new SQLiteParser(tokens);
+            parser.RemoveErrorListeners();
+            var tree = parser.parse();
+
+            var core = new CodeCompletionCore(parser);
+            var candidates = core.CollectCandidates(ComputeTokenIndex(tokens, caret), tree);
+
+            var vocabulary = parser.Vocabulary;
+            var keywords = new List<string>();
+            foreach (var tokenType in candidates.Tokens.Keys)
             {
-                continue;
+                string? keyword = ToKeyword(vocabulary.GetLiteralName(tokenType));
+                if (keyword != null)
+                {
+                    keywords.Add(keyword);
+                }
             }
-            if (prefix.Length == 0 || item.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-            {
-                target.Add(new CompletionItem(item, kind));
-            }
+
+            return keywords;
+        }
+        catch
+        {
+            // Incomplete/invalid SQL can throw during analysis.
+            return Array.Empty<string>();
         }
     }
 
-    // --- Caret / current-token helpers (editor positioning only) ---
+    /// <summary>
+    /// Maps a character caret offset to the token stream index expected by
+    /// <see cref="CodeCompletionCore.CollectCandidates"/>: the token that contains
+    /// the caret (partial word) or the token that follows it.
+    /// </summary>
+    private static int ComputeTokenIndex(CommonTokenStream tokenStream, int caret)
+    {
+        var tokens = tokenStream.GetTokens();
+        foreach (var token in tokens)
+        {
+            if (token.Type == TokenConstants.EOF)
+            {
+                return token.TokenIndex;
+            }
+            if ((caret > token.StartIndex && caret <= token.StopIndex + 1) || token.StartIndex >= caret)
+            {
+                return token.TokenIndex;
+            }
+        }
+        return tokens.Count > 0 ? tokens[tokens.Count - 1].TokenIndex : 0;
+    }
 
-    private static bool IsWordChar(char c) => char.IsLetterOrDigit(c) || c == '_';
+    /// <summary>
+    /// Converts a vocabulary literal name (e.g. <c>'SELECT'</c>) to a bare keyword,
+    /// or returns <c>null</c> for operators/punctuation that are not keywords.
+    /// </summary>
+    private static string? ToKeyword(string? literalName)
+    {
+        if (string.IsNullOrEmpty(literalName))
+        {
+            return null;
+        }
 
-    private static string GetCurrentToken(string text, int caret, out int start)
+        string value = literalName!.Trim('\'');
+        if (value.Length == 0 || !value.All(c => char.IsLetter(c) || c == '_'))
+        {
+            return null;
+        }
+
+        return value.ToUpperInvariant();
+    }
+
+    /// <summary>Returns the word currently under the caret and its start offset.</summary>
+    private static string GetCurrentWord(string text, int caret, out int start)
     {
         int i = caret;
-        while (i > 0 && IsWordChar(text[i - 1]))
+        while (i > 0 && (char.IsLetterOrDigit(text[i - 1]) || text[i - 1] == '_'))
         {
             i--;
         }
