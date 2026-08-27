@@ -1,10 +1,12 @@
 using System.ComponentModel;
 using System.Windows.Forms.Integration;
+using System.Xml;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Highlighting;
+using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using WpfFontFamily = System.Windows.Media.FontFamily;
 using WpfKey = System.Windows.Input.Key;
 using WpfKeyboard = System.Windows.Input.Keyboard;
@@ -34,7 +36,7 @@ public sealed class SqlCodeEditor : UserControl
             FontFamily = new WpfFontFamily("Consolas"),
             FontSize = 13,
             WordWrap = false,
-            SyntaxHighlighting = HighlightingManager.Instance.GetDefinition("SQL")
+            SyntaxHighlighting = LoadSqlHighlighting()
         };
         _editor.Options.EnableHyperlinks = false;
         _editor.Options.EnableEmailHyperlinks = false;
@@ -82,6 +84,19 @@ public sealed class SqlCodeEditor : UserControl
             // WinForms font size is in points; AvalonEdit expects device-independent pixels.
             _editor.FontSize = Font.SizeInPoints * 96.0 / 72.0;
         }
+    }
+
+    /// <summary>
+    /// Loads the SQL syntax highlighting from the embedded <c>Sql.xshd</c>
+    /// resource. AvalonEdit's built-in <see cref="HighlightingManager"/> does
+    /// not register a SQL definition by default, so we ship and load our own.
+    /// </summary>
+    private static IHighlightingDefinition LoadSqlHighlighting()
+    {
+        using var stream = typeof(SqlCodeEditor).Assembly.GetManifestResourceStream("Sql.xshd")
+            ?? throw new InvalidOperationException("Embedded resource 'Sql.xshd' was not found.");
+        using var reader = XmlReader.Create(stream);
+        return HighlightingLoader.Load(reader, HighlightingManager.Instance);
     }
 
     private void Editor_KeyDown(object? sender, System.Windows.Input.KeyEventArgs e)

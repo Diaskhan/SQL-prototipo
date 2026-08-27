@@ -31,6 +31,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Controls\Resources\Sql.xshd">
+      <LogicalName>Sql.xshd</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Assets\" />
   </ItemGroup>
 

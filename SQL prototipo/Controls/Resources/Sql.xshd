@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+<SyntaxDefinition name="SQL" extensions=".sql"
+	xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+
+  <Color name="Comment"      foreground="#008000" />
+  <Color name="String"       foreground="#A31515" />
+  <Color name="Number"       foreground="#0F6FAD" />
+  <Color name="Keyword"      foreground="#0000FF" fontWeight="bold" />
+  <Color name="Function"     foreground="#795E26" />
+  <Color name="Operator"     foreground="#666666" />
+
+  <RuleSet ignoreCase="true">
+
+	<!-- Comments -->
+	<Span color="Comment" begin="--" />
+	<Span color="Comment" multiline="true" begin="/\*" end="\*/" />
+
+	<!-- Strings -->
+	<Span color="String" multiline="true">
+	  <Begin>'</Begin>
+	  <End>'</End>
+	  <RuleSet>
+		<!-- SQL escapes a quote by doubling it -->
+		<Span begin="''" end="" />
+	  </RuleSet>
+	</Span>
+
+	<!-- Keywords -->
+	<Keywords color="Keyword">
+	  <Word>ADD</Word>
+	  <Word>ALL</Word>
+	  <Word>ALTER</Word>
+	  <Word>AND</Word>
+	  <Word>AS</Word>
+	  <Word>ASC</Word>
+	  <Word>BETWEEN</Word>
+	  <Word>BY</Word>
+	  <Word>CASE</Word>
+	  <Word>CAST</Word>
+	  <Word>CHECK</Word>
+	  <Word>COLUMN</Word>
+	  <Word>CONSTRAINT</Word>
+	  <Word>CREATE</Word>
+	  <Word>CROSS</Word>
+	  <Word>DATABASE</Word>
+	  <Word>DEFAULT</Word>
+	  <Word>DELETE</Word>
+	  <Word>DESC</Word>
+	  <Word>DISTINCT</Word>
+	  <Word>DROP</Word>
+	  <Word>ELSE</Word>
+	  <Word>END</Word>
+	  <Word>EXISTS</Word>
+	  <Word>FOREIGN</Word>
+	  <Word>FROM</Word>
+	  <Word>FULL</Word>
+	  <Word>GROUP</Word>
+	  <Word>HAVING</Word>
+	  <Word>IN</Word>
+	  <Word>INDEX</Word>
+	  <Word>INNER</Word>
+	  <Word>INSERT</Word>
+	  <Word>INTO</Word>
+	  <Word>IS</Word>
+	  <Word>JOIN</Word>
+	  <Word>KEY</Word>
+	  <Word>LEFT</Word>
+	  <Word>LIKE</Word>
+	  <Word>LIMIT</Word>
+	  <Word>NOT</Word>
+	  <Word>NULL</Word>
+	  <Word>OFFSET</Word>
+	  <Word>ON</Word>
+	  <Word>OR</Word>
+	  <Word>ORDER</Word>
+	  <Word>OUTER</Word>
+	  <Word>PRIMARY</Word>
+	  <Word>REFERENCES</Word>
+	  <Word>RIGHT</Word>
+	  <Word>SELECT</Word>
+	  <Word>SET</Word>
+	  <Word>TABLE</Word>
+	  <Word>THEN</Word>
+	  <Word>TOP</Word>
+	  <Word>TRUNCATE</Word>
+	  <Word>UNION</Word>
+	  <Word>UNIQUE</Word>
+	  <Word>UPDATE</Word>
+	  <Word>VALUES</Word>
+	  <Word>VIEW</Word>
+	  <Word>WHEN</Word>
+	  <Word>WHERE</Word>
+	  <Word>WITH</Word>
+	</Keywords>
+
+	<!-- Common functions -->
+	<Keywords color="Function">
+	  <Word>AVG</Word>
+	  <Word>COALESCE</Word>
+	  <Word>COUNT</Word>
+	  <Word>IFNULL</Word>
+	  <Word>ISNULL</Word>
+	  <Word>LOWER</Word>
+	  <Word>MAX</Word>
+	  <Word>MIN</Word>
+	  <Word>NULLIF</Word>
+	  <Word>ROUND</Word>
+	  <Word>SUBSTR</Word>
+	  <Word>SUBSTRING</Word>
+	  <Word>SUM</Word>
+	  <Word>TRIM</Word>
+	  <Word>UPPER</Word>
+	</Keywords>
+
+	<!-- Numbers -->
+	<Rule color="Number">
+	  \b0[xX][0-9a-fA-F]+  # hex
+	  |
+	  (\b\d+(\.[0-9]+)?   # decimal
+	  |\.[0-9]+)
+	  ([eE][+-]?[0-9]+)?  # exponent
+	</Rule>
+
+	<Rule color="Operator">
+	  [?,.;()\[\]{}+\-/%*&lt;&gt;=~!|&amp;^]
+	</Rule>
+
+  </RuleSet>
+</SyntaxDefinition>
