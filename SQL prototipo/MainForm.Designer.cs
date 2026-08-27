@@ -38,7 +38,7 @@ namespace SQL_prototipo
             panel1 = new Panel();
             tabControl1 = new SQL_prototipo.Controls.ClosableTabControl();
             tabPage1 = new TabPage();
-            richTextBox1 = new RichTextBox();
+            richTextBox1 = new SQL_prototipo.Controls.SqlCodeEditor();
             dataGridView1 = new DataGridView();
             panel3 = new Panel();
             button2 = new Button();
@@ -503,7 +503,7 @@ namespace SQL_prototipo
         private SQL_prototipo.Controls.ClosableTabControl tabControl1;
         private TabPage tabPage1;
         private TabPage tabPage2;
-        private RichTextBox richTextBox1;
+        private SQL_prototipo.Controls.SqlCodeEditor richTextBox1;
         private Panel panel3;
         private Button button1;
         private Button button2;

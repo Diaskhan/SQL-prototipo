@@ -15,9 +15,8 @@ public partial class MainForm : Form
     private ConnectionInfo? _activeConnection;
     private bool _isLoadingUI = false;
 
-    // Shared schema metadata cache + autocomplete controllers for query editors.
+    // Shared schema metadata cache for query editors.
     private readonly SchemaCache _schemaCache = new();
-    private readonly List<SqlAutoComplete> _autoCompleters = new();
 
     // Additional UI elements created programmatically
     private StatusStrip _statusStrip = null!;
@@ -64,9 +63,9 @@ public partial class MainForm : Form
         AttachAutoComplete(richTextBox1);
     }
 
-    private void AttachAutoComplete(RichTextBox editor)
+    private void AttachAutoComplete(SqlCodeEditor editor)
     {
-        _autoCompleters.Add(new SqlAutoComplete(editor, _schemaCache));
+        editor.AttachSchema(_schemaCache);
     }
 
     private void InitializeAdditionalUi()
@@ -1147,13 +1146,12 @@ public partial class MainForm : Form
             .Count(tp => tp.Tag is QueryTabContext);
         string title = $"{tableName} ({tabCount + 1})";
 
-        // --- RichTextBox (query editor) ---
-        var rtb = new RichTextBox
+        // --- SQL code editor (AvalonEdit-based) ---
+        var rtb = new SqlCodeEditor
         {
             Dock = DockStyle.Fill,
             Text = query,
-            Font = richTextBox1.Font,
-            ScrollBars = RichTextBoxScrollBars.Both
+            Font = richTextBox1.Font
         };
 
         // --- DataGridView (results) ---
@@ -1306,13 +1304,13 @@ public partial class MainForm : Form
 
     private sealed class QueryTabContext
     {
-        public RichTextBox Editor { get; }
+        public SqlCodeEditor Editor { get; }
         public DataGridView Grid { get; }
         public Button ExecuteButton { get; }
         public Button CancelButton { get; }
         public CancellationTokenSource? Cts { get; set; }
 
-        public QueryTabContext(RichTextBox editor, DataGridView grid, Button executeButton, Button cancelButton)
+        public QueryTabContext(SqlCodeEditor editor, DataGridView grid, Button executeButton, Button cancelButton)
         {
             Editor = editor;
             Grid = grid;

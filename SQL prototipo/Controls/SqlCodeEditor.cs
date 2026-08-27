@@ -1,0 +1,187 @@
+using System.ComponentModel;
+using System.Windows.Forms.Integration;
+using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.CodeCompletion;
+using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Editing;
+using ICSharpCode.AvalonEdit.Highlighting;
+using WpfFontFamily = System.Windows.Media.FontFamily;
+using WpfKey = System.Windows.Input.Key;
+using WpfKeyboard = System.Windows.Input.Keyboard;
+using WpfModifierKeys = System.Windows.Input.ModifierKeys;
+
+namespace SQL_prototipo.Controls;
+
+/// <summary>
+/// A WinForms SQL code editor that hosts the WPF AvalonEdit
+/// <see cref="TextEditor"/> via an <see cref="ElementHost"/>. It provides SQL
+/// syntax highlighting and IntelliSense-like completion (keywords, tables and
+/// columns) powered by <see cref="SqlCompletionEngine"/>. The control exposes a
+/// familiar <see cref="Text"/> property so it can be used as a drop-in
+/// replacement for the previous <c>RichTextBox</c> based editor.
+/// </summary>
+public sealed class SqlCodeEditor : UserControl
+{
+    private readonly TextEditor _editor;
+    private SqlCompletionEngine? _engine;
+    private CompletionWindow? _completionWindow;
+
+    public SqlCodeEditor()
+    {
+        _editor = new TextEditor
+        {
+            ShowLineNumbers = true,
+            FontFamily = new WpfFontFamily("Consolas"),
+            FontSize = 13,
+            WordWrap = false,
+            SyntaxHighlighting = HighlightingManager.Instance.GetDefinition("SQL")
+        };
+        _editor.Options.EnableHyperlinks = false;
+        _editor.Options.EnableEmailHyperlinks = false;
+
+        var host = new ElementHost
+        {
+            Dock = DockStyle.Fill,
+            Child = _editor
+        };
+        Controls.Add(host);
+
+        _editor.TextChanged += (_, _) => OnTextChanged(EventArgs.Empty);
+        _editor.TextArea.TextEntered += TextArea_TextEntered;
+        _editor.TextArea.TextEntering += TextArea_TextEntering;
+        _editor.KeyDown += Editor_KeyDown;
+    }
+
+    /// <summary>Gets or sets the SQL text of the editor.</summary>
+    [Browsable(true)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+    public override string Text
+    {
+        get => _editor.Document?.Text ?? string.Empty;
+        set
+        {
+            if (_editor.Document != null)
+            {
+                _editor.Document.Text = value ?? string.Empty;
+            }
+        }
+    }
+
+    /// <summary>Provides the schema used to build table/column suggestions.</summary>
+    public void AttachSchema(SchemaCache schema)
+    {
+        _engine = new SqlCompletionEngine(schema);
+    }
+
+    protected override void OnFontChanged(EventArgs e)
+    {
+        base.OnFontChanged(e);
+        if (Font != null)
+        {
+            _editor.FontFamily = new WpfFontFamily(Font.Name);
+            // WinForms font size is in points; AvalonEdit expects device-independent pixels.
+            _editor.FontSize = Font.SizeInPoints * 96.0 / 72.0;
+        }
+    }
+
+    private void Editor_KeyDown(object? sender, System.Windows.Input.KeyEventArgs e)
+    {
+        // Ctrl+Space forces the completion popup open.
+        if (e.Key == WpfKey.Space && (WpfKeyboard.Modifiers & WpfModifierKeys.Control) == WpfModifierKeys.Control)
+        {
+            ShowCompletion(force: true);
+            e.Handled = true;
+        }
+    }
+
+    private void TextArea_TextEntered(object? sender, System.Windows.Input.TextCompositionEventArgs e)
+    {
+        if (e.Text.Length == 0)
+        {
+            return;
+        }
+
+        char c = e.Text[0];
+        if (char.IsLetterOrDigit(c) || c == '_' || c == '.')
+        {
+            ShowCompletion(force: false);
+        }
+    }
+
+    private void TextArea_TextEntering(object? sender, System.Windows.Input.TextCompositionEventArgs e)
+    {
+        // Commit the selected suggestion when a non-identifier character is typed.
+        if (e.Text.Length > 0 && _completionWindow != null)
+        {
+            char c = e.Text[0];
+            if (!char.IsLetterOrDigit(c) && c != '_')
+            {
+                _completionWindow.CompletionList.RequestInsertion(e);
+            }
+        }
+    }
+
+    private void ShowCompletion(bool force)
+    {
+        if (_engine == null)
+        {
+            return;
+        }
+
+        string text = _editor.Document.Text;
+        int caret = _editor.CaretOffset;
+
+        var items = _engine.GetSuggestions(text, caret, force, out int replaceStart);
+        if (items.Count == 0)
+        {
+            _completionWindow?.Close();
+            return;
+        }
+
+        _completionWindow = new CompletionWindow(_editor.TextArea)
+        {
+            StartOffset = replaceStart,
+            EndOffset = caret
+        };
+
+        var data = _completionWindow.CompletionList.CompletionData;
+        foreach (var item in items)
+        {
+            data.Add(new SqlCompletionData(item));
+        }
+
+        _completionWindow.Closed += (_, _) => _completionWindow = null;
+        _completionWindow.Show();
+    }
+
+    /// <summary>Adapts a <see cref="CompletionItem"/> to AvalonEdit's completion list.</summary>
+    private sealed class SqlCompletionData : ICompletionData
+    {
+        private readonly CompletionItem _item;
+
+        public SqlCompletionData(CompletionItem item)
+        {
+            _item = item;
+        }
+
+        public System.Windows.Media.ImageSource? Image => null;
+
+        public string Text => _item.Text;
+
+        public object Content => _item.Text;
+
+        public object Description => _item.Kind.ToString();
+
+        public double Priority => _item.Kind switch
+        {
+            CompletionKind.Column => 2,
+            CompletionKind.Table => 1,
+            _ => 0
+        };
+
+        public void Complete(TextArea textArea, ISegment completionSegment, EventArgs insertionRequestEventArgs)
+        {
+            textArea.Document.Replace(completionSegment, _item.Text);
+        }
+    }
+}
