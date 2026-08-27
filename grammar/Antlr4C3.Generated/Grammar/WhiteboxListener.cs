@@ -19,335 +19,267 @@
 // Ambiguous reference in cref attribute
 #pragma warning disable 419
 
-namespace Antlr4C3.Tests.Grammar {
-
+namespace Antlr4C3.Grammars {
 using Antlr4.Runtime.Misc;
-using IErrorNode = Antlr4.Runtime.Tree.IErrorNode;
-using ITerminalNode = Antlr4.Runtime.Tree.ITerminalNode;
+using IParseTreeListener = Antlr4.Runtime.Tree.IParseTreeListener;
 using IToken = Antlr4.Runtime.IToken;
-using ParserRuleContext = Antlr4.Runtime.ParserRuleContext;
 
 /// <summary>
-/// This class provides an empty implementation of <see cref="IWhiteboxListener"/>,
-/// which can be extended to create a listener which only needs to handle a subset
-/// of the available methods.
+/// This interface defines a complete listener for a parse tree produced by
+/// <see cref="WhiteboxParser"/>.
 /// </summary>
 [System.CodeDom.Compiler.GeneratedCode("ANTLR", "4.13.2")]
-[System.Diagnostics.DebuggerNonUserCode]
 [System.CLSCompliant(false)]
-public partial class WhiteboxBaseListener : IWhiteboxListener {
+public interface IWhiteboxListener : IParseTreeListener {
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.test1"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterTest1([NotNull] WhiteboxParser.Test1Context context) { }
+	void EnterTest1([NotNull] WhiteboxParser.Test1Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.test1"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitTest1([NotNull] WhiteboxParser.Test1Context context) { }
+	void ExitTest1([NotNull] WhiteboxParser.Test1Context context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.rule1"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterRule1([NotNull] WhiteboxParser.Rule1Context context) { }
+	void EnterRule1([NotNull] WhiteboxParser.Rule1Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.rule1"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitRule1([NotNull] WhiteboxParser.Rule1Context context) { }
+	void ExitRule1([NotNull] WhiteboxParser.Rule1Context context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.rule2"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterRule2([NotNull] WhiteboxParser.Rule2Context context) { }
+	void EnterRule2([NotNull] WhiteboxParser.Rule2Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.rule2"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitRule2([NotNull] WhiteboxParser.Rule2Context context) { }
+	void ExitRule2([NotNull] WhiteboxParser.Rule2Context context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.rule3"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterRule3([NotNull] WhiteboxParser.Rule3Context context) { }
+	void EnterRule3([NotNull] WhiteboxParser.Rule3Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.rule3"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitRule3([NotNull] WhiteboxParser.Rule3Context context) { }
+	void ExitRule3([NotNull] WhiteboxParser.Rule3Context context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.rule4"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterRule4([NotNull] WhiteboxParser.Rule4Context context) { }
+	void EnterRule4([NotNull] WhiteboxParser.Rule4Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.rule4"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitRule4([NotNull] WhiteboxParser.Rule4Context context) { }
+	void ExitRule4([NotNull] WhiteboxParser.Rule4Context context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.rule5"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterRule5([NotNull] WhiteboxParser.Rule5Context context) { }
+	void EnterRule5([NotNull] WhiteboxParser.Rule5Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.rule5"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitRule5([NotNull] WhiteboxParser.Rule5Context context) { }
+	void ExitRule5([NotNull] WhiteboxParser.Rule5Context context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.test2"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterTest2([NotNull] WhiteboxParser.Test2Context context) { }
+	void EnterTest2([NotNull] WhiteboxParser.Test2Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.test2"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitTest2([NotNull] WhiteboxParser.Test2Context context) { }
+	void ExitTest2([NotNull] WhiteboxParser.Test2Context context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.rule7"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterRule7([NotNull] WhiteboxParser.Rule7Context context) { }
+	void EnterRule7([NotNull] WhiteboxParser.Rule7Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.rule7"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitRule7([NotNull] WhiteboxParser.Rule7Context context) { }
+	void ExitRule7([NotNull] WhiteboxParser.Rule7Context context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.rule8"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterRule8([NotNull] WhiteboxParser.Rule8Context context) { }
+	void EnterRule8([NotNull] WhiteboxParser.Rule8Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.rule8"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitRule8([NotNull] WhiteboxParser.Rule8Context context) { }
+	void ExitRule8([NotNull] WhiteboxParser.Rule8Context context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.rule9"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterRule9([NotNull] WhiteboxParser.Rule9Context context) { }
+	void EnterRule9([NotNull] WhiteboxParser.Rule9Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.rule9"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitRule9([NotNull] WhiteboxParser.Rule9Context context) { }
+	void ExitRule9([NotNull] WhiteboxParser.Rule9Context context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.rule10"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterRule10([NotNull] WhiteboxParser.Rule10Context context) { }
+	void EnterRule10([NotNull] WhiteboxParser.Rule10Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.rule10"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitRule10([NotNull] WhiteboxParser.Rule10Context context) { }
+	void ExitRule10([NotNull] WhiteboxParser.Rule10Context context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.rule11"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterRule11([NotNull] WhiteboxParser.Rule11Context context) { }
+	void EnterRule11([NotNull] WhiteboxParser.Rule11Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.rule11"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitRule11([NotNull] WhiteboxParser.Rule11Context context) { }
+	void ExitRule11([NotNull] WhiteboxParser.Rule11Context context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.test3"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterTest3([NotNull] WhiteboxParser.Test3Context context) { }
+	void EnterTest3([NotNull] WhiteboxParser.Test3Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.test3"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitTest3([NotNull] WhiteboxParser.Test3Context context) { }
+	void ExitTest3([NotNull] WhiteboxParser.Test3Context context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.rule13"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterRule13([NotNull] WhiteboxParser.Rule13Context context) { }
+	void EnterRule13([NotNull] WhiteboxParser.Rule13Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.rule13"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitRule13([NotNull] WhiteboxParser.Rule13Context context) { }
+	void ExitRule13([NotNull] WhiteboxParser.Rule13Context context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.test4"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterTest4([NotNull] WhiteboxParser.Test4Context context) { }
+	void EnterTest4([NotNull] WhiteboxParser.Test4Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.test4"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitTest4([NotNull] WhiteboxParser.Test4Context context) { }
+	void ExitTest4([NotNull] WhiteboxParser.Test4Context context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.rule15"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterRule15([NotNull] WhiteboxParser.Rule15Context context) { }
+	void EnterRule15([NotNull] WhiteboxParser.Rule15Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.rule15"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitRule15([NotNull] WhiteboxParser.Rule15Context context) { }
+	void ExitRule15([NotNull] WhiteboxParser.Rule15Context context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.rule16"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterRule16([NotNull] WhiteboxParser.Rule16Context context) { }
+	void EnterRule16([NotNull] WhiteboxParser.Rule16Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.rule16"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitRule16([NotNull] WhiteboxParser.Rule16Context context) { }
+	void ExitRule16([NotNull] WhiteboxParser.Rule16Context context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.test5"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterTest5([NotNull] WhiteboxParser.Test5Context context) { }
+	void EnterTest5([NotNull] WhiteboxParser.Test5Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.test5"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitTest5([NotNull] WhiteboxParser.Test5Context context) { }
+	void ExitTest5([NotNull] WhiteboxParser.Test5Context context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.rule18"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterRule18([NotNull] WhiteboxParser.Rule18Context context) { }
+	void EnterRule18([NotNull] WhiteboxParser.Rule18Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.rule18"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitRule18([NotNull] WhiteboxParser.Rule18Context context) { }
+	void ExitRule18([NotNull] WhiteboxParser.Rule18Context context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.rule19"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterRule19([NotNull] WhiteboxParser.Rule19Context context) { }
+	void EnterRule19([NotNull] WhiteboxParser.Rule19Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.rule19"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitRule19([NotNull] WhiteboxParser.Rule19Context context) { }
+	void ExitRule19([NotNull] WhiteboxParser.Rule19Context context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.test6"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterTest6([NotNull] WhiteboxParser.Test6Context context) { }
+	void EnterTest6([NotNull] WhiteboxParser.Test6Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.test6"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitTest6([NotNull] WhiteboxParser.Test6Context context) { }
+	void ExitTest6([NotNull] WhiteboxParser.Test6Context context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.rule21"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterRule21([NotNull] WhiteboxParser.Rule21Context context) { }
+	void EnterRule21([NotNull] WhiteboxParser.Rule21Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.rule21"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitRule21([NotNull] WhiteboxParser.Rule21Context context) { }
+	void ExitRule21([NotNull] WhiteboxParser.Rule21Context context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.rule22"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterRule22([NotNull] WhiteboxParser.Rule22Context context) { }
+	void EnterRule22([NotNull] WhiteboxParser.Rule22Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.rule22"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitRule22([NotNull] WhiteboxParser.Rule22Context context) { }
+	void ExitRule22([NotNull] WhiteboxParser.Rule22Context context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.test7"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterTest7([NotNull] WhiteboxParser.Test7Context context) { }
+	void EnterTest7([NotNull] WhiteboxParser.Test7Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.test7"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitTest7([NotNull] WhiteboxParser.Test7Context context) { }
+	void ExitTest7([NotNull] WhiteboxParser.Test7Context context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="WhiteboxParser.test8"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterTest8([NotNull] WhiteboxParser.Test8Context context) { }
+	void EnterTest8([NotNull] WhiteboxParser.Test8Context context);
 	/// <summary>
 	/// Exit a parse tree produced by <see cref="WhiteboxParser.test8"/>.
-	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitTest8([NotNull] WhiteboxParser.Test8Context context) { }
-
-	/// <inheritdoc/>
-	/// <remarks>The default implementation does nothing.</remarks>
-	public virtual void EnterEveryRule([NotNull] ParserRuleContext context) { }
-	/// <inheritdoc/>
-	/// <remarks>The default implementation does nothing.</remarks>
-	public virtual void ExitEveryRule([NotNull] ParserRuleContext context) { }
-	/// <inheritdoc/>
-	/// <remarks>The default implementation does nothing.</remarks>
-	public virtual void VisitTerminal([NotNull] ITerminalNode node) { }
-	/// <inheritdoc/>
-	/// <remarks>The default implementation does nothing.</remarks>
-	public virtual void VisitErrorNode([NotNull] IErrorNode node) { }
+	void ExitTest8([NotNull] WhiteboxParser.Test8Context context);
 }
-} // namespace Antlr4C3.Tests.Grammar
+} // namespace Antlr4C3.Grammars
