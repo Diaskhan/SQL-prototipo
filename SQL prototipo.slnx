@@ -1,3 +1,5 @@
 <Solution>
+  <Project Path="Antlr4C3.Tests/Antlr4C3.Tests.csproj" />
+  <Project Path="Antlr4C3/Antlr4C3.csproj" />
   <Project Path="SQL prototipo/SQL prototipo.csproj" />
 </Solution>
