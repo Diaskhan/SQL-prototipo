@@ -69,10 +69,13 @@ public sealed class SqlCodeEditor : UserControl
         }
     }
 
-    /// <summary>Provides the schema used to build table/column suggestions.</summary>
+    /// <summary>
+    /// Retained for API compatibility. Completion is now driven purely by the
+    /// grammar via <see cref="SqlCompletionEngine"/> and no longer uses schema data.
+    /// </summary>
     public void AttachSchema(SchemaCache schema)
     {
-        _engine = new SqlCompletionEngine(schema);
+        _engine = new SqlCompletionEngine();
     }
 
     protected override void OnFontChanged(EventArgs e)

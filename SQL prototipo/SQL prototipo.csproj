@@ -25,6 +25,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\src\Antlr4C3\Antlr4C3.csproj" />
+    <ProjectReference Include="..\grammar\Antlr4C3.Generated\Antlr4C3.Generated.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="chinook.sqlite">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
