@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -18,16 +18,17 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.11" />
     <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.1" />
-    <PackageReference Include="MySqlConnector" Version="2.4.0" />
-    <PackageReference Include="Npgsql" Version="9.0.2" />
     <PackageReference Include="AvalonEdit" Version="6.3.1.120" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\src\Antlr4C3\Antlr4C3.csproj" />
     <ProjectReference Include="..\grammar\Antlr4C3.Generated\Antlr4C3.Generated.csproj" />
+    <ProjectReference Include="..\Ob.Common\Ob.Common.csproj" />
     <ProjectReference Include="..\Ob.Sqlite\Ob.Sqlite.csproj" />
+    <ProjectReference Include="..\Ob.SqlServer\Ob.SqlServer.csproj" />
+    <ProjectReference Include="..\Ob.MySql\Ob.MySql.csproj" />
+    <ProjectReference Include="..\Ob.PostgreSql\Ob.PostgreSql.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,7 +45,7 @@
 
   <ItemGroup>
     <Folder Include="Assets\" />
-    <Folder Include="Controls\Completion\" />
+    <Folder Include="Services\Providers\" />
   </ItemGroup>
 
 </Project>

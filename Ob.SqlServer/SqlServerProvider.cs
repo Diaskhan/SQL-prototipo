@@ -1,16 +1,15 @@
 using System.Data.Common;
 using Microsoft.Data.SqlClient;
+using Ob.Common;
 
-namespace SQL_prototipo.Services.Providers;
+namespace Ob.SqlServer;
 
 /// <summary>
-/// Provider for SQL Server LocalDB. It shares the SQL Server T-SQL dialect and
-/// the <see cref="SqlConnection"/> client; only the connection string differs
-/// (e.g. "Server=(localdb)\\MSSQLLocalDB;Database=...;Integrated Security=true").
+/// <see cref="IDbProvider"/> implementation for Microsoft SQL Server.
 /// </summary>
-public class LocalDbProvider : IDbProvider
+public sealed class SqlServerProvider : IDbProvider
 {
-    public string DatabaseType => "LocalDB";
+    public string DatabaseType => "SqlServer";
 
     public bool SupportsSchemas => true;
 
@@ -31,9 +30,7 @@ public class LocalDbProvider : IDbProvider
     }
 
     public string QualifyTableName(string schema, string tableName) =>
-        string.IsNullOrEmpty(schema)
-            ? $"[{tableName}]"
-            : $"[{schema}].[{tableName}]";
+        string.IsNullOrEmpty(schema) ? $"[{tableName}]" : $"[{schema}].[{tableName}]";
 
     public string BuildSelectTopQuery(string qualifiedTableName, int rowCount) =>
         $"SELECT TOP {rowCount} * FROM {qualifiedTableName}";

@@ -1,8 +1,13 @@
 <Solution>
+  <Folder Name="/Providers/">
+    <Project Path="Ob.Common/Ob.Common.csproj" />
+    <Project Path="Ob.MySql/Ob.MySql.csproj" />
+    <Project Path="Ob.PostgreSql/Ob.PostgreSql.csproj" />
+    <Project Path="Ob.Sqlite/Ob.Sqlite.csproj" />
+    <Project Path="Ob.SqlServer/Ob.SqlServer.csproj" />
+  </Folder>
   <Project Path="grammar/Antlr4C3.Generated/Antlr4C3.Generated.csproj" />
-  <Project Path="Ob.Sqlite/Ob.Sqlite.csproj" />
   <Project Path="SQL prototipo/SQL prototipo.csproj" />
   <Project Path="src/Antlr4C3/Antlr4C3.csproj" />
   <Project Path="test/Antlr4C3.Tests/Antlr4C3.Tests.csproj" />
 </Solution>
-

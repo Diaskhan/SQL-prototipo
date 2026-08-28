@@ -1,9 +1,13 @@
 using System.Data.Common;
 using Npgsql;
+using Ob.Common;
 
-namespace SQL_prototipo.Services.Providers;
+namespace Ob.PostgreSql;
 
-public class PostgreSqlProvider : IDbProvider
+/// <summary>
+/// <see cref="IDbProvider"/> implementation for PostgreSQL databases.
+/// </summary>
+public sealed class PostgreSqlProvider : IDbProvider
 {
     public string DatabaseType => "PostgreSQL";
 
@@ -28,9 +32,7 @@ public class PostgreSqlProvider : IDbProvider
     }
 
     public string QualifyTableName(string schema, string tableName) =>
-        string.IsNullOrEmpty(schema)
-            ? $"\"{tableName}\""
-            : $"\"{schema}\".\"{tableName}\"";
+        string.IsNullOrEmpty(schema) ? $"\"{tableName}\"" : $"\"{schema}\".\"{tableName}\"";
 
     public string BuildSelectTopQuery(string qualifiedTableName, int rowCount) =>
         $"SELECT * FROM {qualifiedTableName} LIMIT {rowCount}";

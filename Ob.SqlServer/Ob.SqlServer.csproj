@@ -5,17 +5,16 @@
 	<LangVersion>latest</LangVersion>
 	<Nullable>enable</Nullable>
 	<ImplicitUsings>enable</ImplicitUsings>
-	<RootNamespace>Ob.Sqlite</RootNamespace>
-	<AssemblyName>Ob.Sqlite</AssemblyName>
+	<RootNamespace>Ob.SqlServer</RootNamespace>
+	<AssemblyName>Ob.SqlServer</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
-	<PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.11" />
+	<PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.1" />
   </ItemGroup>
 
   <ItemGroup>
 	<ProjectReference Include="..\Ob.Common\Ob.Common.csproj" />
-	<ProjectReference Include="..\grammar\Antlr4C3.Generated\Antlr4C3.Generated.csproj" />
   </ItemGroup>
 
 </Project>

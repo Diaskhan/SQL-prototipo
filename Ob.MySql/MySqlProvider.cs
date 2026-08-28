@@ -1,9 +1,13 @@
 using System.Data.Common;
 using MySqlConnector;
+using Ob.Common;
 
-namespace SQL_prototipo.Services.Providers;
+namespace Ob.MySql;
 
-public class MySqlProvider : IDbProvider
+/// <summary>
+/// <see cref="IDbProvider"/> implementation for MySQL databases.
+/// </summary>
+public sealed class MySqlProvider : IDbProvider
 {
     public string DatabaseType => "MySQL";
 

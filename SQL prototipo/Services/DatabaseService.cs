@@ -1,5 +1,6 @@
 using System.Data;
 using System.Diagnostics;
+using Ob.Common;
 using SQL_prototipo.Models;
 
 namespace SQL_prototipo.Services;

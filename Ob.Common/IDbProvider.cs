@@ -1,6 +1,6 @@
 using System.Data.Common;
 
-namespace SQL_prototipo.Services;
+namespace Ob.Common;
 
 /// <summary>
 /// Abstracts database-specific behavior so the application can work with
