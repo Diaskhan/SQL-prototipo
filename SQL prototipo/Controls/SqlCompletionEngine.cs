@@ -36,6 +36,49 @@ public sealed class CompletionItem
 public sealed class SqlCompletionEngine
 {
     /// <summary>
+    /// The 30 most commonly needed SQLite grammar rules for completion. These
+    /// tell <see cref="CodeCompletionCore"/> to surface schema/identifier
+    /// candidates (tables, columns, functions, aliases, etc.) in addition to
+    /// bare keyword tokens.
+    /// </summary>
+    private static readonly HashSet<int> PreferredRules = new()
+    {
+        SQLiteParser.RULE_table_name,
+        SQLiteParser.RULE_column_name,
+        SQLiteParser.RULE_column_name_excluding_string,
+        SQLiteParser.RULE_schema_name,
+        SQLiteParser.RULE_function_name,
+        SQLiteParser.RULE_table_alias,
+        SQLiteParser.RULE_column_alias,
+        SQLiteParser.RULE_table_or_index_name,
+        SQLiteParser.RULE_table_or_subquery,
+        SQLiteParser.RULE_index_name,
+        SQLiteParser.RULE_view_name,
+        SQLiteParser.RULE_trigger_name,
+        SQLiteParser.RULE_collation_name,
+        SQLiteParser.RULE_foreign_table,
+        SQLiteParser.RULE_pragma_name,
+        SQLiteParser.RULE_module_name,
+        SQLiteParser.RULE_savepoint_name,
+        SQLiteParser.RULE_window_name,
+        SQLiteParser.RULE_table_function_name,
+        SQLiteParser.RULE_cte_table_name,
+        SQLiteParser.RULE_qualified_table_name,
+        SQLiteParser.RULE_result_column,
+        SQLiteParser.RULE_ordering_term,
+        SQLiteParser.RULE_indexed_column,
+        SQLiteParser.RULE_column_def,
+        SQLiteParser.RULE_type_name,
+        SQLiteParser.RULE_literal_value,
+        // RULE_expr is disabled: as the outermost preferred rule it shadows the
+        // nested rules, so column_name/column_name_excluding_string never surface.
+        //SQLiteParser.RULE_expr,
+        SQLiteParser.RULE_alias,
+        SQLiteParser.RULE_name,
+
+    };
+
+    /// <summary>
     /// Returns keyword completion candidates for the given text and caret.
     /// <paramref name="replaceStart"/> is the offset where the current word begins
     /// (where a chosen suggestion replaces text up to the caret). When
@@ -73,11 +116,26 @@ public sealed class SqlCompletionEngine
             parser.RemoveErrorListeners();
             var tree = parser.parse();
 
-            var core = new CodeCompletionCore(parser);
+            var core = new CodeCompletionCore(parser)
+            {
+                preferredRules = PreferredRules,
+            };
             var candidates = core.CollectCandidates(ComputeTokenIndex(tokens, caret), tree);
 
             var vocabulary = parser.Vocabulary;
+            var ruleNames = parser.RuleNames;
             var keywords = new List<string>();
+
+            // Emit candidate rules first (tables, columns, aliases, ...)...
+            foreach (var ruleIndex in candidates.Rules.Keys)
+            {
+                if (ruleIndex >= 0 && ruleIndex < ruleNames.Length)
+                {
+                    keywords.Add(ruleNames[ruleIndex]);
+                }
+            }
+
+            // ...then the candidate keyword tokens.
             foreach (var tokenType in candidates.Tokens.Keys)
             {
                 string? keyword = ToKeyword(vocabulary.GetLiteralName(tokenType));
