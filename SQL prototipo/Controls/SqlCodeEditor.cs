@@ -7,6 +7,7 @@ using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
+using Ob.Common;
 using Ob.Sqlite;
 using WpfFontFamily = System.Windows.Media.FontFamily;
 using WpfKey = System.Windows.Input.Key;

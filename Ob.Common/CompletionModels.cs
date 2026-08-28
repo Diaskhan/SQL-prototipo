@@ -1,4 +1,4 @@
-namespace Ob.Sqlite;
+namespace Ob.Common;
 
 /// <summary>The kind of a completion suggestion, used to pick its icon.</summary>
 public enum CompletionKind

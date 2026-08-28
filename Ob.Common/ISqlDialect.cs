@@ -1,6 +1,6 @@
 using Antlr4.Runtime;
 
-namespace Ob.Sqlite;
+namespace Ob.Common;
 
 /// <summary>
 /// Encapsulates everything that is specific to a concrete SQL grammar/dialect
