@@ -1,7 +1,7 @@
 using Antlr4.Runtime.Tree;
 using Antlr4C3.Grammars;
 
-namespace SQL_prototipo.Controls.Completion;
+namespace Ob.Sqlite;
 
 /// <summary>
 /// A single table reference found in a SQL statement's <c>FROM</c>/<c>JOIN</c>

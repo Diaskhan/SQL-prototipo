@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	<TargetFramework>net8.0</TargetFramework>
+	<LangVersion>latest</LangVersion>
+	<Nullable>enable</Nullable>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<RootNamespace>Ob.Sqlite</RootNamespace>
+	<AssemblyName>Ob.Sqlite</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<ProjectReference Include="..\grammar\Antlr4C3.Generated\Antlr4C3.Generated.csproj" />
+  </ItemGroup>
+
+</Project>

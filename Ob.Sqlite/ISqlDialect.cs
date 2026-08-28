@@ -1,13 +1,13 @@
 using Antlr4.Runtime;
 
-namespace SQL_prototipo.Controls.Completion;
+namespace Ob.Sqlite;
 
 /// <summary>
 /// Encapsulates everything that is specific to a concrete SQL grammar/dialect
 /// (lexer, parser, entry rule, preferred rules, ignored tokens and how a fired
 /// rule maps to a suggestion kind). This keeps the generic
-/// <see cref="Antlr4C3.CodeCompletionCore"/> and <see cref="SqlCompletionEngine"/>
-/// free of any dialect-specific knowledge.
+/// <see cref="Antlr4C3.CodeCompletionCore"/> and the completion engine free of
+/// any dialect-specific knowledge.
 /// </summary>
 public interface ISqlDialect
 {

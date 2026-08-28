@@ -7,6 +7,7 @@ using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
+using Ob.Sqlite;
 using WpfFontFamily = System.Windows.Media.FontFamily;
 using WpfKey = System.Windows.Input.Key;
 using WpfKeyboard = System.Windows.Input.Keyboard;
@@ -82,7 +83,7 @@ public sealed class SqlCodeEditor : UserControl
         }
 
         _schema = schema;
-        _engine = new SqlCompletionEngine(new Completion.SqliteDialect(), schema);
+        _engine = new SqlCompletionEngine(new SqliteDialect(), schema);
 
         if (_schema != null)
         {

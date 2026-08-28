@@ -1,7 +1,7 @@
 using Antlr4.Runtime;
 using Antlr4C3.Grammars;
 
-namespace SQL_prototipo.Controls.Completion;
+namespace Ob.Sqlite;
 
 /// <summary>
 /// SQLite-specific <see cref="ISqlDialect"/> implementation. All references to

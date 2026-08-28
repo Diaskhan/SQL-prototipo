@@ -1,31 +1,8 @@
 using Antlr4.Runtime;
 using Antlr4C3;
-using SQL_prototipo.Controls.Completion;
+using Ob.Sqlite;
 
 namespace SQL_prototipo.Controls;
-
-/// <summary>The kind of a completion suggestion, used to pick its icon.</summary>
-public enum CompletionKind
-{
-    Keyword,
-    Table,
-    Column
-}
-
-/// <summary>A single suggestion shown in the autocomplete popup.</summary>
-public sealed class CompletionItem
-{
-    public CompletionItem(string text, CompletionKind kind)
-    {
-        Text = text;
-        Kind = kind;
-    }
-
-    public string Text { get; }
-    public CompletionKind Kind { get; }
-
-    public override string ToString() => Text;
-}
 
 /// <summary>
 /// UI-agnostic SQL completion engine driven purely by the antlr4-c3

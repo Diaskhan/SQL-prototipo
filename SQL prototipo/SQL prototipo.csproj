@@ -27,6 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\src\Antlr4C3\Antlr4C3.csproj" />
     <ProjectReference Include="..\grammar\Antlr4C3.Generated\Antlr4C3.Generated.csproj" />
+    <ProjectReference Include="..\Ob.Sqlite\Ob.Sqlite.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,6 +44,7 @@
 
   <ItemGroup>
     <Folder Include="Assets\" />
+    <Folder Include="Controls\Completion\" />
   </ItemGroup>
 
 </Project>
