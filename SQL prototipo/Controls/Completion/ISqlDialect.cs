@@ -17,6 +17,13 @@ public interface ISqlDialect
     /// <summary>Builds the parse tree from the grammar entry rule (e.g. <c>parser.parse()</c>).</summary>
     ParserRuleContext CreateParseTree(Parser parser);
 
+    /// <summary>
+    /// Collects the table references (name + optional schema/alias) that appear
+    /// in the <c>FROM</c>/<c>JOIN</c> clauses of the parsed statement. This is the
+    /// semantic scope used to resolve which columns are valid at the caret.
+    /// </summary>
+    IReadOnlyList<TableReference> CollectTableReferences(ParserRuleContext tree);
+
     /// <summary>Rules the completion core should surface (tables, columns, aliases, ...).</summary>
     ISet<int> PreferredRules { get; }
 

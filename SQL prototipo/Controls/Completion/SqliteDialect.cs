@@ -72,6 +72,9 @@ public sealed class SqliteDialect : ISqlDialect
     public ParserRuleContext CreateParseTree(Parser parser)
         => ((SQLiteParser)parser).parse();
 
+    public IReadOnlyList<TableReference> CollectTableReferences(ParserRuleContext tree)
+        => SqliteTableReferenceCollector.Collect(tree);
+
     public CompletionKind? MapRule(int ruleIndex) => ruleIndex switch
     {
         SQLiteParser.RULE_table_name or

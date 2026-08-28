@@ -26,6 +26,7 @@ public sealed class SqlCodeEditor : UserControl
     private readonly TextEditor _editor;
     private SqlCompletionEngine? _engine;
     private CompletionWindow? _completionWindow;
+    private SchemaCache? _schema;
 
     public SqlCodeEditor()
     {
@@ -69,12 +70,49 @@ public sealed class SqlCodeEditor : UserControl
     }
 
     /// <summary>
-    /// Retained for API compatibility. Completion is now driven purely by the
-    /// grammar via <see cref="SqlCompletionEngine"/> and no longer uses schema data.
+    /// Attaches the schema cache that drives table and column suggestions.
+    /// Completion is produced by <see cref="SqlCompletionEngine"/> from the grammar
+    /// (which identifiers are valid) combined with this schema (their real names).
     /// </summary>
     public void AttachSchema(SchemaCache schema)
     {
-        _engine = new SqlCompletionEngine(new Completion.SqliteDialect());
+        if (_schema != null)
+        {
+            _schema.Updated -= OnSchemaUpdated;
+        }
+
+        _schema = schema;
+        _engine = new SqlCompletionEngine(new Completion.SqliteDialect(), schema);
+
+        if (_schema != null)
+        {
+            _schema.Updated += OnSchemaUpdated;
+        }
+    }
+
+    /// <summary>
+    /// Re-runs completion when the schema cache changes (e.g. a table's columns
+    /// finished loading asynchronously) so newly available items appear without
+    /// requiring the user to retype.
+    /// </summary>
+    private void OnSchemaUpdated()
+    {
+        if (_editor.Dispatcher.CheckAccess())
+        {
+            RefreshOpenCompletion();
+        }
+        else
+        {
+            _editor.Dispatcher.BeginInvoke(new Action(RefreshOpenCompletion));
+        }
+    }
+
+    private void RefreshOpenCompletion()
+    {
+        if (_completionWindow != null)
+        {
+            ShowCompletion(force: true);
+        }
     }
 
     protected override void OnFontChanged(EventArgs e)
@@ -213,6 +251,70 @@ public sealed class SqlCodeEditor : UserControl
         return Math.Clamp(widest + Chrome, MinWidth, MaxWidth);
     }
 
+    /// <summary>
+    /// Provides small vector icons (rendered once and frozen) for each
+    /// <see cref="CompletionKind"/> shown in the completion popup, so no external
+    /// image assets are required.
+    /// </summary>
+    private static class CompletionIcons
+    {
+        private static readonly System.Windows.Media.ImageSource TableIcon =
+            Create(System.Windows.Media.Color.FromRgb(0x2E, 0x7D, 0x32), "T");
+        private static readonly System.Windows.Media.ImageSource ColumnIcon =
+            Create(System.Windows.Media.Color.FromRgb(0x15, 0x65, 0xC0), "C");
+        private static readonly System.Windows.Media.ImageSource KeywordIcon =
+            Create(System.Windows.Media.Color.FromRgb(0x6A, 0x1B, 0x9A), "K");
+
+        public static System.Windows.Media.ImageSource? For(CompletionKind kind) => kind switch
+        {
+            CompletionKind.Table => TableIcon,
+            CompletionKind.Column => ColumnIcon,
+            CompletionKind.Keyword => KeywordIcon,
+            _ => null
+        };
+
+        private static System.Windows.Media.ImageSource Create(System.Windows.Media.Color color, string glyph)
+        {
+            const int size = 16;
+
+            var visual = new System.Windows.Media.DrawingVisual();
+            using (var dc = visual.RenderOpen())
+            {
+                var background = new System.Windows.Media.SolidColorBrush(color);
+                dc.DrawRoundedRectangle(
+                    background,
+                    null,
+                    new System.Windows.Rect(0, 0, size, size),
+                    3, 3);
+
+                var typeface = new System.Windows.Media.Typeface(
+                    new WpfFontFamily("Segoe UI"),
+                    System.Windows.FontStyles.Normal,
+                    System.Windows.FontWeights.Bold,
+                    System.Windows.FontStretches.Normal);
+
+                var text = new System.Windows.Media.FormattedText(
+                    glyph,
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    System.Windows.FlowDirection.LeftToRight,
+                    typeface,
+                    10,
+                    System.Windows.Media.Brushes.White,
+                    1.0);
+
+                dc.DrawText(
+                    text,
+                    new System.Windows.Point((size - text.Width) / 2, (size - text.Height) / 2));
+            }
+
+            var bitmap = new System.Windows.Media.Imaging.RenderTargetBitmap(
+                size, size, 96, 96, System.Windows.Media.PixelFormats.Pbgra32);
+            bitmap.Render(visual);
+            bitmap.Freeze();
+            return bitmap;
+        }
+    }
+
     /// <summary>Adapts a <see cref="CompletionItem"/> to AvalonEdit's completion list.</summary>
     private sealed class SqlCompletionData : ICompletionData
     {
@@ -223,7 +325,7 @@ public sealed class SqlCodeEditor : UserControl
             _item = item;
         }
 
-        public System.Windows.Media.ImageSource? Image => null;
+        public System.Windows.Media.ImageSource? Image => CompletionIcons.For(_item.Kind);
 
         public string Text => _item.Text;
 
