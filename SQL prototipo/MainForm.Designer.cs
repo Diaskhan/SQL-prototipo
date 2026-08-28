@@ -443,6 +443,7 @@ namespace SQL_prototipo
             // exitMenuItem
             // 
             exitMenuItem.Name = "exitMenuItem";
+            exitMenuItem.ShortcutKeys = Keys.Control | Keys.Q;
             exitMenuItem.Size = new Size(176, 22);
             exitMenuItem.Text = "E&xit";
             exitMenuItem.Click += exitMenuItem_Click;

@@ -66,6 +66,20 @@ public partial class MainForm : Form
     private void AttachAutoComplete(SqlCodeEditor editor)
     {
         editor.AttachSchema(_schemaCache);
+        editor.CloseTabRequested -= Editor_CloseTabRequested;
+        editor.CloseTabRequested += Editor_CloseTabRequested;
+        editor.ExitRequested -= Editor_ExitRequested;
+        editor.ExitRequested += Editor_ExitRequested;
+    }
+
+    private void Editor_CloseTabRequested(object? sender, EventArgs e)
+    {
+        CloseActiveTab();
+    }
+
+    private void Editor_ExitRequested(object? sender, EventArgs e)
+    {
+        Close();
     }
 
     private void InitializeAdditionalUi()
@@ -1122,6 +1136,22 @@ public partial class MainForm : Form
 
     private void MainForm_KeyDown(object? sender, KeyEventArgs e)
     {
+        if (e.Control && e.KeyCode == Keys.W)
+        {
+            e.Handled = true;
+            e.SuppressKeyPress = true;
+            CloseActiveTab();
+            return;
+        }
+
+        if (e.Control && e.KeyCode == Keys.Q)
+        {
+            e.Handled = true;
+            e.SuppressKeyPress = true;
+            Close();
+            return;
+        }
+
         if (e.KeyCode == Keys.F5)
         {
             e.Handled = true;
@@ -1137,6 +1167,29 @@ public partial class MainForm : Form
                 btnExecuteQuery_Click(this, EventArgs.Empty);
             }
         }
+    }
+
+    private void CloseActiveTab()
+    {
+        var activeTab = tabControl1.SelectedTab;
+        if (activeTab is null)
+        {
+            return;
+        }
+
+        if (activeTab == tabPage2)
+        {
+            tabControl1.TabPages.Remove(tabPage2);
+            return;
+        }
+
+        if (activeTab.Tag is QueryTabContext ctx)
+        {
+            ctx.Cts?.Cancel();
+        }
+
+        tabControl1.TabPages.Remove(activeTab);
+        activeTab.Dispose();
     }
 
     private void OpenNewQueryTab(string query, string tableName, bool autoExecute = true)

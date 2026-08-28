@@ -30,6 +30,9 @@ public sealed class SqlCodeEditor : UserControl
     private CompletionWindow? _completionWindow;
     private SchemaCache? _schema;
 
+    public event EventHandler? CloseTabRequested;
+    public event EventHandler? ExitRequested;
+
     public SqlCodeEditor()
     {
         _editor = new TextEditor
@@ -143,6 +146,23 @@ public sealed class SqlCodeEditor : UserControl
 
     private void Editor_KeyDown(object? sender, System.Windows.Input.KeyEventArgs e)
     {
+        if ((WpfKeyboard.Modifiers & WpfModifierKeys.Control) == WpfModifierKeys.Control)
+        {
+            if (e.Key == WpfKey.W)
+            {
+                CloseTabRequested?.Invoke(this, EventArgs.Empty);
+                e.Handled = true;
+                return;
+            }
+
+            if (e.Key == WpfKey.Q)
+            {
+                ExitRequested?.Invoke(this, EventArgs.Empty);
+                e.Handled = true;
+                return;
+            }
+        }
+
         // Ctrl+Space forces the completion popup open.
         if (e.Key == WpfKey.Space && (WpfKeyboard.Modifiers & WpfModifierKeys.Control) == WpfModifierKeys.Control)
         {
