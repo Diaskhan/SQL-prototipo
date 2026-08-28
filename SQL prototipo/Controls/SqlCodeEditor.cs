@@ -11,7 +11,6 @@ using WpfFontFamily = System.Windows.Media.FontFamily;
 using WpfKey = System.Windows.Input.Key;
 using WpfKeyboard = System.Windows.Input.Keyboard;
 using WpfModifierKeys = System.Windows.Input.ModifierKeys;
-
 namespace SQL_prototipo.Controls;
 
 /// <summary>
@@ -168,8 +167,50 @@ public sealed class SqlCodeEditor : UserControl
             data.Add(new SqlCompletionData(item));
         }
 
+        // Size the popup to fit the widest suggestion text.
+        _completionWindow.Width = ComputeCompletionWidth(items);
+
         _completionWindow.Closed += (_, _) => _completionWindow = null;
         _completionWindow.Show();
+    }
+
+    /// <summary>
+    /// Computes a popup width (in device-independent pixels) that fits the widest
+    /// suggestion text, plus room for the icon, padding and scrollbar.
+    /// </summary>
+    private double ComputeCompletionWidth(IReadOnlyList<CompletionItem> items)
+    {
+        // Icon + item padding + potential vertical scrollbar.
+        const double Chrome = 44;
+        const double MinWidth = 120;
+        const double MaxWidth = 600;
+
+        var typeface = new System.Windows.Media.Typeface(
+            _editor.FontFamily,
+            System.Windows.FontStyles.Normal,
+            System.Windows.FontWeights.Normal,
+            System.Windows.FontStretches.Normal);
+
+        double dpi = System.Windows.Media.VisualTreeHelper.GetDpi(_editor).PixelsPerDip;
+
+        double widest = 0;
+        foreach (var item in items)
+        {
+            var formatted = new System.Windows.Media.FormattedText(
+                item.Text,
+                System.Globalization.CultureInfo.CurrentCulture,
+                System.Windows.FlowDirection.LeftToRight,
+                typeface,
+                _editor.FontSize,
+                System.Windows.Media.Brushes.Black,
+                dpi);
+            if (formatted.Width > widest)
+            {
+                widest = formatted.Width;
+            }
+        }
+
+        return Math.Clamp(widest + Chrome, MinWidth, MaxWidth);
     }
 
     /// <summary>Adapts a <see cref="CompletionItem"/> to AvalonEdit's completion list.</summary>
