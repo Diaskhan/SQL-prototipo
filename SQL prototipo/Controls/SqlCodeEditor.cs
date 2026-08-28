@@ -75,7 +75,7 @@ public sealed class SqlCodeEditor : UserControl
     /// </summary>
     public void AttachSchema(SchemaCache schema)
     {
-        _engine = new SqlCompletionEngine();
+        _engine = new SqlCompletionEngine(new Completion.SqliteDialect());
     }
 
     protected override void OnFontChanged(EventArgs e)
