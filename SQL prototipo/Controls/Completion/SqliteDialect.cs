@@ -38,8 +38,11 @@ public sealed class SqliteDialect : ISqlDialect
         SQLiteParser.RULE_table_function_name,
         SQLiteParser.RULE_cte_table_name,
         SQLiteParser.RULE_qualified_table_name,
-        SQLiteParser.RULE_result_column,
-        SQLiteParser.RULE_ordering_term,
+        // RULE_result_column / RULE_ordering_term are disabled: like RULE_expr they
+        // wrap the expression (result_column -> expr -> ... -> column_name), so as
+        // outermost preferred rules they would shadow column_name in SELECT/ORDER BY.
+        //SQLiteParser.RULE_result_column,
+        //SQLiteParser.RULE_ordering_term,
         SQLiteParser.RULE_indexed_column,
         SQLiteParser.RULE_column_def,
         SQLiteParser.RULE_type_name,
