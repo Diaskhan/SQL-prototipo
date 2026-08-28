@@ -38,20 +38,19 @@ public sealed class SqliteDialect : ISqlDialect
         SQLiteParser.RULE_table_function_name,
         SQLiteParser.RULE_cte_table_name,
         SQLiteParser.RULE_qualified_table_name,
-        // RULE_result_column / RULE_ordering_term are disabled: like RULE_expr they
-        // wrap the expression (result_column -> expr -> ... -> column_name), so as
-        // outermost preferred rules they would shadow column_name in SELECT/ORDER BY.
-        //SQLiteParser.RULE_result_column,
-        //SQLiteParser.RULE_ordering_term,
         SQLiteParser.RULE_indexed_column,
         SQLiteParser.RULE_column_def,
         SQLiteParser.RULE_type_name,
         SQLiteParser.RULE_literal_value,
-        // RULE_expr is disabled: as the outermost preferred rule it shadows the
-        // nested rules, so column_name/column_name_excluding_string never surface.
-        //SQLiteParser.RULE_expr,
         SQLiteParser.RULE_alias,
         SQLiteParser.RULE_name,
+
+        // Disabled rules: these wrap an expression (rule -> expr -> ... -> column_name),
+        // so as outermost preferred rules they would shadow column_name and prevent
+        // column suggestions in SELECT / ORDER BY / WHERE.
+        //SQLiteParser.RULE_expr,
+        //SQLiteParser.RULE_result_column,
+        //SQLiteParser.RULE_ordering_term,
     };
 
     public ISet<int> IgnoredTokens { get; } = new HashSet<int>();
