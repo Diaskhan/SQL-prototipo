@@ -655,10 +655,10 @@ public partial class MainForm : Form
 
     private async void btnExecuteQuery_Click(object sender, EventArgs e)
     {
+        var query = richTextBox1.Text?.Trim() ?? string.Empty;
         try
         {
             ToggleUiState(false);
-            var query = richTextBox1.Text.Trim();
             if (string.IsNullOrEmpty(query)) return;
 
             SetStatus("Executing query...");
@@ -667,7 +667,7 @@ public partial class MainForm : Form
         }
         catch (Exception ex)
         {
-            RecordHistory(richTextBox1.Text.Trim(), false);
+            RecordHistory(query, false);
             SetStatus("Query failed.");
             MessageBox.Show($"Error executing query: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
@@ -942,7 +942,7 @@ public partial class MainForm : Form
         }
     }
 
-    private async void btnTestConnection_Click(object sender, EventArgs e)
+    private async void btnTestConnection_Click(object? sender, EventArgs e)
     {
         var name = txtConnectionName.Text.Trim();
         var connectionString = txtConnectionString.Text.Trim();
@@ -977,7 +977,7 @@ public partial class MainForm : Form
         }
     }
 
-    private void btnUpdateConnection_Click(object sender, EventArgs e)
+    private void btnUpdateConnection_Click(object? sender, EventArgs e)
     {
         try
         {
@@ -1323,7 +1323,7 @@ public partial class MainForm : Form
 
     private async void ExecuteQueryInTab(QueryTabContext ctx)
     {
-        var query = ctx.Editor.Text.Trim();
+        var query = ctx.Editor.Text?.Trim() ?? string.Empty;
         if (string.IsNullOrEmpty(query)) return;
 
         using var cts = new CancellationTokenSource();

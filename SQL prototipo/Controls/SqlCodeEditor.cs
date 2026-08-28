@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Windows.Forms.Integration;
 using System.Xml;
 using ICSharpCode.AvalonEdit;
@@ -62,6 +63,7 @@ public sealed class SqlCodeEditor : UserControl
     /// <summary>Gets or sets the SQL text of the editor.</summary>
     [Browsable(true)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+    [AllowNull]
     public override string Text
     {
         get => _editor.Document?.Text ?? string.Empty;
