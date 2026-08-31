@@ -1111,7 +1111,7 @@ public partial class MainForm : Form
         };
 
         // --- DataGridView (results) ---
-        var dgv = new DataGridView
+        var dgv = new Controls.BufferedDataGridView
         {
             Dock = DockStyle.Bottom,
             Height = 250,

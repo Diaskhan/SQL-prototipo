@@ -112,8 +112,7 @@ public class DatabaseService
 
         if (reader.FieldCount > 0)
         {
-            var dataTable = new DataTable();
-            dataTable.Load(reader);
+            var dataTable = await LoadDataTableAsync(reader, cancellationToken).ConfigureAwait(false);
             stopwatch.Stop();
             return new QueryResult
             {
@@ -130,6 +129,32 @@ public class DatabaseService
             RecordsAffected = reader.RecordsAffected,
             ElapsedMilliseconds = stopwatch.ElapsedMilliseconds
         };
+    }
+
+    /// <summary>
+    /// Reads the entire result set of <paramref name="reader"/> into a
+    /// <see cref="DataTable"/> using asynchronous row reads, so large result
+    /// sets don't block while data is being pulled from the provider.
+    /// </summary>
+    private static async Task<DataTable> LoadDataTableAsync(
+        System.Data.Common.DbDataReader reader,
+        CancellationToken cancellationToken)
+    {
+        var dataTable = new DataTable();
+
+        for (int i = 0; i < reader.FieldCount; i++)
+        {
+            dataTable.Columns.Add(reader.GetName(i), reader.GetFieldType(i) ?? typeof(object));
+        }
+
+        var values = new object[reader.FieldCount];
+        while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
+        {
+            reader.GetValues(values);
+            dataTable.Rows.Add(values);
+        }
+
+        return dataTable;
     }
 }
 

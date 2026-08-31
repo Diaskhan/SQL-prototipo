@@ -39,7 +39,7 @@ namespace SQL_prototipo
             tabControl1 = new TabControl();
             tabPage1 = new TabPage();
             richTextBox1 = new RichTextBox();
-            dataGridView1 = new DataGridView();
+            dataGridView1 = new SQL_prototipo.Controls.BufferedDataGridView();
             panel3 = new Panel();
             button2 = new Button();
             button1 = new Button();
