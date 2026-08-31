@@ -1,4 +1,3 @@
-using SQL_prototipo.Controls;
 using SQL_prototipo.Models;
 using SQL_prototipo.Services;
 
@@ -14,10 +13,6 @@ public partial class MainForm : Form
     private string _currentDatabaseType = "SQLite";
     private ConnectionInfo? _activeConnection;
     private bool _isLoadingUI = false;
-
-    // Shared schema metadata cache + autocomplete controllers for query editors.
-    private readonly SchemaCache _schemaCache = new();
-    private readonly List<SqlAutoComplete> _autoCompleters = new();
 
     // Additional UI elements created programmatically
     private StatusStrip _statusStrip = null!;
@@ -43,30 +38,11 @@ public partial class MainForm : Form
 
         InitializeImageList();
         InitializeAdditionalUi();
-        InitializeAutoComplete();
         LoadConnectionsToUI();
         LoadHistoryToUI();
 
         // Remove design-time placeholder tabs so the right panel starts empty.
         tabControl1.TabPages.Clear();
-    }
-
-    private void InitializeAutoComplete()
-    {
-        // Columns are loaded on demand against the currently active service.
-        _schemaCache.SetColumnLoader(async tableRef =>
-        {
-            var columns = await _dbService.GetColumnsAsync(tableRef.Schema, tableRef.Name)
-                .ConfigureAwait(false);
-            return columns.Select(c => c.Name).ToList();
-        });
-
-        AttachAutoComplete(richTextBox1);
-    }
-
-    private void AttachAutoComplete(RichTextBox editor)
-    {
-        _autoCompleters.Add(new SqlAutoComplete(editor, _schemaCache));
     }
 
     private void InitializeAdditionalUi()
@@ -116,23 +92,6 @@ public partial class MainForm : Form
         _listBoxHistory.DoubleClick += listBoxHistory_DoubleClick;
         tabPageQueries.Controls.Add(_listBoxHistory);
         tabPageQueries.Controls.Add(historyLabel);
-
-        // Cancel any running query when a tab is closed via its close button.
-        tabControl1.TabClosing += (_, e) =>
-        {
-            // Keep the Connections tab alive so it can be reopened from the menu.
-            if (e.TabPage == tabPage2)
-            {
-                e.Cancel = true;
-                tabControl1.TabPages.Remove(tabPage2);
-                return;
-            }
-
-            if (e.TabPage.Tag is QueryTabContext ctx)
-            {
-                ctx.Cts?.Cancel();
-            }
-        };
 
         // --- "Manage Connections" menu item ---
         var manageConnectionsMenuItem = new ToolStripMenuItem("&Manage Connections");
@@ -564,9 +523,6 @@ public partial class MainForm : Form
 
             _activeConnection = connection;
 
-            // Feed table metadata to the autocomplete cache.
-            _schemaCache.SetTables(tables);
-
             // Update treeView1 to show connection with its tables
             treeView1.BeginUpdate();
             try
@@ -753,8 +709,6 @@ public partial class MainForm : Form
         {
             ToggleUiState(false);
             var tables = await _dbService.GetAllTablesAsync();
-
-            _schemaCache.SetTables(tables);
 
             treeView1.BeginUpdate();
             try
@@ -1228,9 +1182,6 @@ public partial class MainForm : Form
 
         tabControl1.TabPages.Add(newTab);
         tabControl1.SelectedTab = newTab;
-
-        // Enable SQL autocomplete on this dynamically created editor.
-        AttachAutoComplete(rtb);
 
         // Make the query editor and the results grid share the height 50/50.
         void SizeGridToHalf()

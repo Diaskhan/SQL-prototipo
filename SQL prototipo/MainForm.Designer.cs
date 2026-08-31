@@ -36,7 +36,7 @@ namespace SQL_prototipo
             splitterMain = new Splitter();
             splitterQuery = new Splitter();
             panel1 = new Panel();
-            tabControl1 = new SQL_prototipo.Controls.ClosableTabControl();
+            tabControl1 = new TabControl();
             tabPage1 = new TabPage();
             richTextBox1 = new RichTextBox();
             dataGridView1 = new DataGridView();
@@ -165,11 +165,8 @@ namespace SQL_prototipo
             tabControl1.Controls.Add(tabPage1);
             tabControl1.Controls.Add(tabPage2);
             tabControl1.Dock = DockStyle.Fill;
-            tabControl1.DrawMode = TabDrawMode.OwnerDrawFixed;
-            tabControl1.ItemSize = new Size(0, 26);
             tabControl1.Location = new Point(0, 0);
             tabControl1.Name = "tabControl1";
-            tabControl1.Padding = new Point(22, 3);
             tabControl1.SelectedIndex = 0;
             tabControl1.Size = new Size(980, 724);
             tabControl1.TabIndex = 3;
@@ -500,7 +497,7 @@ namespace SQL_prototipo
         private TabControl leftTabControl;
         private TabPage tabPageDatabase;
         private TabPage tabPageQueries;
-        private SQL_prototipo.Controls.ClosableTabControl tabControl1;
+        private TabControl tabControl1;
         private TabPage tabPage1;
         private TabPage tabPage2;
         private RichTextBox richTextBox1;
