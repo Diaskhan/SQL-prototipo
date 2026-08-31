@@ -1,5 +1,6 @@
 using SQL_prototipo.Models;
 using SQL_prototipo.Services;
+using SQL_prototipo.UI;
 
 namespace SQL_prototipo;
 
@@ -1111,7 +1112,7 @@ public partial class MainForm : Form
         };
 
         // --- DataGridView (results) ---
-        var dgv = new Controls.BufferedDataGridView
+        var dgv = new BufferedDataGridView
         {
             Dock = DockStyle.Bottom,
             Height = 250,

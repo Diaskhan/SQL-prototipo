@@ -1,3 +1,5 @@
+using SQL_prototipo.UI;
+
 namespace SQL_prototipo
 {
     partial class MainForm
@@ -39,7 +41,7 @@ namespace SQL_prototipo
             tabControl1 = new TabControl();
             tabPage1 = new TabPage();
             richTextBox1 = new RichTextBox();
-            dataGridView1 = new SQL_prototipo.Controls.BufferedDataGridView();
+            dataGridView1 = new BufferedDataGridView();
             panel3 = new Panel();
             button2 = new Button();
             button1 = new Button();
