@@ -1,6 +1,6 @@
+using SQL_prototipo.Models;
 using System.Data;
 using System.Diagnostics;
-using SQL_prototipo.Models;
 
 namespace SQL_prototipo.Services;
 

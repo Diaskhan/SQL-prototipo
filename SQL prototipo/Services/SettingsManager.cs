@@ -1,5 +1,5 @@
-using System.Text.Json;
 using SQL_prototipo.Models;
+using System.Text.Json;
 
 namespace SQL_prototipo.Services;
 
