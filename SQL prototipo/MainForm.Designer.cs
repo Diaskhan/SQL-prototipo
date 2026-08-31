@@ -298,7 +298,7 @@ namespace SQL_prototipo
             // 
             cmbConnectionType.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbConnectionType.FormattingEnabled = true;
-            cmbConnectionType.Items.AddRange(new object[] { "SQLite", "SqlServer", "LocalDB", "MySQL", "PostgreSQL" });
+            cmbConnectionType.Items.AddRange(new object[] { "SQLite", "SqlServer", "LocalDB" });
             cmbConnectionType.Location = new Point(10, 165);
             cmbConnectionType.Name = "cmbConnectionType";
             cmbConnectionType.Size = new Size(341, 23);

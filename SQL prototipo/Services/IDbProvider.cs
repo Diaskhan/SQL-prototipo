@@ -4,7 +4,7 @@ namespace SQL_prototipo.Services;
 
 /// <summary>
 /// Abstracts database-specific behavior so the application can work with
-/// SQLite, SQL Server, MySQL and PostgreSQL through a common interface.
+/// SQLite and SQL Server through a common interface.
 /// </summary>
 public interface IDbProvider
 {
@@ -15,7 +15,7 @@ public interface IDbProvider
 
     /// <summary>
     /// Indicates whether this database engine organizes tables into schemas
-    /// (e.g. SQL Server "dbo", PostgreSQL "public"). SQLite and MySQL do not.
+    /// (e.g. SQL Server "dbo"). SQLite does not.
     /// </summary>
     bool SupportsSchemas { get; }
 

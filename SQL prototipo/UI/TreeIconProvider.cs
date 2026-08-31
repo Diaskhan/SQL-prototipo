@@ -24,16 +24,12 @@ public static class TreeIconProvider
         imageList.Images.Add("database_sqlite_active", CreateDatabaseIcon(Color.FromArgb(0, 100, 150), true));
         imageList.Images.Add("database_sqlserver_active", CreateDatabaseIcon(Color.FromArgb(186, 12, 47), true));
         imageList.Images.Add("database_localdb_active", CreateDatabaseIcon(Color.FromArgb(120, 40, 140), true));
-        imageList.Images.Add("database_mysql_active", CreateDatabaseIcon(Color.FromArgb(242, 145, 17), true));
-        imageList.Images.Add("database_postgresql_active", CreateDatabaseIcon(Color.FromArgb(51, 102, 153), true));
 
         // Inactive Icons
         imageList.Images.Add("database_inactive", CreateDatabaseIcon(Color.FromArgb(150, 155, 160), false));
         imageList.Images.Add("database_sqlite_inactive", CreateDatabaseIcon(Color.FromArgb(150, 155, 160), false));
         imageList.Images.Add("database_sqlserver_inactive", CreateDatabaseIcon(Color.FromArgb(150, 155, 160), false));
         imageList.Images.Add("database_localdb_inactive", CreateDatabaseIcon(Color.FromArgb(150, 155, 160), false));
-        imageList.Images.Add("database_mysql_inactive", CreateDatabaseIcon(Color.FromArgb(150, 155, 160), false));
-        imageList.Images.Add("database_postgresql_inactive", CreateDatabaseIcon(Color.FromArgb(150, 155, 160), false));
 
         imageList.Images.Add("folder", CreateFolderIcon());
         imageList.Images.Add("table", CreateTableIcon());
@@ -52,8 +48,6 @@ public static class TreeIconProvider
             "sqlite" => "database_sqlite" + suffix,
             "sqlserver" => "database_sqlserver" + suffix,
             "localdb" => "database_localdb" + suffix,
-            "mysql" => "database_mysql" + suffix,
-            "postgresql" => "database_postgresql" + suffix,
             _ => "database" + suffix
         };
     }

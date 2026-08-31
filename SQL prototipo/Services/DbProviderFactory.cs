@@ -14,8 +14,6 @@ public static class DbProviderFactory
             "sqlite" => new SqliteProvider(),
             "sqlserver" => new SqlServerProvider(),
             "localdb" => new LocalDbProvider(),
-            "mysql" => new MySqlProvider(),
-            "postgresql" => new PostgreSqlProvider(),
             _ => new SqliteProvider()
         };
     }
