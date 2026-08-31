@@ -270,6 +270,11 @@ public partial class MainForm : Form
         // If clicked on a connection node, load its tables
         if (e.Node.Tag is ConnectionInfo connection)
         {
+            if (e.Node.Nodes.Count > 0)
+            {
+                return;
+            }
+
             await LoadTablesForConnection(connection);
             return;
         }
