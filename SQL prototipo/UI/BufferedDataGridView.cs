@@ -1,4 +1,4 @@
-namespace SQL_prototipo.Controls;
+namespace SQL_prototipo.UI;
 
 /// <summary>
 /// A <see cref="DataGridView"/> with double buffering enabled to eliminate the
