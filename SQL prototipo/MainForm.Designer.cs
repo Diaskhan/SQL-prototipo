@@ -90,6 +90,8 @@ namespace SQL_prototipo
             leftTabControl.Name = "leftTabControl";
             leftTabControl.SelectedIndex = 0;
             leftTabControl.Size = new Size(324, 724);
+            leftTabControl.SizeMode = TabSizeMode.Fixed;
+            leftTabControl.ItemSize = new Size(160, 30);
             leftTabControl.TabIndex = 0;
             // 
             // tabPageDatabase
