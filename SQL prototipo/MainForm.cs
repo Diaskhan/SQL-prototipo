@@ -889,7 +889,7 @@ public partial class MainForm : Form
         }
     }
 
-    private async void btnTestConnection_Click(object sender, EventArgs e)
+    private async void btnTestConnection_Click(object? sender, EventArgs e)
     {
         var name = txtConnectionName.Text.Trim();
         var connectionString = txtConnectionString.Text.Trim();
@@ -924,7 +924,7 @@ public partial class MainForm : Form
         }
     }
 
-    private void btnUpdateConnection_Click(object sender, EventArgs e)
+    private void btnUpdateConnection_Click(object? sender, EventArgs e)
     {
         try
         {

@@ -1,7 +1,7 @@
 using Microsoft.Data.SqlClient;
 using System.Data.Common;
 
-namespace SQL_prototipo.Services.Providers;
+namespace OB.DataAccess.Providers;
 
 /// <summary>
 /// Provider for SQL Server LocalDB. It shares the SQL Server T-SQL dialect and
