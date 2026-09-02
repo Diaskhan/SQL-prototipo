@@ -1,4 +1,6 @@
 using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
 
 namespace SQL_prototipo.UI;
 
@@ -11,6 +13,8 @@ namespace SQL_prototipo.UI;
 public sealed class BufferedDataGridView : DataGridView
 {
     private bool _copyInitialized = false;
+    private bool _enableAlternating = true;
+    private Color _alternatingBackColor = Color.FromArgb(245, 245, 245);
 
     /// <summary>
     /// Если true (по умолчанию), грид автоматически настраивает поведение копирования
@@ -21,13 +25,62 @@ public sealed class BufferedDataGridView : DataGridView
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool EnableAutoCopy { get; set; } = true;
 
+    /// <summary>
+    /// Включить подсветку каждой второй строки (zebra). По умолчанию true.
+    /// </summary>
+    [Category("Appearance")]
+    [DefaultValue(true)]
+    public bool EnableAlternatingRowHighlight
+    {
+        get => _enableAlternating;
+        set
+        {
+            _enableAlternating = value;
+            ApplyAlternatingRowStyle();
+        }
+    }
+
+    /// <summary>
+    /// Цвет подсветки для каждой второй строки по умолчанию.
+    /// </summary>
+    [Category("Appearance")]
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public Color AlternatingRowBackColor
+    {
+        get => _alternatingBackColor;
+        set
+        {
+            _alternatingBackColor = value;
+            ApplyAlternatingRowStyle();
+        }
+    }
+
     public BufferedDataGridView()
     {
         DoubleBuffered = true;
+        // Apply alternating row style by default (designer excluded)
+        ApplyAlternatingRowStyle();
+
         // Don't initialize copy behavior at design time (Visual Studio designer)
         if (EnableAutoCopy && LicenseManager.UsageMode != LicenseUsageMode.Designtime)
         {
             SetupGridCopy();
+        }
+    }
+
+    private void ApplyAlternatingRowStyle()
+    {
+        if (EnableAlternatingRowHighlight)
+        {
+            // Ensure default row color is white for contrast
+            this.RowsDefaultCellStyle.BackColor = Color.White;
+            this.AlternatingRowsDefaultCellStyle.BackColor = AlternatingRowBackColor;
+        }
+        else
+        {
+            // Reset to default cell style background
+            this.AlternatingRowsDefaultCellStyle.BackColor = this.DefaultCellStyle.BackColor;
         }
     }
 
