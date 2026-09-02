@@ -1111,6 +1111,7 @@ public partial class MainForm : Form
         var rtb = new RichTextBox
         {
             Dock = DockStyle.Fill,
+            BorderStyle = BorderStyle.None,
             Text = query,
             Font = richTextBox1.Font,
             ScrollBars = RichTextBoxScrollBars.Both
@@ -1120,6 +1121,7 @@ public partial class MainForm : Form
         var dgv = new BufferedDataGridView
         {
             Dock = DockStyle.Bottom,
+            BorderStyle = BorderStyle.None,
             Height = 250,
             ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
             ReadOnly = true,

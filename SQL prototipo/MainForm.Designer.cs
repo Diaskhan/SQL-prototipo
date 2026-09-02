@@ -86,32 +86,33 @@ namespace SQL_prototipo
             leftTabControl.Controls.Add(tabPageDatabase);
             leftTabControl.Controls.Add(tabPageQueries);
             leftTabControl.Dock = DockStyle.Left;
+            leftTabControl.ItemSize = new Size(160, 30);
             leftTabControl.Location = new Point(0, 24);
             leftTabControl.Name = "leftTabControl";
             leftTabControl.SelectedIndex = 0;
             leftTabControl.Size = new Size(324, 724);
             leftTabControl.SizeMode = TabSizeMode.Fixed;
-            leftTabControl.ItemSize = new Size(160, 30);
             leftTabControl.TabIndex = 0;
             // 
             // tabPageDatabase
             // 
             tabPageDatabase.Controls.Add(treeView1);
             tabPageDatabase.Controls.Add(txtTableFilter);
-            tabPageDatabase.Location = new Point(4, 24);
+            tabPageDatabase.Location = new Point(4, 34);
             tabPageDatabase.Name = "tabPageDatabase";
             tabPageDatabase.Padding = new Padding(3);
-            tabPageDatabase.Size = new Size(316, 696);
+            tabPageDatabase.Size = new Size(316, 686);
             tabPageDatabase.TabIndex = 0;
             tabPageDatabase.Text = "Database";
             tabPageDatabase.UseVisualStyleBackColor = true;
             // 
             // treeView1
             // 
+            treeView1.BorderStyle = BorderStyle.None;
             treeView1.Dock = DockStyle.Fill;
-            treeView1.Location = new Point(3, 3);
+            treeView1.Location = new Point(3, 26);
             treeView1.Name = "treeView1";
-            treeView1.Size = new Size(310, 690);
+            treeView1.Size = new Size(310, 657);
             treeView1.TabIndex = 0;
             // 
             // txtTableFilter
@@ -125,10 +126,10 @@ namespace SQL_prototipo
             // 
             // tabPageQueries
             // 
-            tabPageQueries.Location = new Point(4, 24);
+            tabPageQueries.Location = new Point(4, 34);
             tabPageQueries.Name = "tabPageQueries";
             tabPageQueries.Padding = new Padding(3);
-            tabPageQueries.Size = new Size(316, 525);
+            tabPageQueries.Size = new Size(316, 686);
             tabPageQueries.TabIndex = 1;
             tabPageQueries.Text = "Queries";
             tabPageQueries.UseVisualStyleBackColor = true;
@@ -146,7 +147,7 @@ namespace SQL_prototipo
             // splitterQuery
             // 
             splitterQuery.Dock = DockStyle.Bottom;
-            splitterQuery.Location = new Point(3, 248);
+            splitterQuery.Location = new Point(3, 254);
             splitterQuery.MinExtra = 100;
             splitterQuery.MinSize = 80;
             splitterQuery.Name = "splitterQuery";
@@ -181,10 +182,10 @@ namespace SQL_prototipo
             tabPage1.Controls.Add(splitterQuery);
             tabPage1.Controls.Add(dataGridView1);
             tabPage1.Controls.Add(panel3);
-            tabPage1.Location = new Point(4, 30);
+            tabPage1.Location = new Point(4, 24);
             tabPage1.Name = "tabPage1";
             tabPage1.Padding = new Padding(3);
-            tabPage1.Size = new Size(972, 690);
+            tabPage1.Size = new Size(972, 696);
             tabPage1.TabIndex = 0;
             tabPage1.Text = "Query";
             tabPage1.UseVisualStyleBackColor = true;
@@ -194,15 +195,16 @@ namespace SQL_prototipo
             richTextBox1.Dock = DockStyle.Fill;
             richTextBox1.Location = new Point(3, 53);
             richTextBox1.Name = "richTextBox1";
-            richTextBox1.Size = new Size(966, 195);
+            richTextBox1.Size = new Size(966, 201);
             richTextBox1.TabIndex = 0;
             richTextBox1.Text = "";
             // 
             // dataGridView1
             // 
+            dataGridView1.BorderStyle = BorderStyle.None;
             dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridView1.Dock = DockStyle.Bottom;
-            dataGridView1.Location = new Point(3, 262);
+            dataGridView1.Location = new Point(3, 268);
             dataGridView1.Name = "dataGridView1";
             dataGridView1.Size = new Size(966, 425);
             dataGridView1.TabIndex = 2;
@@ -243,10 +245,10 @@ namespace SQL_prototipo
             // 
             tabPage2.Controls.Add(panel4);
             tabPage2.Controls.Add(treeViewConnections);
-            tabPage2.Location = new Point(4, 30);
+            tabPage2.Location = new Point(4, 24);
             tabPage2.Name = "tabPage2";
             tabPage2.Padding = new Padding(3);
-            tabPage2.Size = new Size(760, 519);
+            tabPage2.Size = new Size(972, 696);
             tabPage2.TabIndex = 1;
             tabPage2.Text = "Connections";
             tabPage2.UseVisualStyleBackColor = true;
@@ -267,9 +269,9 @@ namespace SQL_prototipo
             panel4.Controls.Add(btnAddConnection);
             panel4.Controls.Add(btnAddFolder);
             panel4.Dock = DockStyle.Right;
-            panel4.Location = new Point(396, 3);
+            panel4.Location = new Point(608, 3);
             panel4.Name = "panel4";
-            panel4.Size = new Size(361, 513);
+            panel4.Size = new Size(361, 690);
             panel4.TabIndex = 1;
             // 
             // labelGroup
@@ -397,7 +399,7 @@ namespace SQL_prototipo
             treeViewConnections.HideSelection = false;
             treeViewConnections.Location = new Point(3, 3);
             treeViewConnections.Name = "treeViewConnections";
-            treeViewConnections.Size = new Size(754, 513);
+            treeViewConnections.Size = new Size(966, 690);
             treeViewConnections.TabIndex = 0;
             treeViewConnections.AfterSelect += treeViewConnections_AfterSelect;
             treeViewConnections.NodeMouseDoubleClick += treeViewConnections_NodeMouseDoubleClick;
@@ -476,6 +478,7 @@ namespace SQL_prototipo
             Text = "Database Manager";
             leftTabControl.ResumeLayout(false);
             tabPageDatabase.ResumeLayout(false);
+            tabPageDatabase.PerformLayout();
             panel1.ResumeLayout(false);
             tabControl1.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
@@ -508,7 +511,6 @@ namespace SQL_prototipo
         private Panel panel3;
         private Button button1;
         private Button button2;
-        private DataGridView dataGridView1;
         private Panel panel4;
         private Label label4;
         private ComboBox cmbConnectionType;
@@ -532,5 +534,6 @@ namespace SQL_prototipo
         private ToolStripMenuItem settingsMenuItem;
         private ToolStripMenuItem helpMenuItem;
         private ToolStripMenuItem aboutMenuItem;
+        private BufferedDataGridView dataGridView1;
     }
 }
