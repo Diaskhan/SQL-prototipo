@@ -13,6 +13,7 @@ namespace SQL_prototipo.UI;
 public sealed class BufferedDataGridView : DataGridView
 {
     private bool _copyInitialized = false;
+    private bool _freezeMenuInitialized = false;
     private bool _enableAlternating = true;
     private Color _alternatingBackColor = Color.FromArgb(245, 245, 245);
 
@@ -67,6 +68,11 @@ public sealed class BufferedDataGridView : DataGridView
         {
             SetupGridCopy();
         }
+
+        if (LicenseManager.UsageMode != LicenseUsageMode.Designtime)
+        {
+            SetupFrozenColumnsMenu();
+        }
     }
 
     private void ApplyAlternatingRowStyle()
@@ -118,6 +124,199 @@ public sealed class BufferedDataGridView : DataGridView
                 e.Handled = true;
             }
         };
+    }
+
+    public void ConfigureBinaryColumns(System.Data.DataTable? data)
+    {
+        if (data == null) return;
+
+        var binaryColumns = data.Columns.Cast<System.Data.DataColumn>()
+            .Where(c => c.DataType == typeof(byte[]))
+            .Select(c => c.ColumnName)
+            .ToHashSet(StringComparer.Ordinal);
+
+        if (binaryColumns.Count == 0) return;
+
+        foreach (var colName in binaryColumns)
+        {
+            var existing = Columns[colName];
+            if (existing == null) continue;
+
+            int index = existing.Index;
+            var textColumn = new DataGridViewTextBoxColumn
+            {
+                Name = existing.Name,
+                HeaderText = existing.HeaderText,
+                DataPropertyName = existing.DataPropertyName,
+                ReadOnly = true
+            };
+
+            Columns.RemoveAt(index);
+            Columns.Insert(index, textColumn);
+        }
+
+        CellFormatting -= BinaryCellFormatting;
+        CellFormatting += BinaryCellFormatting;
+
+        void BinaryCellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.ColumnIndex < 0 || e.RowIndex < 0) return;
+            var colName = Columns[e.ColumnIndex].DataPropertyName;
+            if (string.IsNullOrEmpty(colName)) colName = Columns[e.ColumnIndex].Name;
+            if (!binaryColumns.Contains(colName)) return;
+
+            if (e.Value is byte[] bytes)
+            {
+                e.Value = $"binary data ({bytes.Length} bytes)";
+                e.FormattingApplied = true;
+            }
+        }
+    }
+
+    private void SetupFrozenColumnsMenu()
+    {
+        if (_freezeMenuInitialized) return;
+        _freezeMenuInitialized = true;
+
+        var menu = ContextMenuStrip ?? new ContextMenuStrip();
+        var freezeItem = new ToolStripMenuItem("Закрепить столбец");
+        var unfreezeItem = new ToolStripMenuItem("Открепить столбец");
+        var unfreezeAllItem = new ToolStripMenuItem("Открепить все столбцы");
+        int selectedColumnIndex = -1;
+
+        if (menu.Items.Count > 0)
+        {
+            menu.Items.Add(new ToolStripSeparator());
+        }
+
+        freezeItem.Click += (_, _) => FreezeColumn(selectedColumnIndex);
+        unfreezeItem.Click += (_, _) => UnfreezeColumn(selectedColumnIndex);
+        unfreezeAllItem.Click += (_, _) => UnfreezeAllColumns();
+
+        menu.Items.Add(freezeItem);
+        menu.Items.Add(unfreezeItem);
+        menu.Items.Add(unfreezeAllItem);
+        menu.Opening += (_, e) =>
+        {
+            Point clientPoint = PointToClient(Cursor.Position);
+            var hit = HitTest(clientPoint.X, clientPoint.Y);
+            selectedColumnIndex = hit.RowIndex >= 0 && hit.ColumnIndex >= 0
+                ? hit.ColumnIndex
+                : -1;
+
+            if (selectedColumnIndex < 0)
+            {
+                freezeItem.Enabled = false;
+                unfreezeItem.Enabled = false;
+                return;
+            }
+
+            bool isFrozen = Columns[selectedColumnIndex].Frozen;
+            freezeItem.Enabled = !isFrozen;
+            unfreezeItem.Enabled = isFrozen;
+        };
+
+        ContextMenuStrip = menu;
+    }
+
+    private void FreezeColumn(int columnIndex)
+    {
+        if (columnIndex < 0 || columnIndex >= Columns.Count) return;
+
+        var column = Columns[columnIndex];
+        if (column.Frozen) return;
+
+        var columnsToFreeze = Columns
+            .Cast<DataGridViewColumn>()
+            .Where(c => c.Frozen)
+            .OrderBy(c => c.DisplayIndex)
+            .Append(column)
+            .ToArray();
+
+        UnfreezeAllColumns();
+
+        var columnsInDisplayOrder = Columns
+            .Cast<DataGridViewColumn>()
+            .OrderBy(c => c.DisplayIndex)
+            .ToList();
+
+        columnsInDisplayOrder.Remove(column);
+        columnsInDisplayOrder.Insert(columnsToFreeze.Length - 1, column);
+
+        for (int i = 0; i < columnsInDisplayOrder.Count; i++)
+        {
+            columnsInDisplayOrder[i].DisplayIndex = i;
+        }
+
+        foreach (var frozenColumn in columnsToFreeze)
+        {
+            frozenColumn.Frozen = true;
+        }
+
+        Invalidate();
+    }
+
+    private void UnfreezeColumn(int columnIndex)
+    {
+        if (columnIndex < 0 || columnIndex >= Columns.Count) return;
+
+        var columnsToKeepFrozen = Columns
+            .Cast<DataGridViewColumn>()
+            .Where(c => c.Frozen && c.Index != columnIndex)
+            .OrderBy(c => c.DisplayIndex)
+            .ToArray();
+
+        UnfreezeAllColumns();
+
+        foreach (var column in columnsToKeepFrozen)
+        {
+            FreezeColumn(column.Index);
+        }
+    }
+
+    private void UnfreezeAllColumns()
+    {
+        foreach (var column in Columns
+            .Cast<DataGridViewColumn>()
+            .Where(c => c.Frozen)
+            .OrderByDescending(c => c.DisplayIndex))
+        {
+            column.Frozen = false;
+        }
+
+        Invalidate();
+    }
+
+    public void PrepareForDataRefresh()
+    {
+        UnfreezeAllColumns();
+    }
+
+    protected override void OnCellPainting(DataGridViewCellPaintingEventArgs e)
+    {
+        base.OnCellPainting(e);
+
+        if (e.RowIndex == -1 && e.ColumnIndex >= 0 && Columns[e.ColumnIndex].Frozen)
+        {
+            float scale = DeviceDpi / 96f;
+            int lockWidth = Math.Max(8, (int)(10 * scale));
+            int lockHeight = Math.Max(6, (int)(7 * scale));
+            int x = e.CellBounds.Right - lockWidth - (int)(4 * scale);
+            int y = e.CellBounds.Top + (e.CellBounds.Height - lockHeight) / 2 + (int)(2 * scale);
+
+            using var lockBrush = new SolidBrush(Color.FromArgb(70, 70, 70));
+            using var lockPen = new Pen(Color.FromArgb(70, 70, 70), Math.Max(1, scale));
+
+            e.Graphics.DrawArc(
+                lockPen,
+                x + (int)(2 * scale),
+                y - (int)(5 * scale),
+                lockWidth - (int)(4 * scale),
+                (int)(9 * scale),
+                180,
+                180);
+            e.Graphics.FillRectangle(lockBrush, x, y, lockWidth, lockHeight);
+        }
     }
 
     private void CopySelection(bool includeHeaders)
