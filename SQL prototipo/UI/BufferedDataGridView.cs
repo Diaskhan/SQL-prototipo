@@ -179,9 +179,9 @@ public sealed class BufferedDataGridView : DataGridView
         _freezeMenuInitialized = true;
 
         var menu = ContextMenuStrip ?? new ContextMenuStrip();
-        var freezeItem = new ToolStripMenuItem("Закрепить столбец");
-        var unfreezeItem = new ToolStripMenuItem("Открепить столбец");
-        var unfreezeAllItem = new ToolStripMenuItem("Открепить все столбцы");
+        var freezeItem = new ToolStripMenuItem("Freeze column");
+        var unfreezeItem = new ToolStripMenuItem("Unfreeze column");
+        var unfreezeAllItem = new ToolStripMenuItem("Unfreeze all columns");
         int selectedColumnIndex = -1;
 
         if (menu.Items.Count > 0)
@@ -290,33 +290,6 @@ public sealed class BufferedDataGridView : DataGridView
     public void PrepareForDataRefresh()
     {
         UnfreezeAllColumns();
-    }
-
-    protected override void OnCellPainting(DataGridViewCellPaintingEventArgs e)
-    {
-        base.OnCellPainting(e);
-
-        if (e.RowIndex == -1 && e.ColumnIndex >= 0 && Columns[e.ColumnIndex].Frozen)
-        {
-            float scale = DeviceDpi / 96f;
-            int lockWidth = Math.Max(8, (int)(10 * scale));
-            int lockHeight = Math.Max(6, (int)(7 * scale));
-            int x = e.CellBounds.Right - lockWidth - (int)(4 * scale);
-            int y = e.CellBounds.Top + (e.CellBounds.Height - lockHeight) / 2 + (int)(2 * scale);
-
-            using var lockBrush = new SolidBrush(Color.FromArgb(70, 70, 70));
-            using var lockPen = new Pen(Color.FromArgb(70, 70, 70), Math.Max(1, scale));
-
-            e.Graphics.DrawArc(
-                lockPen,
-                x + (int)(2 * scale),
-                y - (int)(5 * scale),
-                lockWidth - (int)(4 * scale),
-                (int)(9 * scale),
-                180,
-                180);
-            e.Graphics.FillRectangle(lockBrush, x, y, lockWidth, lockHeight);
-        }
     }
 
     private void CopySelection(bool includeHeaders)
