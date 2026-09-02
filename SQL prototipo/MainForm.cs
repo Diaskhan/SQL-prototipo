@@ -54,28 +54,7 @@ public partial class MainForm : Form
         _statusStrip.Items.Add(_statusLabel);
         this.Controls.Add(_statusStrip);
 
-        // --- Test Connection button (Connections tab) ---
-        _btnTestConnection = new Button
-        {
-            Text = "Test Connection",
-            Location = new Point(10, 295),
-            Size = new Size(165, 40),
-            UseVisualStyleBackColor = true
-        };
-        _btnTestConnection.Click += btnTestConnection_Click;
 
-        // --- Update Connection button (Connections tab) ---
-        _btnUpdateConnection = new Button
-        {
-            Text = "Update Connection",
-            Location = new Point(186, 295),
-            Size = new Size(165, 40),
-            UseVisualStyleBackColor = true
-        };
-        _btnUpdateConnection.Click += btnUpdateConnection_Click;
-
-        panel4.Controls.Add(_btnTestConnection);
-        panel4.Controls.Add(_btnUpdateConnection);
 
         // --- Query history list (Queries tab) ---
         var historyLabel = new Label

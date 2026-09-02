@@ -46,6 +46,7 @@ namespace SQL_prototipo
             button2 = new Button();
             button1 = new Button();
             tabPage2 = new TabPage();
+            treeViewConnections = new TreeView();
             panel4 = new Panel();
             labelGroup = new Label();
             txtGroup = new TextBox();
@@ -57,10 +58,12 @@ namespace SQL_prototipo
             label2 = new Label();
             txtConnectionName = new TextBox();
             label1 = new Label();
-            btnDeleteConnection = new Button();
+            flButtons = new FlowLayoutPanel();
             btnAddConnection = new Button();
             btnAddFolder = new Button();
-            treeViewConnections = new TreeView();
+            btnDeleteConnection = new Button();
+            btnTestConnection = new Button();
+            btnUpdateConnection = new Button();
             menuStrip1 = new MenuStrip();
             fileMenuItem = new ToolStripMenuItem();
             newQueryMenuItem = new ToolStripMenuItem();
@@ -78,6 +81,7 @@ namespace SQL_prototipo
             panel3.SuspendLayout();
             tabPage2.SuspendLayout();
             panel4.SuspendLayout();
+            flButtons.SuspendLayout();
             menuStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -243,8 +247,8 @@ namespace SQL_prototipo
             // 
             // tabPage2
             // 
-            tabPage2.Controls.Add(panel4);
             tabPage2.Controls.Add(treeViewConnections);
+            tabPage2.Controls.Add(panel4);
             tabPage2.Location = new Point(4, 24);
             tabPage2.Name = "tabPage2";
             tabPage2.Padding = new Padding(3);
@@ -252,6 +256,17 @@ namespace SQL_prototipo
             tabPage2.TabIndex = 1;
             tabPage2.Text = "Connections";
             tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // treeViewConnections
+            // 
+            treeViewConnections.Dock = DockStyle.Fill;
+            treeViewConnections.HideSelection = false;
+            treeViewConnections.Location = new Point(3, 3);
+            treeViewConnections.Name = "treeViewConnections";
+            treeViewConnections.Size = new Size(247, 690);
+            treeViewConnections.TabIndex = 0;
+            treeViewConnections.AfterSelect += treeViewConnections_AfterSelect;
+            treeViewConnections.NodeMouseDoubleClick += treeViewConnections_NodeMouseDoubleClick;
             // 
             // panel4
             // 
@@ -265,13 +280,11 @@ namespace SQL_prototipo
             panel4.Controls.Add(label2);
             panel4.Controls.Add(txtConnectionName);
             panel4.Controls.Add(label1);
-            panel4.Controls.Add(btnDeleteConnection);
-            panel4.Controls.Add(btnAddConnection);
-            panel4.Controls.Add(btnAddFolder);
+            panel4.Controls.Add(flButtons);
             panel4.Dock = DockStyle.Right;
-            panel4.Location = new Point(608, 3);
+            panel4.Location = new Point(250, 3);
             panel4.Name = "panel4";
-            panel4.Size = new Size(361, 690);
+            panel4.Size = new Size(719, 690);
             panel4.TabIndex = 1;
             // 
             // labelGroup
@@ -363,21 +376,27 @@ namespace SQL_prototipo
             label1.TabIndex = 2;
             label1.Text = "Conn. Name";
             // 
-            // btnDeleteConnection
+            // flButtons
             // 
-            btnDeleteConnection.Location = new Point(186, 245);
-            btnDeleteConnection.Name = "btnDeleteConnection";
-            btnDeleteConnection.Size = new Size(165, 40);
-            btnDeleteConnection.TabIndex = 1;
-            btnDeleteConnection.Text = "Delete Connection";
-            btnDeleteConnection.UseVisualStyleBackColor = true;
-            btnDeleteConnection.Click += btnDeleteConnection_Click;
+            flButtons.Controls.Add(btnAddConnection);
+            flButtons.Controls.Add(btnAddFolder);
+            flButtons.Controls.Add(btnDeleteConnection);
+            flButtons.Controls.Add(btnTestConnection);
+            flButtons.Controls.Add(btnUpdateConnection);
+            flButtons.Dock = DockStyle.Bottom;
+            flButtons.FlowDirection = FlowDirection.TopDown;
+            flButtons.Location = new Point(0, 260);
+            flButtons.Name = "flButtons";
+            flButtons.Size = new Size(719, 430);
+            flButtons.TabIndex = 12;
+            flButtons.WrapContents = false;
             // 
             // btnAddConnection
             // 
-            btnAddConnection.Location = new Point(10, 245);
+            btnAddConnection.Location = new Point(10, 5);
+            btnAddConnection.Margin = new Padding(10, 5, 10, 5);
             btnAddConnection.Name = "btnAddConnection";
-            btnAddConnection.Size = new Size(165, 40);
+            btnAddConnection.Size = new Size(320, 40);
             btnAddConnection.TabIndex = 0;
             btnAddConnection.Text = "Add Connection";
             btnAddConnection.UseVisualStyleBackColor = true;
@@ -385,24 +404,47 @@ namespace SQL_prototipo
             // 
             // btnAddFolder
             // 
-            btnAddFolder.Location = new Point(10, 295);
+            btnAddFolder.Location = new Point(10, 55);
+            btnAddFolder.Margin = new Padding(10, 5, 10, 5);
             btnAddFolder.Name = "btnAddFolder";
-            btnAddFolder.Size = new Size(341, 40);
-            btnAddFolder.TabIndex = 12;
+            btnAddFolder.Size = new Size(320, 40);
+            btnAddFolder.TabIndex = 2;
             btnAddFolder.Text = "Add Folder";
             btnAddFolder.UseVisualStyleBackColor = true;
             btnAddFolder.Click += btnAddFolder_Click;
             // 
-            // treeViewConnections
+            // btnDeleteConnection
             // 
-            treeViewConnections.Dock = DockStyle.Fill;
-            treeViewConnections.HideSelection = false;
-            treeViewConnections.Location = new Point(3, 3);
-            treeViewConnections.Name = "treeViewConnections";
-            treeViewConnections.Size = new Size(966, 690);
-            treeViewConnections.TabIndex = 0;
-            treeViewConnections.AfterSelect += treeViewConnections_AfterSelect;
-            treeViewConnections.NodeMouseDoubleClick += treeViewConnections_NodeMouseDoubleClick;
+            btnDeleteConnection.Location = new Point(10, 105);
+            btnDeleteConnection.Margin = new Padding(10, 5, 10, 5);
+            btnDeleteConnection.Name = "btnDeleteConnection";
+            btnDeleteConnection.Size = new Size(320, 40);
+            btnDeleteConnection.TabIndex = 1;
+            btnDeleteConnection.Text = "Delete Connection";
+            btnDeleteConnection.UseVisualStyleBackColor = true;
+            btnDeleteConnection.Click += btnDeleteConnection_Click;
+            // 
+            // btnTestConnection
+            // 
+            btnTestConnection.Location = new Point(10, 155);
+            btnTestConnection.Margin = new Padding(10, 5, 10, 5);
+            btnTestConnection.Name = "btnTestConnection";
+            btnTestConnection.Size = new Size(327, 37);
+            btnTestConnection.TabIndex = 0;
+            btnTestConnection.Text = "Test Connection";
+            btnTestConnection.UseVisualStyleBackColor = true;
+            btnTestConnection.Click += btnTestConnection_Click;
+            // 
+            // btnUpdateConnection
+            // 
+            btnUpdateConnection.Location = new Point(10, 202);
+            btnUpdateConnection.Margin = new Padding(10, 5, 10, 5);
+            btnUpdateConnection.Name = "btnUpdateConnection";
+            btnUpdateConnection.Size = new Size(327, 48);
+            btnUpdateConnection.TabIndex = 0;
+            btnUpdateConnection.Text = "Update Connection";
+            btnUpdateConnection.UseVisualStyleBackColor = true;
+            btnUpdateConnection.Click += btnUpdateConnection_Click;
             // 
             // menuStrip1
             // 
@@ -487,6 +529,7 @@ namespace SQL_prototipo
             tabPage2.ResumeLayout(false);
             panel4.ResumeLayout(false);
             panel4.PerformLayout();
+            flButtons.ResumeLayout(false);
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
             ResumeLayout(false);
@@ -512,6 +555,9 @@ namespace SQL_prototipo
         private Button button1;
         private Button button2;
         private Panel panel4;
+        private FlowLayoutPanel flButtons;
+        private Button btnTestConnection;
+        private Button btnUpdateConnection;
         private Label label4;
         private ComboBox cmbConnectionType;
         private Label label3;
