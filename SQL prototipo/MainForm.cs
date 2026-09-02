@@ -18,8 +18,6 @@ public partial class MainForm : Form
     // Additional UI elements created programmatically
     private StatusStrip _statusStrip = null!;
     private ToolStripStatusLabel _statusLabel = null!;
-    private Button _btnTestConnection = null!;
-    private Button _btnUpdateConnection = null!;
     private ListBox _listBoxHistory = null!;
 
     public MainForm()
