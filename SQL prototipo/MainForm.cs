@@ -7,9 +7,9 @@ namespace SQL_prototipo;
 public partial class MainForm : Form
 {
     private DatabaseService _dbService;
-    private ConnectionManager _connectionManager;
-    private QueryHistoryManager _historyManager;
-    private SettingsManager _settingsManager;
+    private readonly ConnectionManager _connectionManager;
+    private readonly QueryHistoryManager _historyManager;
+    private readonly SettingsManager _settingsManager;
     private string _currentConnectionString = "Data Source=chinook.sqlite";
     private string _currentDatabaseType = "SQLite";
     private ConnectionInfo? _activeConnection;
@@ -67,7 +67,7 @@ public partial class MainForm : Form
         {
             Dock = DockStyle.Fill
         };
-        _listBoxHistory.DoubleClick += listBoxHistory_DoubleClick;
+        _listBoxHistory.DoubleClick += ListBoxHistory_DoubleClick;
         tabPageQueries.Controls.Add(_listBoxHistory);
         tabPageQueries.Controls.Add(historyLabel);
 
@@ -115,7 +115,7 @@ public partial class MainForm : Form
 
             foreach (var group in groups)
             {
-                TreeNode groupNode = new TreeNode(group.Key)
+                TreeNode groupNode = new(group.Key)
                 {
                     ImageKey = "folder",
                     SelectedImageKey = "folder"
@@ -125,7 +125,7 @@ public partial class MainForm : Form
                 {
                     bool isActive = _activeConnection != null && _activeConnection.Name == connection.Name;
                     string dbIconKey = TreeIconProvider.GetDatabaseIconKey(connection.DatabaseType, isActive);
-                    TreeNode connectionNode = new TreeNode(connection.Name)
+                    TreeNode connectionNode = new(connection.Name)
                     {
                         Tag = connection,
                         ImageKey = dbIconKey,
@@ -188,7 +188,7 @@ public partial class MainForm : Form
 
             foreach (var folderName in _connectionManager.Folders)
             {
-                TreeNode folderNode = new TreeNode(folderName)
+                TreeNode folderNode = new(folderName)
                 {
                     Name = folderName,
                     Tag = folderName,
@@ -349,7 +349,7 @@ public partial class MainForm : Form
 
     // Holds an unfiltered snapshot of the Database tree so the table filter
     // can be applied and cleared without reloading from the database.
-    private List<TreeNode> _treeBackup = new();
+    private List<TreeNode> _treeBackup = [];
 
     /// <summary>
     /// Takes a snapshot of the freshly built Database tree and re-applies the
@@ -357,9 +357,10 @@ public partial class MainForm : Form
     /// </summary>
     private void CaptureTreeBackupAndFilter()
     {
-        _treeBackup = treeView1.Nodes.Cast<TreeNode>()
-            .Select(n => (TreeNode)n.Clone())
-            .ToList();
+        _treeBackup =
+        [
+            .. treeView1.Nodes.Cast<TreeNode>().Select(n => (TreeNode)n.Clone()),
+        ];
 
         if (!string.IsNullOrWhiteSpace(txtTableFilter.Text))
         {
@@ -412,7 +413,7 @@ public partial class MainForm : Form
     /// Returns a clone of <paramref name="source"/> if it is a matching table
     /// node or a container that has at least one matching descendant; otherwise null.
     /// </summary>
-    private TreeNode? FilterNode(TreeNode source, string filter)
+    private static TreeNode? FilterNode(TreeNode source, string filter)
     {
         if (source.Tag is TableRef)
         {
@@ -452,7 +453,7 @@ public partial class MainForm : Form
         return clone;
     }
 
-    private static TreeNode CloneShallow(TreeNode source) => new TreeNode(source.Text)
+    private static TreeNode CloneShallow(TreeNode source) => new(source.Text)
     {
         Name = source.Name,
         Tag = source.Tag,
@@ -471,7 +472,7 @@ public partial class MainForm : Form
                 text, pattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
         }
 
-        return text.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0;
+        return text.Contains(filter, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -519,7 +520,7 @@ public partial class MainForm : Form
 
                 foreach (var group in groups)
                 {
-                    TreeNode groupNode = new TreeNode(group.Key)
+                    TreeNode groupNode = new(group.Key)
                     {
                         ImageKey = "folder",
                         SelectedImageKey = "folder"
@@ -529,7 +530,7 @@ public partial class MainForm : Form
                     {
                         bool isActive = _activeConnection != null && _activeConnection.Name == conn.Name;
                         string dbIconKey = TreeIconProvider.GetDatabaseIconKey(conn.DatabaseType, isActive);
-                        TreeNode connectionNode = new TreeNode(conn.Name)
+                        TreeNode connectionNode = new(conn.Name)
                         {
                             Tag = conn,
                             ImageKey = dbIconKey,
@@ -539,7 +540,7 @@ public partial class MainForm : Form
                         // If this is the current connection, add its tables
                         if (conn.Name == connection.Name)
                         {
-                            TreeNode tablesNode = new TreeNode("Tables")
+                            TreeNode tablesNode = new("Tables")
                             {
                                 ImageKey = "folder",
                                 SelectedImageKey = "folder"
@@ -579,7 +580,7 @@ public partial class MainForm : Form
         }
     }
 
-    private async void btnExecuteQuery_Click(object sender, EventArgs e)
+    private async void BtnExecuteQuery_Click(object sender, EventArgs e)
     {
         try
         {
@@ -628,7 +629,7 @@ public partial class MainForm : Form
         LoadHistoryToUI();
     }
 
-    private void listBoxHistory_DoubleClick(object? sender, EventArgs e)
+    private void ListBoxHistory_DoubleClick(object? sender, EventArgs e)
     {
         if (_listBoxHistory.SelectedItem is Models.QueryHistoryEntry entry)
         {
@@ -636,7 +637,7 @@ public partial class MainForm : Form
         }
     }
 
-    private async void btnLoadTables_Click(object sender, EventArgs e)
+    private async void BtnLoadTables_Click(object sender, EventArgs e)
     {
         try
         {
@@ -647,7 +648,7 @@ public partial class MainForm : Form
             try
             {
                 treeView1.Nodes.Clear();
-                TreeNode rootNode = new TreeNode("Tables")
+                TreeNode rootNode = new("Tables")
                 {
                     ImageKey = "folder",
                     SelectedImageKey = "folder"
@@ -690,7 +691,7 @@ public partial class MainForm : Form
     }
 
     // Connection Management Event Handlers
-    private void btnAddConnection_Click(object sender, EventArgs e)
+    private void BtnAddConnection_Click(object sender, EventArgs e)
     {
         try
         {
@@ -732,7 +733,7 @@ public partial class MainForm : Form
         }
     }
 
-    private void btnAddFolder_Click(object sender, EventArgs e)
+    private void BtnAddFolder_Click(object sender, EventArgs e)
     {
         using var dialog = new Form
         {
@@ -749,7 +750,7 @@ public partial class MainForm : Form
         var btnOk = new Button { Text = "OK", DialogResult = DialogResult.OK, Location = new Point(152, 72), Size = new Size(75, 26) };
         var btnCancel = new Button { Text = "Cancel", DialogResult = DialogResult.Cancel, Location = new Point(233, 72), Size = new Size(75, 26) };
 
-        dialog.Controls.AddRange(new Control[] { label, textBox, btnOk, btnCancel });
+        dialog.Controls.AddRange([label, textBox, btnOk, btnCancel]);
         dialog.AcceptButton = btnOk;
         dialog.CancelButton = btnCancel;
 
@@ -779,7 +780,7 @@ public partial class MainForm : Form
         }
     }
 
-    private void btnDeleteConnection_Click(object sender, EventArgs e)
+    private void BtnDeleteConnection_Click(object sender, EventArgs e)
     {
         try
         {
@@ -816,7 +817,7 @@ public partial class MainForm : Form
         }
     }
 
-    private async void btnTestConnection_Click(object? sender, EventArgs e)
+    private async void BtnTestConnection_Click(object? sender, EventArgs e)
     {
         var name = txtConnectionName.Text.Trim();
         var connectionString = txtConnectionString.Text.Trim();
@@ -851,7 +852,7 @@ public partial class MainForm : Form
         }
     }
 
-    private void btnUpdateConnection_Click(object? sender, EventArgs e)
+    private void BtnUpdateConnection_Click(object? sender, EventArgs e)
     {
         try
         {
@@ -888,7 +889,7 @@ public partial class MainForm : Form
         }
     }
 
-    private void treeViewConnections_AfterSelect(object? sender, TreeViewEventArgs e)
+    private void TreeViewConnections_AfterSelect(object? sender, TreeViewEventArgs e)
     {
         if (_isLoadingUI) return;
 
@@ -906,7 +907,7 @@ public partial class MainForm : Form
         }
     }
 
-    private async void treeViewConnections_NodeMouseDoubleClick(object? sender, TreeNodeMouseClickEventArgs e)
+    private async void TreeViewConnections_NodeMouseDoubleClick(object? sender, TreeNodeMouseClickEventArgs e)
     {
         // Double-clicking a connection switches to it and loads its tables.
         if (e.Node?.Tag is ConnectionInfo connection)
@@ -925,7 +926,7 @@ public partial class MainForm : Form
         }
     }
 
-    private async void cmbConnections_SelectedIndexChanged(object sender, EventArgs e)
+    private async void CmbConnections_SelectedIndexChanged(object sender, EventArgs e)
     {
         if (_isLoadingUI) return;
         if (cmbConnections.SelectedItem is ConnectionInfo connection)
@@ -953,12 +954,12 @@ public partial class MainForm : Form
         treeViewConnections.ImageList = imageList;
     }
 
-    private void newQueryMenuItem_Click(object? sender, EventArgs e)
+    private void NewQueryMenuItem_Click(object? sender, EventArgs e)
     {
         OpenNewQueryTab(_dbService.GetNewQueryTemplate(), "Query", autoExecute: false);
     }
 
-    private void executeQueryMenuItem_Click(object? sender, EventArgs e)
+    private void ExecuteQueryMenuItem_Click(object? sender, EventArgs e)
     {
         var activeTab = tabControl1.SelectedTab;
         if (activeTab?.Tag is QueryTabContext ctx)
@@ -967,16 +968,16 @@ public partial class MainForm : Form
         }
         else
         {
-            btnExecuteQuery_Click(this, EventArgs.Empty);
+            BtnExecuteQuery_Click(this, EventArgs.Empty);
         }
     }
 
-    private void exitMenuItem_Click(object? sender, EventArgs e)
+    private void ExitMenuItem_Click(object? sender, EventArgs e)
     {
         Close();
     }
 
-    private async void settingsMenuItem_Click(object? sender, EventArgs e)
+    private async void SettingsMenuItem_Click(object? sender, EventArgs e)
     {
         bool previousShowColumns = _settingsManager.Settings.ShowTableColumnsInTree;
 
@@ -993,7 +994,7 @@ public partial class MainForm : Form
         }
     }
 
-    private void aboutMenuItem_Click(object? sender, EventArgs e)
+    private void AboutMenuItem_Click(object? sender, EventArgs e)
     {
         var version = BuildInfo.Version;
         var metadata = BuildInfo.Metadata;
@@ -1022,7 +1023,7 @@ public partial class MainForm : Form
             else
             {
                 // Fallback to the static first tab
-                btnExecuteQuery_Click(this, EventArgs.Empty);
+                BtnExecuteQuery_Click(this, EventArgs.Empty);
             }
         }
     }
@@ -1190,20 +1191,12 @@ public partial class MainForm : Form
         }
     }
 
-    private sealed class QueryTabContext
+    private sealed class QueryTabContext(RichTextBox editor, BufferedDataGridView grid, Button executeButton, Button cancelButton)
     {
-        public RichTextBox Editor { get; }
-        public BufferedDataGridView Grid { get; }
-        public Button ExecuteButton { get; }
-        public Button CancelButton { get; }
+        public RichTextBox Editor { get; } = editor;
+        public BufferedDataGridView Grid { get; } = grid;
+        public Button ExecuteButton { get; } = executeButton;
+        public Button CancelButton { get; } = cancelButton;
         public CancellationTokenSource? Cts { get; set; }
-
-        public QueryTabContext(RichTextBox editor, BufferedDataGridView grid, Button executeButton, Button cancelButton)
-        {
-            Editor = editor;
-            Grid = grid;
-            ExecuteButton = executeButton;
-            CancelButton = cancelButton;
-        }
     }
 }

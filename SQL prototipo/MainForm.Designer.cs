@@ -232,7 +232,7 @@ namespace SQL_prototipo
             button2.TabIndex = 3;
             button2.Text = "Execute Query";
             button2.UseVisualStyleBackColor = true;
-            button2.Click += btnExecuteQuery_Click;
+            button2.Click += BtnExecuteQuery_Click;
             // 
             // button1
             // 
@@ -243,7 +243,7 @@ namespace SQL_prototipo
             button1.TabIndex = 2;
             button1.Text = "Load Tables";
             button1.UseVisualStyleBackColor = true;
-            button1.Click += btnLoadTables_Click;
+            button1.Click += BtnLoadTables_Click;
             // 
             // tabPage2
             // 
@@ -265,8 +265,8 @@ namespace SQL_prototipo
             treeViewConnections.Name = "treeViewConnections";
             treeViewConnections.Size = new Size(247, 690);
             treeViewConnections.TabIndex = 0;
-            treeViewConnections.AfterSelect += treeViewConnections_AfterSelect;
-            treeViewConnections.NodeMouseDoubleClick += treeViewConnections_NodeMouseDoubleClick;
+            treeViewConnections.AfterSelect += TreeViewConnections_AfterSelect;
+            treeViewConnections.NodeMouseDoubleClick += TreeViewConnections_NodeMouseDoubleClick;
             // 
             // panel4
             // 
@@ -340,7 +340,7 @@ namespace SQL_prototipo
             cmbConnections.Name = "cmbConnections";
             cmbConnections.Size = new Size(341, 23);
             cmbConnections.TabIndex = 6;
-            cmbConnections.SelectedIndexChanged += cmbConnections_SelectedIndexChanged;
+            cmbConnections.SelectedIndexChanged += CmbConnections_SelectedIndexChanged;
             // 
             // txtConnectionString
             // 
@@ -401,7 +401,7 @@ namespace SQL_prototipo
             btnAddConnection.TabIndex = 0;
             btnAddConnection.Text = "Add Connection";
             btnAddConnection.UseVisualStyleBackColor = true;
-            btnAddConnection.Click += btnAddConnection_Click;
+            btnAddConnection.Click += BtnAddConnection_Click;
             // 
             // btnAddFolder
             // 
@@ -412,7 +412,7 @@ namespace SQL_prototipo
             btnAddFolder.TabIndex = 2;
             btnAddFolder.Text = "Add Folder";
             btnAddFolder.UseVisualStyleBackColor = true;
-            btnAddFolder.Click += btnAddFolder_Click;
+            btnAddFolder.Click += BtnAddFolder_Click;
             // 
             // btnDeleteConnection
             // 
@@ -423,7 +423,7 @@ namespace SQL_prototipo
             btnDeleteConnection.TabIndex = 1;
             btnDeleteConnection.Text = "Delete Connection";
             btnDeleteConnection.UseVisualStyleBackColor = true;
-            btnDeleteConnection.Click += btnDeleteConnection_Click;
+            btnDeleteConnection.Click += BtnDeleteConnection_Click;
             // 
             // btnTestConnection
             // 
@@ -434,7 +434,7 @@ namespace SQL_prototipo
             btnTestConnection.TabIndex = 0;
             btnTestConnection.Text = "Test Connection";
             btnTestConnection.UseVisualStyleBackColor = true;
-            btnTestConnection.Click += btnTestConnection_Click;
+            btnTestConnection.Click += BtnTestConnection_Click;
             // 
             // btnUpdateConnection
             // 
@@ -445,7 +445,7 @@ namespace SQL_prototipo
             btnUpdateConnection.TabIndex = 0;
             btnUpdateConnection.Text = "Update Connection";
             btnUpdateConnection.UseVisualStyleBackColor = true;
-            btnUpdateConnection.Click += btnUpdateConnection_Click;
+            btnUpdateConnection.Click += BtnUpdateConnection_Click;
             // 
             // menuStrip1
             // 
@@ -469,7 +469,7 @@ namespace SQL_prototipo
             newQueryMenuItem.ShortcutKeys = Keys.Control | Keys.N;
             newQueryMenuItem.Size = new Size(176, 22);
             newQueryMenuItem.Text = "&New Query";
-            newQueryMenuItem.Click += newQueryMenuItem_Click;
+            newQueryMenuItem.Click += NewQueryMenuItem_Click;
             // 
             // executeQueryMenuItem
             // 
@@ -477,21 +477,21 @@ namespace SQL_prototipo
             executeQueryMenuItem.ShortcutKeys = Keys.F5;
             executeQueryMenuItem.Size = new Size(176, 22);
             executeQueryMenuItem.Text = "&Execute Query";
-            executeQueryMenuItem.Click += executeQueryMenuItem_Click;
+            executeQueryMenuItem.Click += ExecuteQueryMenuItem_Click;
             // 
             // settingsMenuItem
             // 
             settingsMenuItem.Name = "settingsMenuItem";
             settingsMenuItem.Size = new Size(176, 22);
             settingsMenuItem.Text = "&Settings...";
-            settingsMenuItem.Click += settingsMenuItem_Click;
+            settingsMenuItem.Click += SettingsMenuItem_Click;
             // 
             // exitMenuItem
             // 
             exitMenuItem.Name = "exitMenuItem";
             exitMenuItem.Size = new Size(176, 22);
             exitMenuItem.Text = "E&xit";
-            exitMenuItem.Click += exitMenuItem_Click;
+            exitMenuItem.Click += ExitMenuItem_Click;
             // 
             // helpMenuItem
             // 
@@ -505,7 +505,7 @@ namespace SQL_prototipo
             aboutMenuItem.Name = "aboutMenuItem";
             aboutMenuItem.Size = new Size(107, 22);
             aboutMenuItem.Text = "&About";
-            aboutMenuItem.Click += aboutMenuItem_Click;
+            aboutMenuItem.Click += AboutMenuItem_Click;
             // 
             // MainForm
             // 
