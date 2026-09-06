@@ -23,6 +23,9 @@ public class QueryHistoryManager
     {
         if (string.IsNullOrWhiteSpace(query)) return;
 
+        // Only successful queries should be stored in the history.
+        if (!success) return;
+
         var normalized = query.Trim();
         var today = DateTime.Now.Date;
 
