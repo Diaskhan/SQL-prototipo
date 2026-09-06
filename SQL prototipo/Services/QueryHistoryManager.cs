@@ -1,4 +1,5 @@
 using SQL_prototipo.Models;
+using System.Linq;
 using System.Text.Json;
 
 namespace SQL_prototipo.Services;
@@ -21,6 +22,15 @@ public class QueryHistoryManager
     public void Add(string query, string connectionName, bool success)
     {
         if (string.IsNullOrWhiteSpace(query)) return;
+
+        var normalized = query.Trim();
+        var today = DateTime.Now.Date;
+
+        // Skip logging if the same query was already recorded today.
+        bool alreadyLoggedToday = _entries.Any(e =>
+            e.ExecutedAt.Date == today &&
+            string.Equals(e.Query.Trim(), normalized, StringComparison.OrdinalIgnoreCase));
+        if (alreadyLoggedToday) return;
 
         _entries.Insert(0, new QueryHistoryEntry(query, connectionName, success));
         if (_entries.Count > MaxEntries)
