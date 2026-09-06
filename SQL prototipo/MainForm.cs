@@ -36,12 +36,55 @@ public partial class MainForm : Form
         this.KeyDown += MainForm_KeyDown;
 
         InitializeImageList();
+        SetupSqlHighlighting(richTextBox1);
         InitializeAdditionalUi();
         LoadConnectionsToUI();
         LoadHistoryToUI();
 
         // Remove design-time placeholder tabs so the right panel starts empty.
         tabControl1.TabPages.Clear();
+    }
+
+    private void SetupSqlHighlighting(ScintillaNET.Scintilla editor)
+    {
+        // Enable the built-in SQL lexer
+        editor.LexerName = "sql";
+
+        // Base font/style for all styles
+        editor.StyleResetDefault();
+        editor.Styles[ScintillaNET.Style.Default].Font = "Consolas";
+        editor.Styles[ScintillaNET.Style.Default].Size = 11;
+        editor.StyleClearAll();
+
+        // Case-insensitive keyword matching
+        editor.SetProperty("sql.case.sensitive.keywords", "0");
+
+        // Colors for individual SQL styles
+        editor.Styles[ScintillaNET.Style.Sql.Comment].ForeColor = System.Drawing.Color.Green;
+        editor.Styles[ScintillaNET.Style.Sql.CommentLine].ForeColor = System.Drawing.Color.Green;
+        editor.Styles[ScintillaNET.Style.Sql.CommentDoc].ForeColor = System.Drawing.Color.Green;
+        editor.Styles[ScintillaNET.Style.Sql.Number].ForeColor = System.Drawing.Color.Olive;
+        editor.Styles[ScintillaNET.Style.Sql.Word].ForeColor = System.Drawing.Color.Blue;      // keywords
+        editor.Styles[ScintillaNET.Style.Sql.Word2].ForeColor = System.Drawing.Color.DarkCyan; // functions/types
+        editor.Styles[ScintillaNET.Style.Sql.String].ForeColor = System.Drawing.Color.Firebrick;
+        editor.Styles[ScintillaNET.Style.Sql.Character].ForeColor = System.Drawing.Color.Firebrick;
+        editor.Styles[ScintillaNET.Style.Sql.Operator].ForeColor = System.Drawing.Color.Black;
+        editor.Styles[ScintillaNET.Style.Sql.Identifier].ForeColor = System.Drawing.Color.Black;
+
+        // Keyword set 0 -> Style.Sql.Word
+        editor.SetKeywords(0,
+            "select insert update delete from where join inner left right outer full cross " +
+            "on group by having order asc desc distinct as and or not null is in like between " +
+            "exists union all create table alter drop truncate index view into values set " +
+            "primary key foreign references default constraint unique check case when then else end " +
+            "limit offset top with");
+
+        // Keyword set 1 -> Style.Sql.Word2 (functions/types)
+        editor.SetKeywords(1,
+            "count sum avg min max coalesce nullif cast convert getdate now datediff dateadd " +
+            "substring len length upper lower trim ltrim rtrim replace round abs " +
+            "int integer bigint smallint tinyint bit decimal numeric float real money " +
+            "char varchar nvarchar nchar text datetime date time timestamp uniqueidentifier bool boolean");
     }
 
     private void InitializeAdditionalUi()
@@ -1035,15 +1078,14 @@ public partial class MainForm : Form
             .Count(tp => tp.Tag is QueryTabContext);
         string title = $"{tableName} ({tabCount + 1})";
 
-        // --- RichTextBox (query editor) ---
-        var rtb = new RichTextBox
+        // --- Scintilla (query editor with SQL syntax highlighting) ---
+        var rtb = new ScintillaNET.Scintilla
         {
             Dock = DockStyle.Fill,
-            BorderStyle = BorderStyle.None,
-            Text = query,
-            Font = richTextBox1.Font,
-            ScrollBars = RichTextBoxScrollBars.Both
+            BorderStyle = ScintillaNET.BorderStyle.None
         };
+        SetupSqlHighlighting(rtb);
+        rtb.Text = query;
 
         // --- DataGridView (results) ---
         var dgv = new BufferedDataGridView
@@ -1191,9 +1233,9 @@ public partial class MainForm : Form
         }
     }
 
-    private sealed class QueryTabContext(RichTextBox editor, BufferedDataGridView grid, Button executeButton, Button cancelButton)
+    private sealed class QueryTabContext(ScintillaNET.Scintilla editor, BufferedDataGridView grid, Button executeButton, Button cancelButton)
     {
-        public RichTextBox Editor { get; } = editor;
+        public ScintillaNET.Scintilla Editor { get; } = editor;
         public BufferedDataGridView Grid { get; } = grid;
         public Button ExecuteButton { get; } = executeButton;
         public Button CancelButton { get; } = cancelButton;

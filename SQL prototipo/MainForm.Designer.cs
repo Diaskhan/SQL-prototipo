@@ -40,7 +40,7 @@ namespace SQL_prototipo
             panel1 = new Panel();
             tabControl1 = new TabControl();
             tabPage1 = new TabPage();
-            richTextBox1 = new RichTextBox();
+            richTextBox1 = new ScintillaNET.Scintilla();
             dataGridView1 = new BufferedDataGridView();
             panel3 = new Panel();
             button2 = new Button();
@@ -201,7 +201,6 @@ namespace SQL_prototipo
             richTextBox1.Name = "richTextBox1";
             richTextBox1.Size = new Size(966, 201);
             richTextBox1.TabIndex = 0;
-            richTextBox1.Text = "";
             // 
             // dataGridView1
             // 
@@ -551,7 +550,7 @@ namespace SQL_prototipo
         private TabControl tabControl1;
         private TabPage tabPage1;
         private TabPage tabPage2;
-        private RichTextBox richTextBox1;
+        private ScintillaNET.Scintilla richTextBox1;
         private Panel panel3;
         private Button button1;
         private Button button2;
