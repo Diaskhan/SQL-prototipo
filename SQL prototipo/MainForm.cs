@@ -13,7 +13,6 @@ public partial class MainForm : Form
     private string _currentConnectionString = "Data Source=chinook.sqlite";
     private string _currentDatabaseType = "SQLite";
     private ConnectionInfo? _activeConnection;
-    private bool _isLoadingUI = false;
 
     // Additional UI elements created programmatically
     private StatusStrip _statusStrip = null!;
@@ -31,6 +30,12 @@ public partial class MainForm : Form
         treeView1.BeforeExpand += TreeView1_BeforeExpand;
         txtTableFilter.TextChanged += (_, _) => ApplyTableFilter(txtTableFilter.Text);
 
+        // Connection management is delegated to the ConnectionsPanel user control.
+        connectionsPanel.Initialize(_connectionManager);
+        connectionsPanel.ConnectionActivated += ConnectionsPanel_ConnectionActivated;
+        connectionsPanel.ConnectionsChanged += (_, _) => OnConnectionsChanged();
+        connectionsPanel.StatusChanged += (_, message) => SetStatus(message);
+
         // F5 shortcut to execute queries
         this.KeyPreview = true;
         this.KeyDown += MainForm_KeyDown;
@@ -38,7 +43,7 @@ public partial class MainForm : Form
         InitializeImageList();
         SetupSqlHighlighting(richTextBox1);
         InitializeAdditionalUi();
-        LoadConnectionsToUI();
+        RefreshDatabaseTree();
         LoadHistoryToUI();
 
         // Remove design-time placeholder tabs so the right panel starts empty.
@@ -196,7 +201,7 @@ public partial class MainForm : Form
         e.DrawFocusRectangle();
     }
 
-    private void LoadConnectionsToUI()
+    private void RefreshDatabaseTree()
     {
         // Load connections into treeView1
         treeView1.BeginUpdate();
@@ -219,15 +224,7 @@ public partial class MainForm : Form
 
                 foreach (var connection in group)
                 {
-                    bool isActive = _activeConnection != null && _activeConnection.Name == connection.Name;
-                    string dbIconKey = TreeIconProvider.GetDatabaseIconKey(connection.DatabaseType, isActive);
-                    TreeNode connectionNode = new(connection.Name)
-                    {
-                        Tag = connection,
-                        ImageKey = dbIconKey,
-                        SelectedImageKey = dbIconKey
-                    };
-                    groupNode.Nodes.Add(connectionNode);
+                    groupNode.Nodes.Add(CreateConnectionNode(connection));
                 }
 
                 treeView1.Nodes.Add(groupNode);
@@ -241,91 +238,47 @@ public partial class MainForm : Form
         }
 
         CaptureTreeBackupAndFilter();
+    }
 
-        // Populate the Connections tab tree (folders -> connections) and the combobox
-        PopulateConnectionsTree();
-        cmbConnections.Items.Clear();
-
-        foreach (var connection in _connectionManager.Connections)
+    private TreeNode CreateConnectionNode(ConnectionInfo connection)
+    {
+        bool isActive = _activeConnection?.Name == connection.Name;
+        string dbIconKey = TreeIconProvider.GetDatabaseIconKey(connection.DatabaseType, isActive);
+        return new TreeNode(connection.Name)
         {
-            cmbConnections.Items.Add(connection);
-        }
-
-        // If there are connections, select the first one
-        // Use _isLoadingUI flag to prevent SelectedIndexChanged from triggering a table load
-        _isLoadingUI = true;
-        try
-        {
-            if (cmbConnections.Items.Count > 0)
-            {
-                cmbConnections.SelectedIndex = 0;
-            }
-        }
-        finally
-        {
-            _isLoadingUI = false;
-        }
+            Tag = connection,
+            ImageKey = dbIconKey,
+            SelectedImageKey = dbIconKey
+        };
     }
 
     /// <summary>
-    /// Populates the Connections tab tree with a strict two-level hierarchy:
-    /// folders at the root and their connections as children.
+    /// Reacts to add/update/delete/folder changes raised by the connections panel:
+    /// clears a stale active connection and rebuilds the database object tree.
     /// </summary>
-    private void PopulateConnectionsTree()
+    private void OnConnectionsChanged()
     {
-        _isLoadingUI = true;
-        try
+        if (_activeConnection != null && _connectionManager.GetConnection(_activeConnection.Name) == null)
         {
-            treeViewConnections.BeginUpdate();
-            treeViewConnections.Nodes.Clear();
-
-            var connectionsByGroup = _connectionManager.Connections
-                .GroupBy(c => string.IsNullOrWhiteSpace(c.Group) ? "Default" : c.Group);
-
-            foreach (var folderName in _connectionManager.Folders)
-            {
-                TreeNode folderNode = new(folderName)
-                {
-                    Name = folderName,
-                    Tag = folderName,
-                    ImageKey = "folder",
-                    SelectedImageKey = "folder"
-                };
-
-                var group = connectionsByGroup
-                    .FirstOrDefault(g => string.Equals(g.Key, folderName, StringComparison.OrdinalIgnoreCase));
-
-                if (group != null)
-                {
-                    foreach (var connection in group)
-                    {
-                        bool isActive = _activeConnection != null && _activeConnection.Name == connection.Name;
-                        string dbIconKey = TreeIconProvider.GetDatabaseIconKey(connection.DatabaseType, isActive);
-                        folderNode.Nodes.Add(new TreeNode(connection.Name)
-                        {
-                            Tag = connection,
-                            ImageKey = dbIconKey,
-                            SelectedImageKey = dbIconKey
-                        });
-                    }
-                }
-
-                treeViewConnections.Nodes.Add(folderNode);
-            }
-
-            treeViewConnections.ExpandAll();
+            _activeConnection = null;
         }
-        finally
-        {
-            treeViewConnections.EndUpdate();
-            _isLoadingUI = false;
-        }
+        RefreshDatabaseTree();
+        connectionsPanel.ActiveConnection = _activeConnection;
     }
 
-    private void RefreshConnectionsList()
+    private async void ConnectionsPanel_ConnectionActivated(object? sender, ConnectionInfo connection)
     {
-        _connectionManager.Refresh();
-        LoadConnectionsToUI();
+        try
+        {
+            _currentConnectionString = connection.ConnectionString;
+            _currentDatabaseType = connection.DatabaseType;
+            _dbService = new DatabaseService(connection);
+            await LoadTablesForConnection(connection);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error switching connection: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
     }
 
     private async void TreeView1_NodeMouseDoubleClick(object? sender, TreeNodeMouseClickEventArgs e)
@@ -660,11 +613,8 @@ public partial class MainForm : Form
 
             CaptureTreeBackupAndFilter();
 
-            // Also update the Connections tab combobox
-            if (cmbConnections.Items.Count > 0)
-            {
-                cmbConnections.SelectedItem = connection;
-            }
+            // Reflect the active connection in the connections panel.
+            connectionsPanel.ActiveConnection = connection;
         }
         catch (Exception ex)
         {
@@ -786,268 +736,9 @@ public partial class MainForm : Form
         this.Cursor = enabled ? Cursors.Default : Cursors.WaitCursor;
     }
 
-    // Connection Management Event Handlers
-    private void BtnAddConnection_Click(object sender, EventArgs e)
-    {
-        try
-        {
-            var name = txtConnectionName.Text.Trim();
-            var connectionString = txtConnectionString.Text.Trim();
-            var databaseType = cmbConnectionType.SelectedItem?.ToString() ?? "SQLite";
-            var group = txtGroup.Text.Trim();
-
-            if (string.IsNullOrEmpty(name))
-            {
-                MessageBox.Show("Please enter a connection name.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            if (string.IsNullOrEmpty(connectionString))
-            {
-                MessageBox.Show("Please enter a connection string.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            _connectionManager.AddConnection(name, connectionString, databaseType, group);
-            MessageBox.Show("Connection added successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-            // Clear inputs and refresh list
-            txtConnectionName.Clear();
-            txtConnectionString.Clear();
-            txtGroup.Clear();
-            cmbConnectionType.SelectedIndex = 0;
-            RefreshConnectionsList();
-            LoadConnectionsToUI();
-        }
-        catch (InvalidOperationException ex)
-        {
-            MessageBox.Show(ex.Message, "Duplicate Connection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Error adding connection: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-    }
-
-    private void BtnAddFolder_Click(object sender, EventArgs e)
-    {
-        using var dialog = new Form
-        {
-            Text = "Add Folder",
-            FormBorderStyle = FormBorderStyle.FixedDialog,
-            StartPosition = FormStartPosition.CenterParent,
-            MinimizeBox = false,
-            MaximizeBox = false,
-            ClientSize = new Size(320, 110)
-        };
-
-        var label = new Label { Text = "Folder name:", Location = new Point(12, 15), AutoSize = true };
-        var textBox = new TextBox { Location = new Point(12, 38), Size = new Size(296, 23) };
-        var btnOk = new Button { Text = "OK", DialogResult = DialogResult.OK, Location = new Point(152, 72), Size = new Size(75, 26) };
-        var btnCancel = new Button { Text = "Cancel", DialogResult = DialogResult.Cancel, Location = new Point(233, 72), Size = new Size(75, 26) };
-
-        dialog.Controls.AddRange([label, textBox, btnOk, btnCancel]);
-        dialog.AcceptButton = btnOk;
-        dialog.CancelButton = btnCancel;
-
-        if (dialog.ShowDialog(this) != DialogResult.OK)
-            return;
-
-        var folderName = textBox.Text.Trim();
-        if (string.IsNullOrEmpty(folderName))
-        {
-            MessageBox.Show("Please enter a folder name.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            return;
-        }
-
-        try
-        {
-            _connectionManager.AddFolder(folderName);
-            LoadConnectionsToUI();
-            SetStatus($"Folder '{folderName}' added.");
-        }
-        catch (InvalidOperationException ex)
-        {
-            MessageBox.Show(ex.Message, "Duplicate Folder", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Error adding folder: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-    }
-
-    private void BtnDeleteConnection_Click(object sender, EventArgs e)
-    {
-        try
-        {
-            if (treeViewConnections.SelectedNode?.Tag is not ConnectionInfo selectedConnection)
-            {
-                MessageBox.Show("Please select a connection to delete.", "Selection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            var result = MessageBox.Show($"Are you sure you want to delete '{selectedConnection.Name}'?", "Confirm Delete",
-                MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-            if (result == DialogResult.Yes)
-            {
-                _connectionManager.DeleteConnection(selectedConnection.Name);
-                MessageBox.Show("Connection deleted successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                if (_activeConnection != null && _activeConnection.Name == selectedConnection.Name)
-                {
-                    _activeConnection = null;
-                }
-                RefreshConnectionsList();
-                LoadConnectionsToUI();
-
-                // Clear inputs
-                txtConnectionName.Clear();
-                txtConnectionString.Clear();
-                txtGroup.Clear();
-                cmbConnectionType.SelectedIndex = 0;
-            }
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Error deleting connection: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-    }
-
-    private async void BtnTestConnection_Click(object? sender, EventArgs e)
-    {
-        var name = txtConnectionName.Text.Trim();
-        var connectionString = txtConnectionString.Text.Trim();
-        var databaseType = cmbConnectionType.SelectedItem?.ToString() ?? "SQLite";
-
-        if (string.IsNullOrEmpty(connectionString))
-        {
-            MessageBox.Show("Please enter a connection string to test.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            return;
-        }
-
-        try
-        {
-            SetStatus("Testing connection...");
-            this.Cursor = Cursors.WaitCursor;
-
-            var service = new DatabaseService(connectionString, databaseType);
-            await service.TestConnectionAsync();
-
-            SetStatus("Connection test succeeded.");
-            MessageBox.Show($"Connection '{(string.IsNullOrEmpty(name) ? databaseType : name)}' succeeded.", "Test Connection",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-        catch (Exception ex)
-        {
-            SetStatus("Connection test failed.");
-            MessageBox.Show($"Connection failed: {ex.Message}", "Test Connection", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-        finally
-        {
-            this.Cursor = Cursors.Default;
-        }
-    }
-
-    private void BtnUpdateConnection_Click(object? sender, EventArgs e)
-    {
-        try
-        {
-            var name = txtConnectionName.Text.Trim();
-            var connectionString = txtConnectionString.Text.Trim();
-            var databaseType = cmbConnectionType.SelectedItem?.ToString() ?? "SQLite";
-            var group = txtGroup.Text.Trim();
-
-            if (string.IsNullOrEmpty(name))
-            {
-                MessageBox.Show("Please select or enter a connection name to update.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            if (string.IsNullOrEmpty(connectionString))
-            {
-                MessageBox.Show("Please enter a connection string.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            _connectionManager.UpdateConnection(name, connectionString, databaseType, group);
-            MessageBox.Show("Connection updated successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-            RefreshConnectionsList();
-            LoadConnectionsToUI();
-        }
-        catch (InvalidOperationException ex)
-        {
-            MessageBox.Show(ex.Message, "Update Connection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Error updating connection: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-    }
-
-    private void TreeViewConnections_AfterSelect(object? sender, TreeViewEventArgs e)
-    {
-        if (_isLoadingUI) return;
-
-        if (e.Node?.Tag is ConnectionInfo connection)
-        {
-            txtConnectionName.Text = connection.Name;
-            txtConnectionString.Text = connection.ConnectionString;
-            cmbConnectionType.SelectedItem = connection.DatabaseType;
-            txtGroup.Text = connection.Group;
-        }
-        else if (e.Node?.Tag is string folderName)
-        {
-            // A folder is selected: prefill the group so a new connection lands here.
-            txtGroup.Text = folderName;
-        }
-    }
-
-    private async void TreeViewConnections_NodeMouseDoubleClick(object? sender, TreeNodeMouseClickEventArgs e)
-    {
-        // Double-clicking a connection switches to it and loads its tables.
-        if (e.Node?.Tag is ConnectionInfo connection)
-        {
-            try
-            {
-                _currentConnectionString = connection.ConnectionString;
-                _currentDatabaseType = connection.DatabaseType;
-                _dbService = new DatabaseService(connection);
-                await LoadTablesForConnection(connection);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error switching connection: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-    }
-
-    private async void CmbConnections_SelectedIndexChanged(object sender, EventArgs e)
-    {
-        if (_isLoadingUI) return;
-        if (cmbConnections.SelectedItem is ConnectionInfo connection)
-        {
-            try
-            {
-                _currentConnectionString = connection.ConnectionString;
-                _currentDatabaseType = connection.DatabaseType;
-                _dbService = new DatabaseService(connection);
-
-                // Load tables for this connection
-                await LoadTablesForConnection(connection);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error switching connection: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-    }
-
     private void InitializeImageList()
     {
-        ImageList imageList = TreeIconProvider.CreateImageList();
-        treeView1.ImageList = imageList;
-        treeViewConnections.ImageList = imageList;
+        treeView1.ImageList = TreeIconProvider.CreateImageList();
     }
 
     private void NewQueryMenuItem_Click(object? sender, EventArgs e)
