@@ -277,10 +277,6 @@ public class QueryTabPanel : UserControl
         }
     }
 
-    private void InitializeComponent()
-    {
-
-    }
 
     /// <summary>Applies SQL syntax highlighting to a Scintilla editor.</summary>
     public static void ApplySqlHighlighting(ScintillaNET.Scintilla editor)

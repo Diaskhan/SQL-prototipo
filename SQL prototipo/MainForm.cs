@@ -123,10 +123,9 @@ public partial class MainForm : Form
     }
 
     /// <summary>Marker item used to render a day separator inside the history list.</summary>
-    private sealed class HistoryDayHeader
+    private sealed class HistoryDayHeader(DateTime day)
     {
-        public DateTime Day { get; }
-        public HistoryDayHeader(DateTime day) => Day = day;
+        public DateTime Day { get; } = day;
 
         public string Text
         {
