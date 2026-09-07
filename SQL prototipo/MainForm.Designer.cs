@@ -1,4 +1,4 @@
-using SQL_prototipo.UI;
+using SQL_prototipo.Controls;
 
 namespace SQL_prototipo
 {

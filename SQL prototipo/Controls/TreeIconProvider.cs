@@ -1,6 +1,6 @@
 using System.Drawing.Drawing2D;
 
-namespace SQL_prototipo;
+namespace SQL_prototipo.Controls;
 
 /// <summary>
 /// Provides the tree view icons (server, databases, folders, tables) used across the UI.

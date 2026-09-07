@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace SQL_prototipo.UI;
+namespace SQL_prototipo.Controls;
 
 /// <summary>
 /// A <see cref="DataGridView"/> with double buffering enabled to eliminate the
