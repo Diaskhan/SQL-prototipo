@@ -1,3 +1,4 @@
+using SQL_prototipo.Controls;
 using SQL_prototipo.Models;
 using SQL_prototipo.Services;
 using SQL_prototipo.UI;
@@ -41,7 +42,7 @@ public partial class MainForm : Form
         this.KeyDown += MainForm_KeyDown;
 
         InitializeImageList();
-        SetupSqlHighlighting(richTextBox1);
+        QueryTabPanel.ApplySqlHighlighting(richTextBox1);
         InitializeAdditionalUi();
         RefreshDatabaseTree();
         LoadHistoryToUI();
@@ -289,7 +290,8 @@ public partial class MainForm : Form
         if (e.Node.Tag is TableRef table)
         {
             var query = _dbService.BuildSelectTopQuery(table.Schema, table.Name, 1000);
-            OpenNewQueryTab(query, table.Name);
+            QueryTabPanel.Open(tabControl1, query, table.Name,
+                () => _dbService, SetStatus, busy => ToggleUiState(!busy), RecordHistory);
             return;
         }
 
@@ -679,7 +681,8 @@ public partial class MainForm : Form
     {
         if (_listBoxHistory.SelectedItem is Models.QueryHistoryEntry entry)
         {
-            OpenNewQueryTab(entry.Query, "History");
+            QueryTabPanel.Open(tabControl1, entry.Query, "History",
+                () => _dbService, SetStatus, busy => ToggleUiState(!busy), RecordHistory);
         }
     }
 
@@ -727,10 +730,9 @@ public partial class MainForm : Form
 
         // Also toggle the active query tab's Execute/Cancel buttons if present
         var activeTab = tabControl1.SelectedTab;
-        if (activeTab?.Tag is QueryTabContext ctx)
+        if (activeTab?.Tag is QueryTabPanel panel)
         {
-            ctx.ExecuteButton.Enabled = enabled;
-            ctx.CancelButton.Enabled = !enabled;
+            panel.SetExecutionEnabled(enabled);
         }
 
         this.Cursor = enabled ? Cursors.Default : Cursors.WaitCursor;
@@ -743,15 +745,17 @@ public partial class MainForm : Form
 
     private void NewQueryMenuItem_Click(object? sender, EventArgs e)
     {
-        OpenNewQueryTab(_dbService.GetNewQueryTemplate(), "Query", autoExecute: false);
+        QueryTabPanel.Open(tabControl1, _dbService.GetNewQueryTemplate(), "Query",
+            () => _dbService, SetStatus, busy => ToggleUiState(!busy), RecordHistory,
+            autoExecute: false);
     }
 
     private void ExecuteQueryMenuItem_Click(object? sender, EventArgs e)
     {
         var activeTab = tabControl1.SelectedTab;
-        if (activeTab?.Tag is QueryTabContext ctx)
+        if (activeTab?.Tag is QueryTabPanel panel)
         {
-            ExecuteQueryInTab(ctx);
+            panel.ExecuteQuery();
         }
         else
         {
@@ -803,9 +807,9 @@ public partial class MainForm : Form
             e.Handled = true;
             // Execute query in the currently active query tab
             var activeTab = tabControl1.SelectedTab;
-            if (activeTab?.Tag is QueryTabContext ctx)
+            if (activeTab?.Tag is QueryTabPanel panel)
             {
-                ExecuteQueryInTab(ctx);
+                panel.ExecuteQuery();
             }
             else
             {
