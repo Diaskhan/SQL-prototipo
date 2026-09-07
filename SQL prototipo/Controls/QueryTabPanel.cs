@@ -251,6 +251,11 @@ public partial class QueryTabPanel : UserControl
             "int integer bigint smallint tinyint bit decimal numeric float real money " +
             "char varchar nvarchar nchar text datetime date time timestamp uniqueidentifier bool boolean");
     }
+
+    private void _grid_CellContentClick(object sender, DataGridViewCellEventArgs e)
+    {
+
+    }
 }
 
 /// <summary>Carries the executed query text and its success flag to the host.</summary>

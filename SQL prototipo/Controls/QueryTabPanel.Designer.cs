@@ -42,14 +42,14 @@ namespace SQL_prototipo.Controls
             _editor.AutoCMaxHeight = 9;
             _editor.BiDirectionality = ScintillaNET.BiDirectionalDisplayType.Disabled;
             _editor.BorderStyle = ScintillaNET.BorderStyle.None;
-            _editor.CaretLineBackColor = Color.Black;
+            _editor.CaretLineBackColor = Color.Honeydew;
             _editor.CaretLineVisible = true;
             _editor.Dock = DockStyle.Fill;
             _editor.LexerName = null;
             _editor.Location = new Point(0, 50);
             _editor.Name = "_editor";
             _editor.ScrollWidth = 1;
-            _editor.Size = new Size(394, 0);
+            _editor.Size = new Size(881, 292);
             _editor.TabIndents = true;
             _editor.TabIndex = 0;
             _editor.UseRightToLeftReadingLayout = false;
@@ -64,22 +64,23 @@ namespace SQL_prototipo.Controls
             _grid.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
             _grid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             _grid.Dock = DockStyle.Bottom;
-            _grid.Location = new Point(0, -58);
+            _grid.Location = new Point(0, 346);
             _grid.Name = "_grid";
             _grid.ReadOnly = true;
             dataGridViewCellStyle2.BackColor = Color.White;
             _grid.RowsDefaultCellStyle = dataGridViewCellStyle2;
-            _grid.Size = new Size(394, 500);
+            _grid.Size = new Size(881, 201);
             _grid.TabIndex = 2;
+            _grid.CellContentClick += _grid_CellContentClick;
             // 
             // _splitter
             // 
             _splitter.Dock = DockStyle.Bottom;
-            _splitter.Location = new Point(0, -62);
+            _splitter.Location = new Point(0, 342);
             _splitter.MinExtra = 100;
             _splitter.MinSize = 80;
             _splitter.Name = "_splitter";
-            _splitter.Size = new Size(394, 4);
+            _splitter.Size = new Size(881, 4);
             _splitter.TabIndex = 1;
             _splitter.TabStop = false;
             // 
@@ -105,7 +106,7 @@ namespace SQL_prototipo.Controls
             // _btnClose
             // 
             _btnClose.Dock = DockStyle.Right;
-            _btnClose.Location = new Point(294, 0);
+            _btnClose.Location = new Point(781, 0);
             _btnClose.Name = "_btnClose";
             _btnClose.Size = new Size(100, 50);
             _btnClose.TabIndex = 2;
@@ -119,7 +120,7 @@ namespace SQL_prototipo.Controls
             _toolbar.Dock = DockStyle.Top;
             _toolbar.Location = new Point(0, 0);
             _toolbar.Name = "_toolbar";
-            _toolbar.Size = new Size(394, 50);
+            _toolbar.Size = new Size(881, 50);
             _toolbar.TabIndex = 3;
             // 
             // QueryTabPanel
@@ -129,7 +130,7 @@ namespace SQL_prototipo.Controls
             Controls.Add(_grid);
             Controls.Add(_toolbar);
             Name = "QueryTabPanel";
-            Size = new Size(394, 442);
+            Size = new Size(881, 547);
             ((System.ComponentModel.ISupportInitialize)_grid).EndInit();
             _toolbar.ResumeLayout(false);
             ResumeLayout(false);
