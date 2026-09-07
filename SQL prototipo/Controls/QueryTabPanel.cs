@@ -9,16 +9,8 @@ namespace SQL_prototipo.Controls;
 /// logic against a shared <see cref="DatabaseService"/> supplied by the host,
 /// and communicates back to the host form through events.
 /// </summary>
-public class QueryTabPanel : UserControl
+public partial class QueryTabPanel : UserControl
 {
-    private readonly ScintillaNET.Scintilla _editor;
-    private readonly BufferedDataGridView _grid;
-    private readonly Splitter _splitter;
-    private readonly Button _btnExec;
-    private readonly Button _btnCancel;
-    private readonly Button _btnClose;
-    private readonly Panel _toolbar;
-
     private Func<DatabaseService>? _dbServiceProvider;
     private CancellationTokenSource? _cts;
     private bool _userAdjustedSplit;
@@ -37,75 +29,14 @@ public class QueryTabPanel : UserControl
 
     public QueryTabPanel()
     {
-        // --- Scintilla (query editor with SQL syntax highlighting) ---
-        _editor = new ScintillaNET.Scintilla
+        InitializeComponent();
+
+        // Scintilla relies on native components that are not available inside the
+        // Windows Forms designer, so only apply syntax highlighting at runtime.
+        if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Runtime)
         {
-            Dock = DockStyle.Fill,
-            BorderStyle = ScintillaNET.BorderStyle.None,
-            Height=250
-
-        };
-        ApplySqlHighlighting(_editor);
-
-        // --- DataGridView (results) ---
-        _grid = new BufferedDataGridView
-        {
-            Dock = DockStyle.Bottom,
-            BorderStyle = BorderStyle.None,
-            Height = 500,
-            ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
-            ReadOnly = true,
-            AllowUserToAddRows = false
-        };
-
-        // --- Splitter between query editor and results grid ---
-        _splitter = new Splitter
-        {
-            Dock = DockStyle.Bottom,
-            Height = 4,
-            MinExtra = 100,
-            MinSize = 80,
-            TabStop = false
-        };
-
-        // --- Execute button ---
-        _btnExec = new Button
-        {
-            Text = "Execute Query",
-            Dock = DockStyle.Left,
-            Width = 142,
-            Height = 50
-        };
-
-        // --- Cancel button ---
-        _btnCancel = new Button
-        {
-            Text = "Cancel",
-            Dock = DockStyle.Left,
-            Width = 100,
-            Height = 50,
-            Enabled = false
-        };
-
-        // --- Close tab button ---
-        _btnClose = new Button
-        {
-            Text = "✕ Close Tab",
-            Dock = DockStyle.Right,
-            Width = 100,
-            Height = 50
-        };
-
-        // --- Toolbar panel ---
-        _toolbar = new Panel { Dock = DockStyle.Top, Height = 50 };
-        _toolbar.Controls.Add(_btnCancel);
-        _toolbar.Controls.Add(_btnExec);
-        _toolbar.Controls.Add(_btnClose);
-
-        Controls.Add(_editor);
-        Controls.Add(_splitter);
-        Controls.Add(_grid);
-        Controls.Add(_toolbar);
+            ApplySqlHighlighting(_editor);
+        }
 
         // Wire up events
         _btnExec.Click += (_, _) => ExecuteQuery();
