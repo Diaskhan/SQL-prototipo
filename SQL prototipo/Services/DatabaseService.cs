@@ -5,16 +5,10 @@ using OB.DataAccess.Providers;
 
 namespace SQL_prototipo.Services;
 
-public class DatabaseService
+public class DatabaseService(string connectionString, string databaseType = "SQLite")
 {
-    private readonly string _connectionString;
-    private readonly IDbProvider _provider;
-
-    public DatabaseService(string connectionString, string databaseType = "SQLite")
-    {
-        _connectionString = connectionString;
-        _provider = DbProviderFactory.Create(databaseType);
-    }
+    private readonly string _connectionString = connectionString;
+    private readonly IDbProvider _provider = DbProviderFactory.Create(databaseType);
 
     public DatabaseService(ConnectionInfo connection)
         : this(connection.ConnectionString, connection.DatabaseType)

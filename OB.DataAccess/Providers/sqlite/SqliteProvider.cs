@@ -1,7 +1,7 @@
 using Microsoft.Data.Sqlite;
 using System.Data.Common;
 
-namespace OB.DataAccess.Providers;
+namespace OB.DataAccess.Providers.sqlite;
 
 public class SqliteProvider : IDbProvider
 {

@@ -1,7 +1,7 @@
 using Microsoft.Data.SqlClient;
 using System.Data.Common;
 
-namespace OB.DataAccess.Providers;
+namespace OB.DataAccess.Providers.mssql;
 
 public class SqlServerProvider : IDbProvider
 {

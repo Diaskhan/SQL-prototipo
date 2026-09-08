@@ -50,7 +50,7 @@ public class ConnectionManager
             var configPath = GetConfigPath();
             if (!File.Exists(configPath))
             {
-                return new List<ConnectionInfo>();
+                return [];
             }
 
             var doc = System.Xml.Linq.XDocument.Load(configPath);
@@ -64,21 +64,21 @@ public class ConnectionManager
 
             if (settingElement?.Value == null)
             {
-                return new List<ConnectionInfo>();
+                return [];
             }
 
             var json = settingElement.Value.Trim();
             if (string.IsNullOrEmpty(json))
             {
-                return new List<ConnectionInfo>();
+                return [];
             }
 
-            return JsonSerializer.Deserialize<List<ConnectionInfo>>(json) ?? new List<ConnectionInfo>();
+            return JsonSerializer.Deserialize<List<ConnectionInfo>>(json) ?? [];
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Error loading connections: {ex.Message}");
-            return new List<ConnectionInfo>();
+            return [];
         }
     }
 
@@ -92,15 +92,15 @@ public class ConnectionManager
             var json = ReadSetting(FoldersSettingKey);
             if (string.IsNullOrEmpty(json))
             {
-                return new List<string> { DefaultFolder };
+                return [DefaultFolder];
             }
 
-            return JsonSerializer.Deserialize<List<string>>(json) ?? new List<string> { DefaultFolder };
+            return JsonSerializer.Deserialize<List<string>>(json) ?? [DefaultFolder];
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Error loading folders: {ex.Message}");
-            return new List<string> { DefaultFolder };
+            return [DefaultFolder];
         }
     }
 
@@ -209,7 +209,7 @@ public class ConnectionManager
     /// <summary>
     /// Get the path to user.config file
     /// </summary>
-    private string GetConfigPath()
+    private static string GetConfigPath()
     {
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         var companyName = "SQL_prototipo";
@@ -242,9 +242,8 @@ public class ConnectionManager
     /// </summary>
     public void UpdateConnection(string name, string connectionString, string databaseType = "SQLite", string group = "Default", string? newName = null)
     {
-        var connection = _connections.FirstOrDefault(c => c.Name == name);
-        if (connection == null)
-            throw new InvalidOperationException($"Connection '{name}' not found.");
+        var connection = _connections.FirstOrDefault(c => c.Name == name)
+            ?? throw new InvalidOperationException($"Connection '{name}' not found.");
 
         if (!string.IsNullOrWhiteSpace(newName) && newName != name)
         {
