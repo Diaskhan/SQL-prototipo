@@ -340,8 +340,21 @@ public partial class ConnectionsPanel : UserControl
                 return;
             }
 
-            _connectionManager.UpdateConnection(name, connectionString, databaseType, group);
+            // Use the originally selected connection's name to locate it, so renaming works.
+            if (treeViewConnections.SelectedNode?.Tag is not ConnectionInfo selectedConnection)
+            {
+                MessageBox.Show("Please select a connection to update.", "Selection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var originalName = selectedConnection.Name;
+            _connectionManager.UpdateConnection(originalName, connectionString, databaseType, group, name);
             MessageBox.Show("Connection updated successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            if (_activeConnection != null && _activeConnection.Name == originalName)
+            {
+                _activeConnection.Name = name;
+            }
 
             RefreshFromStorage();
             ConnectionsChanged?.Invoke(this, EventArgs.Empty);

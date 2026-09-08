@@ -240,11 +240,19 @@ public class ConnectionManager
     /// <summary>
     /// Update an existing connection
     /// </summary>
-    public void UpdateConnection(string name, string connectionString, string databaseType = "SQLite", string group = "Default")
+    public void UpdateConnection(string name, string connectionString, string databaseType = "SQLite", string group = "Default", string? newName = null)
     {
         var connection = _connections.FirstOrDefault(c => c.Name == name);
         if (connection == null)
             throw new InvalidOperationException($"Connection '{name}' not found.");
+
+        if (!string.IsNullOrWhiteSpace(newName) && newName != name)
+        {
+            if (_connections.Any(c => c != connection && c.Name == newName))
+                throw new InvalidOperationException($"Connection with name '{newName}' already exists.");
+
+            connection.Name = newName;
+        }
 
         connection.ConnectionString = connectionString;
         connection.DatabaseType = databaseType;
