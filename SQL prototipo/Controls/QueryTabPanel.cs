@@ -40,6 +40,9 @@ public partial class QueryTabPanel : UserControl
 
             // Auto-completion driven by the ANTLR T-SQL grammar.
             _editor.AutoCIgnoreCase = true;
+            // Keep the provider's ordering (tables/columns before keywords) instead
+            // of letting Scintilla re-sort the list alphabetically.
+            _editor.AutoCOrder = ScintillaNET.Order.Custom;
             _editor.CharAdded += Editor_CharAdded;
             _editor.KeyDown += Editor_KeyDown;
         }
@@ -113,6 +116,45 @@ public partial class QueryTabPanel : UserControl
     {
         _dbServiceProvider = dbServiceProvider;
         _editor.Text = query;
+
+        // Populate table/column completions from the connection in the background;
+        // completion stays keyword-only until the schema finishes loading.
+        _ = LoadCompletionSchemaAsync();
+    }
+
+    // Best-effort load of tables and their columns for auto-completion.
+    private async Task LoadCompletionSchemaAsync()
+    {
+        var provider = _dbServiceProvider;
+        if (provider == null)
+        {
+            return;
+        }
+
+        try
+        {
+            var service = provider();
+            var tables = await service.GetAllTablesAsync().ConfigureAwait(false);
+
+            var tableNames = new List<string>();
+            var columnNames = new List<string>();
+
+            foreach (var table in tables)
+            {
+                tableNames.Add(table.Name);
+                var columns = await service.GetColumnsAsync(table.Schema, table.Name).ConfigureAwait(false);
+                foreach (var (name, _) in columns)
+                {
+                    columnNames.Add(name);
+                }
+            }
+
+            _completion.Schema = new SqlSchemaSnapshot(tableNames, columnNames);
+        }
+        catch
+        {
+            // Schema is optional; keyword completion still works without it.
+        }
     }
 
     /// <summary>The current (trimmed) query text.</summary>

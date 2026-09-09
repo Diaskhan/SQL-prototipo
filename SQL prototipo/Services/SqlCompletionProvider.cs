@@ -3,72 +3,139 @@ using System.Collections.Generic;
 using System.Linq;
 using Antlr4.Runtime;
 using Antlr4C3;
-using Antlr4C3.Grammars;
+using SqlGrammar = Antlr4C3.Grammars;
 
 namespace SQL_prototipo.Services;
 
 /// <summary>
-/// Provides SQL keyword auto-completion suggestions by driving the ANTLR
-/// <see cref="CodeCompletionCore"/> over the generated T-SQL grammar. Given the
-/// current editor text and caret position, it returns the set of grammar-valid
-/// keywords that may appear at the caret.
+/// Provides SQL auto-completion suggestions by driving the ANTLR
+/// <see cref="CodeCompletionCore"/> over the generated T-SQL grammar. All
+/// grammar-specific logic (parsing, ignored tokens, preferred rules) is supplied
+/// by a <see cref="TSqlGrammarProvider"/>. In addition to grammar-valid keywords,
+/// it offers table and column names from a <see cref="SqlSchemaSnapshot"/> when the
+/// caret sits in a table- or column-name position.
 /// </summary>
 public sealed class SqlCompletionProvider
 {
-    // Grammar rules that represent identifier positions (table/column names).
-    // Marking them as "preferred" makes the core stop descending into them so we
-    // don't get flooded with generic identifier-token noise at those spots.
-    private static readonly HashSet<int> PreferredRules = new()
+    // Grammar rules that indicate the caret is where a table name is expected.
+    private static readonly HashSet<int> TableNameRules = new()
     {
-        TSqlParser.RULE_table_name,
-        TSqlParser.RULE_full_table_name,
-        TSqlParser.RULE_column_name_list,
-        TSqlParser.RULE_full_column_name,
+        SqlGrammar.TSqlParser.RULE_table_name,
+        SqlGrammar.TSqlParser.RULE_full_table_name,
     };
 
+    // Grammar rules that indicate the caret is where a column name is expected.
+    private static readonly HashSet<int> ColumnNameRules = new()
+    {
+        SqlGrammar.TSqlParser.RULE_full_column_name,
+        SqlGrammar.TSqlParser.RULE_column_name_list,
+        SqlGrammar.TSqlParser.RULE_insert_column_id,
+        SqlGrammar.TSqlParser.RULE_column_alias,
+        SqlGrammar.TSqlParser.RULE_as_column_alias,
+    };
+
+    private readonly TSqlGrammarProvider _grammar;
+
+    public SqlCompletionProvider(TSqlGrammarProvider? grammar = null)
+    {
+        _grammar = grammar ?? new TSqlGrammarProvider();
+    }
+
     /// <summary>
-    /// Returns the distinct, sorted list of keyword completions valid at the
-    /// given caret character offset within <paramref name="sql"/>.
+    /// The database schema used to suggest table and column names. Replace it as
+    /// the active connection changes; may be assigned from any thread.
+    /// </summary>
+    public SqlSchemaSnapshot Schema { get; set; } = SqlSchemaSnapshot.Empty;
+
+    /// <summary>
+    /// Returns the distinct, sorted list of completions valid at the given caret
+    /// character offset within <paramref name="sql"/>. Includes grammar keywords
+    /// plus table/column names when the caret is in an object-name position.
     /// </summary>
     public IReadOnlyList<string> GetCompletions(string sql, int caretOffset)
     {
         sql ??= string.Empty;
 
-        var input = new AntlrInputStream(sql);
-        var lexer = new TSqlLexer(input);
-        lexer.RemoveErrorListeners();
-
-        var tokenStream = new CommonTokenStream(lexer);
+        (Parser parser, CommonTokenStream tokenStream) = _grammar.Parse(sql);
         tokenStream.Fill();
-
-        var parser = new TSqlParser(tokenStream);
-        parser.RemoveErrorListeners();
-        var tree = parser.tsql_file();
 
         int caretTokenIndex = ComputeCaretTokenIndex(tokenStream, caretOffset);
 
         var core = new CodeCompletionCore(parser)
         {
-            preferredRules = PreferredRules,
+            ignoredTokens = _grammar.IgnoredTokens,
+            preferredRules = _grammar.PreferredRules,
         };
 
         CodeCompletionCore.CandidatesCollection candidates =
-            core.CollectCandidates(caretTokenIndex, tree);
+            core.CollectCandidates(caretTokenIndex, null);
 
         var vocabulary = parser.Vocabulary;
-        var results = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
 
+        var keywords = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (int tokenType in candidates.Tokens.Keys)
         {
             string? keyword = ToKeyword(vocabulary, tokenType);
             if (keyword != null)
             {
-                results.Add(keyword);
+                keywords.Add(keyword);
             }
         }
 
-        return results.ToList();
+        // Table/column names are listed first so they surface above keywords, then
+        // keywords fill the rest. A shared set prevents duplicates across groups.
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var ordered = new List<string>();
+
+        foreach (string name in GetSchemaCandidates(candidates))
+        {
+            if (seen.Add(name))
+            {
+                ordered.Add(name);
+            }
+        }
+
+        foreach (string keyword in keywords)
+        {
+            if (seen.Add(keyword))
+            {
+                ordered.Add(keyword);
+            }
+        }
+
+        return ordered;
     }
+
+    // Yields the table and/or column names (sorted) when the collected rule
+    // candidates indicate the caret is at a table- or column-name position.
+    private IEnumerable<string> GetSchemaCandidates(CodeCompletionCore.CandidatesCollection candidates)
+    {
+        SqlSchemaSnapshot schema = Schema;
+        if (schema == null || schema.IsEmpty)
+        {
+            yield break;
+        }
+
+        bool wantsTables = candidates.Rules.Keys.Any(TableNameRules.Contains);
+        bool wantsColumns = candidates.Rules.Keys.Any(ColumnNameRules.Contains);
+
+        if (wantsTables)
+        {
+            foreach (string table in schema.Tables)
+            {
+                yield return table;
+            }
+        }
+
+        if (wantsColumns)
+        {
+            foreach (string column in schema.Columns)
+            {
+                yield return column;
+            }
+        }
+    }
+
 
     // Locates the index of the token the caret sits in (or the following token /
     // EOF when the caret is on whitespace) so the core knows where to resolve.
@@ -139,3 +206,45 @@ public sealed class SqlCompletionProvider
         return word.ToUpperInvariant();
     }
 }
+
+/// <summary>
+/// An immutable snapshot of the table and column names available for
+/// auto-completion. Build one from the active connection's schema and assign it
+/// to <see cref="SqlCompletionProvider.Schema"/>.
+/// </summary>
+public sealed class SqlSchemaSnapshot
+{
+    /// <summary>An empty snapshot that yields no table/column suggestions.</summary>
+    public static readonly SqlSchemaSnapshot Empty =
+        new(Array.Empty<string>(), Array.Empty<string>());
+
+    public SqlSchemaSnapshot(IEnumerable<string> tables, IEnumerable<string> columns)
+    {
+        Tables = Distinct(tables);
+        Columns = Distinct(columns);
+    }
+
+    /// <summary>Distinct table names (unqualified).</summary>
+    public IReadOnlyList<string> Tables { get; }
+
+    /// <summary>Distinct column names across all known tables.</summary>
+    public IReadOnlyList<string> Columns { get; }
+
+    /// <summary>True when there is nothing to suggest.</summary>
+    public bool IsEmpty => Tables.Count == 0 && Columns.Count == 0;
+
+    private static IReadOnlyList<string> Distinct(IEnumerable<string>? values)
+    {
+        if (values == null)
+        {
+            return Array.Empty<string>();
+        }
+
+        return values
+            .Where(v => !string.IsNullOrWhiteSpace(v))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(v => v, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+}
+
