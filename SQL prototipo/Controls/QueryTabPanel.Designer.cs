@@ -8,9 +8,15 @@ namespace SQL_prototipo.Controls
         /// <summary>Clean up any resources being used.</summary>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing)
             {
-                components.Dispose();
+                (_grid?.DataSource as System.Data.DataTable)?.Dispose();
+                _grid.DataSource = null;
+
+                if (components != null)
+                {
+                    components.Dispose();
+                }
             }
             base.Dispose(disposing);
         }

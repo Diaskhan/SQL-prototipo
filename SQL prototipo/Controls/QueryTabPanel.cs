@@ -163,14 +163,26 @@ public partial class QueryTabPanel : UserControl
         if (result.HasResultSet)
         {
             _grid.PrepareForDataRefresh();
-            _grid.DataSource = result.Data;
+            SetGridDataSource(result.Data);
             _grid.ConfigureBinaryColumns(result.Data);
             OnStatus($"{result.RowCount} row(s) returned in {result.ElapsedMilliseconds} ms.");
         }
         else
         {
-            _grid.DataSource = null;
+            SetGridDataSource(null);
             OnStatus($"{result.RecordsAffected} row(s) affected in {result.ElapsedMilliseconds} ms.");
+        }
+    }
+
+    // Replaces the grid's data source, disposing the previously bound DataTable so its
+    // memory is released immediately instead of lingering until the next GC pass.
+    private void SetGridDataSource(System.Data.DataTable? data)
+    {
+        var previous = _grid.DataSource as System.Data.DataTable;
+        _grid.DataSource = data;
+        if (previous != null && !ReferenceEquals(previous, data))
+        {
+            previous.Dispose();
         }
     }
 
