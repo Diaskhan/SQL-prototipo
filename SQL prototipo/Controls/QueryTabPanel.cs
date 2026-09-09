@@ -14,6 +14,7 @@ public partial class QueryTabPanel : UserControl
     private Func<DatabaseService>? _dbServiceProvider;
     private CancellationTokenSource? _cts;
     private bool _userAdjustedSplit;
+    private readonly SqlCompletionProvider _completion = new();
 
     /// <summary>Raised to report a short status message to the host.</summary>
     public event EventHandler<string>? StatusChanged;
@@ -36,6 +37,11 @@ public partial class QueryTabPanel : UserControl
         if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Runtime)
         {
             ApplySqlHighlighting(_editor);
+
+            // Auto-completion driven by the ANTLR T-SQL grammar.
+            _editor.AutoCIgnoreCase = true;
+            _editor.CharAdded += Editor_CharAdded;
+            _editor.KeyDown += Editor_KeyDown;
         }
 
         // Wire up events
@@ -220,6 +226,60 @@ public partial class QueryTabPanel : UserControl
         }
     }
 
+
+    // Offers grammar-driven keyword completions as the user types identifiers.
+    private void Editor_CharAdded(object? sender, ScintillaNET.CharAddedEventArgs e)
+    {
+        char added = (char)e.Char;
+        if (!char.IsLetter(added) && added != '_')
+        {
+            return;
+        }
+
+        ShowCompletions(requireWord: true);
+    }
+
+    // Manually triggers the completion list on Ctrl+Space.
+    private void Editor_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Control && e.KeyCode == Keys.Space)
+        {
+            e.SuppressKeyPress = true;
+            e.Handled = true;
+            ShowCompletions(requireWord: false);
+        }
+    }
+
+    // Computes and displays grammar-valid completions at the caret. When
+    // <paramref name="requireWord"/> is true the list is only shown while typing a
+    // word; Ctrl+Space passes false so it can pop up on an empty position too.
+    private void ShowCompletions(bool requireWord)
+    {
+        int caret = _editor.CurrentPosition;
+        int wordStart = _editor.WordStartPosition(caret, true);
+        int lenEntered = caret - wordStart;
+        if (requireWord && lenEntered <= 0)
+        {
+            return;
+        }
+
+        try
+        {
+            var suggestions = _completion.GetCompletions(_editor.Text, caret);
+            if (suggestions.Count == 0)
+            {
+                _editor.AutoCCancel();
+                return;
+            }
+
+            _editor.AutoCShow(lenEntered, string.Join(" ", suggestions));
+        }
+        catch
+        {
+            // Completion is best-effort; never let it disrupt typing.
+            _editor.AutoCCancel();
+        }
+    }
 
     /// <summary>Applies SQL syntax highlighting to a Scintilla editor.</summary>
     public static void ApplySqlHighlighting(ScintillaNET.Scintilla editor)
