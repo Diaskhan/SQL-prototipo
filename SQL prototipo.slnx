@@ -1,5 +1,5 @@
 <Solution>
-  <Project Path="Antlr4C3.Generated/Antlr4C3.Generated.csproj" />
+  <Project Path="Antlr4C3.Generated.Sql/Antlr4C3.Generated.Sql.csproj" />
   <Project Path="Antlr4C3/Antlr4C3.csproj" />
   <Project Path="OB.DataAccess/OB.DataAccess.csproj" Id="20d394a0-bc5b-4dde-84fe-46ad14414fac" />
   <Project Path="SQL prototipo/SQL prototipo.csproj" />
