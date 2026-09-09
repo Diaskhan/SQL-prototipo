@@ -43,6 +43,7 @@ public partial class QueryTabPanel : UserControl
             // Keep the provider's ordering (tables/columns before keywords) instead
             // of letting Scintilla re-sort the list alphabetically.
             _editor.AutoCOrder = ScintillaNET.Order.Custom;
+            RegisterCompletionIcons();
             _editor.CharAdded += Editor_CharAdded;
             _editor.KeyDown += Editor_KeyDown;
         }
@@ -314,13 +315,59 @@ public partial class QueryTabPanel : UserControl
                 return;
             }
 
-            _editor.AutoCShow(lenEntered, string.Join(" ", suggestions));
+            // Each entry is "Text?N" where N is the registered icon index.
+            string list = string.Join(" ", suggestions.Select(s =>
+                $"{s.Text}{_editor.AutoCTypeSeparator}{IconIndexFor(s.Kind)}"));
+            _editor.AutoCShow(lenEntered, list);
         }
         catch
         {
             // Completion is best-effort; never let it disrupt typing.
             _editor.AutoCCancel();
         }
+    }
+
+    // Icon indices registered with the editor via RegisterCompletionIcons.
+    private const int IconKeyword = 0;
+    private const int IconTable = 1;
+    private const int IconColumn = 2;
+
+    private static int IconIndexFor(SqlCompletionKind kind) => kind switch
+    {
+        SqlCompletionKind.Table => IconTable,
+        SqlCompletionKind.Column => IconColumn,
+        _ => IconKeyword,
+    };
+
+    // Registers small color-coded icons shown next to each completion entry.
+    private void RegisterCompletionIcons()
+    {
+        _editor.AutoCTypeSeparator = '?';
+        _editor.RegisterRgbaImage(IconKeyword, CreateGlyph('K', Color.FromArgb(120, 120, 120)));
+        _editor.RegisterRgbaImage(IconTable, CreateGlyph('T', Color.FromArgb(46, 116, 181)));
+        _editor.RegisterRgbaImage(IconColumn, CreateGlyph('C', Color.FromArgb(46, 139, 87)));
+    }
+
+    // Builds a 16x16 rounded badge with a centered letter for a completion icon.
+    private static Bitmap CreateGlyph(char letter, Color color)
+    {
+        var bitmap = new Bitmap(16, 16);
+        using var graphics = Graphics.FromImage(bitmap);
+        graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+        graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+
+        using var brush = new SolidBrush(color);
+        graphics.FillEllipse(brush, 0, 0, 15, 15);
+
+        using var font = new Font("Segoe UI", 8f, FontStyle.Bold, GraphicsUnit.Pixel);
+        using var format = new StringFormat
+        {
+            Alignment = StringAlignment.Center,
+            LineAlignment = StringAlignment.Center,
+        };
+        graphics.DrawString(letter.ToString(), font, Brushes.White, new RectangleF(0, 0, 16, 16), format);
+
+        return bitmap;
     }
 
     /// <summary>Applies SQL syntax highlighting to a Scintilla editor.</summary>

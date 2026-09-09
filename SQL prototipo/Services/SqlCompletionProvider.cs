@@ -52,7 +52,7 @@ public sealed class SqlCompletionProvider
     /// character offset within <paramref name="sql"/>. Includes grammar keywords
     /// plus table/column names when the caret is in an object-name position.
     /// </summary>
-    public IReadOnlyList<string> GetCompletions(string sql, int caretOffset)
+    public IReadOnlyList<SqlCompletionItem> GetCompletions(string sql, int caretOffset)
     {
         sql ??= string.Empty;
 
@@ -85,13 +85,13 @@ public sealed class SqlCompletionProvider
         // Table/column names are listed first so they surface above keywords, then
         // keywords fill the rest. A shared set prevents duplicates across groups.
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var ordered = new List<string>();
+        var ordered = new List<SqlCompletionItem>();
 
-        foreach (string name in GetSchemaCandidates(candidates))
+        foreach (SqlCompletionItem item in GetSchemaCandidates(candidates))
         {
-            if (seen.Add(name))
+            if (seen.Add(item.Text))
             {
-                ordered.Add(name);
+                ordered.Add(item);
             }
         }
 
@@ -99,7 +99,7 @@ public sealed class SqlCompletionProvider
         {
             if (seen.Add(keyword))
             {
-                ordered.Add(keyword);
+                ordered.Add(new SqlCompletionItem(keyword, SqlCompletionKind.Keyword));
             }
         }
 
@@ -108,7 +108,7 @@ public sealed class SqlCompletionProvider
 
     // Yields the table and/or column names (sorted) when the collected rule
     // candidates indicate the caret is at a table- or column-name position.
-    private IEnumerable<string> GetSchemaCandidates(CodeCompletionCore.CandidatesCollection candidates)
+    private IEnumerable<SqlCompletionItem> GetSchemaCandidates(CodeCompletionCore.CandidatesCollection candidates)
     {
         SqlSchemaSnapshot schema = Schema;
         if (schema == null || schema.IsEmpty)
@@ -123,7 +123,7 @@ public sealed class SqlCompletionProvider
         {
             foreach (string table in schema.Tables)
             {
-                yield return table;
+                yield return new SqlCompletionItem(table, SqlCompletionKind.Table);
             }
         }
 
@@ -131,7 +131,7 @@ public sealed class SqlCompletionProvider
         {
             foreach (string column in schema.Columns)
             {
-                yield return column;
+                yield return new SqlCompletionItem(column, SqlCompletionKind.Column);
             }
         }
     }
@@ -206,6 +206,18 @@ public sealed class SqlCompletionProvider
         return word.ToUpperInvariant();
     }
 }
+
+/// <summary>The category of a completion suggestion, used to pick its icon.</summary>
+public enum SqlCompletionKind
+{
+    Keyword,
+    Table,
+    Column,
+}
+
+/// <summary>A single completion suggestion together with its category.</summary>
+public readonly record struct SqlCompletionItem(string Text, SqlCompletionKind Kind);
+
 
 /// <summary>
 /// An immutable snapshot of the table and column names available for
