@@ -40,6 +40,12 @@ public sealed class SqlCompletionProvider(TSqlGrammarProvider? grammar = null)
     public SqlSchemaSnapshot Schema { get; set; } = SqlSchemaSnapshot.Empty;
 
     /// <summary>
+    /// Maximum number of completion items returned (top N). Values less than or
+    /// equal to zero mean "no limit". Defaults to 25.
+    /// </summary>
+    public int MaxSuggestions { get; set; } = 25;
+
+    /// <summary>
     /// Returns the distinct, sorted list of completions valid at the given caret
     /// character offset within <paramref name="sql"/>. Includes grammar keywords
     /// plus table/column names when the caret is in an object-name position.
@@ -83,8 +89,16 @@ public sealed class SqlCompletionProvider(TSqlGrammarProvider? grammar = null)
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var ordered = new List<SqlCompletionItem>();
 
+        // A value <= 0 means "no limit"; otherwise cap the result at the top N items.
+        int limit = MaxSuggestions > 0 ? MaxSuggestions : int.MaxValue;
+
         foreach (SqlCompletionItem item in GetSchemaCandidates(candidates))
         {
+            if (ordered.Count >= limit)
+            {
+                return ordered;
+            }
+
             if (MatchesPrefix(item.Text, prefix) && seen.Add(item.Text))
             {
                 ordered.Add(item);
@@ -93,6 +107,11 @@ public sealed class SqlCompletionProvider(TSqlGrammarProvider? grammar = null)
 
         foreach (string keyword in keywords)
         {
+            if (ordered.Count >= limit)
+            {
+                break;
+            }
+
             if (MatchesPrefix(keyword, prefix) && seen.Add(keyword))
             {
                 ordered.Add(new SqlCompletionItem(keyword, SqlCompletionKind.Keyword));

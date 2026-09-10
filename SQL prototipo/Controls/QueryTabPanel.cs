@@ -28,6 +28,17 @@ public partial class QueryTabPanel : UserControl
     /// <summary>Raised when the user clicks the "Close Tab" button.</summary>
     public event EventHandler? CloseRequested;
 
+    /// <summary>
+    /// Maximum number of items shown in the auto-completion dropdown (top N).
+    /// </summary>
+    [System.ComponentModel.Browsable(false)]
+    [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+    public int MaxAutocompleteSuggestions
+    {
+        get => _completion.MaxSuggestions;
+        set => _completion.MaxSuggestions = value;
+    }
+
     public QueryTabPanel()
     {
         InitializeComponent();
@@ -73,7 +84,8 @@ public partial class QueryTabPanel : UserControl
         Action<string> onStatus,
         Action<bool> onBusy,
         Action<string, bool> onQueryCompleted,
-        bool autoExecute = true)
+        bool autoExecute = true,
+        int maxAutocompleteSuggestions = 25)
     {
         // Build a unique tab title
         int tabCount = tabControl.TabPages.Cast<TabPage>()
@@ -81,6 +93,7 @@ public partial class QueryTabPanel : UserControl
         string title = $"{tableName} ({tabCount + 1})";
 
         var panel = new QueryTabPanel { Dock = DockStyle.Fill };
+        panel.MaxAutocompleteSuggestions = maxAutocompleteSuggestions;
         panel.Initialize(dbServiceProvider, query);
         panel.StatusChanged += (_, message) => onStatus(message);
         panel.BusyChanged += (_, busy) => onBusy(busy);
@@ -315,8 +328,10 @@ public partial class QueryTabPanel : UserControl
                 return;
             }
 
-            // Each entry is "Text?N" where N is the registered icon index.
-            string list = string.Join(" ", suggestions.Select(s =>
+            // Each entry is "Text?N" where N is the registered icon index. Entries
+            // are joined with AutoCSeparator (not a space) so table names that
+            // contain spaces (e.g. "Order Details") stay a single completion item.
+            string list = string.Join(_editor.AutoCSeparator.ToString(), suggestions.Select(s =>
                 $"{s.Text}{_editor.AutoCTypeSeparator}{IconIndexFor(s.Kind)}"));
             _editor.AutoCShow(lenEntered, list);
         }
@@ -342,6 +357,9 @@ public partial class QueryTabPanel : UserControl
     // Registers small color-coded icons shown next to each completion entry.
     private void RegisterCompletionIcons()
     {
+        // Use a separator that cannot appear inside SQL identifiers so multi-word
+        // names such as "Order Details" are treated as a single completion entry.
+        _editor.AutoCSeparator = '\n';
         _editor.AutoCTypeSeparator = '?';
         _editor.RegisterRgbaImage(IconKeyword, CreateGlyph('K', Color.FromArgb(120, 120, 120)));
         _editor.RegisterRgbaImage(IconTable, CreateGlyph('T', Color.FromArgb(46, 116, 181)));

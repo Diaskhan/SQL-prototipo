@@ -8,6 +8,7 @@ namespace SQL_prototipo;
 public class SettingsForm : Form
 {
     private readonly CheckBox _chkShowColumns;
+    private readonly NumericUpDown _numMaxSuggestions;
 
     /// <summary>
     /// The settings edited by the dialog. Reflects the user's choices after the dialog closes with OK.
@@ -24,7 +25,7 @@ public class SettingsForm : Form
         MaximizeBox = false;
         MinimizeBox = false;
         ShowInTaskbar = false;
-        ClientSize = new Size(360, 130);
+        ClientSize = new Size(360, 196);
 
         var groupObjectTree = new GroupBox
         {
@@ -42,27 +43,54 @@ public class SettingsForm : Form
         };
         groupObjectTree.Controls.Add(_chkShowColumns);
 
+        var groupAutocomplete = new GroupBox
+        {
+            Text = "Auto-completion",
+            Location = new Point(12, 78),
+            Size = new Size(336, 60)
+        };
+
+        var lblMaxSuggestions = new Label
+        {
+            Text = "Max suggestions (top N):",
+            Location = new Point(12, 27),
+            AutoSize = true
+        };
+        groupAutocomplete.Controls.Add(lblMaxSuggestions);
+
+        _numMaxSuggestions = new NumericUpDown
+        {
+            Location = new Point(240, 25),
+            Size = new Size(80, 23),
+            Minimum = 1,
+            Maximum = 1000,
+            Value = Math.Clamp(settings.MaxAutocompleteSuggestions, 1, 1000)
+        };
+        groupAutocomplete.Controls.Add(_numMaxSuggestions);
+
         var btnOk = new Button
         {
             Text = "OK",
             DialogResult = DialogResult.OK,
-            Location = new Point(192, 90),
+            Location = new Point(192, 156),
             Size = new Size(75, 28)
         };
         btnOk.Click += (_, _) =>
         {
             Settings.ShowTableColumnsInTree = _chkShowColumns.Checked;
+            Settings.MaxAutocompleteSuggestions = (int)_numMaxSuggestions.Value;
         };
 
         var btnCancel = new Button
         {
             Text = "Cancel",
             DialogResult = DialogResult.Cancel,
-            Location = new Point(273, 90),
+            Location = new Point(273, 156),
             Size = new Size(75, 28)
         };
 
         Controls.Add(groupObjectTree);
+        Controls.Add(groupAutocomplete);
         Controls.Add(btnOk);
         Controls.Add(btnCancel);
 

@@ -65,7 +65,8 @@ public partial class MainForm : Form
         _historyPanel.EntryActivated += (_, entry) =>
         {
             QueryTabPanel.Open(tabControl1, entry.Query, "History",
-                () => _dbService, SetStatus, busy => ToggleUiState(!busy), RecordHistory);
+                () => _dbService, SetStatus, busy => ToggleUiState(!busy), RecordHistory,
+                maxAutocompleteSuggestions: _settingsManager.Settings.MaxAutocompleteSuggestions);
         };
         tabPageQueries.Controls.Add(_historyPanel);
 
@@ -178,7 +179,8 @@ public partial class MainForm : Form
         {
             var query = _dbService.BuildSelectTopQuery(table.Schema, table.Name, 1000);
             QueryTabPanel.Open(tabControl1, query, table.Name,
-                () => _dbService, SetStatus, busy => ToggleUiState(!busy), RecordHistory);
+                () => _dbService, SetStatus, busy => ToggleUiState(!busy), RecordHistory,
+                maxAutocompleteSuggestions: _settingsManager.Settings.MaxAutocompleteSuggestions);
             return;
         }
 
@@ -624,7 +626,8 @@ public partial class MainForm : Form
     {
         QueryTabPanel.Open(tabControl1, _dbService.GetNewQueryTemplate(), "Query",
             () => _dbService, SetStatus, busy => ToggleUiState(!busy), RecordHistory,
-            autoExecute: false);
+            autoExecute: false,
+            maxAutocompleteSuggestions: _settingsManager.Settings.MaxAutocompleteSuggestions);
     }
 
     private void ExecuteQueryMenuItem_Click(object? sender, EventArgs e)
@@ -653,6 +656,15 @@ public partial class MainForm : Form
         if (dialog.ShowDialog(this) != DialogResult.OK) return;
 
         _settingsManager.Save();
+
+        // Apply the (possibly updated) autocomplete limit to all open query tabs.
+        foreach (TabPage tab in tabControl1.TabPages)
+        {
+            if (tab.Tag is QueryTabPanel openPanel)
+            {
+                openPanel.MaxAutocompleteSuggestions = _settingsManager.Settings.MaxAutocompleteSuggestions;
+            }
+        }
 
         // Rebuild the object tree if the column visibility setting changed
         if (previousShowColumns != _settingsManager.Settings.ShowTableColumnsInTree
