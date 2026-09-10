@@ -6,6 +6,7 @@
 	<Nullable>disable</Nullable>
 	<ImplicitUsings>disable</ImplicitUsings>
 	<IsPackable>false</IsPackable>
+	<NoWarn>$(NoWarn);CS3021;CS0108</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

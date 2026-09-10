@@ -15,31 +15,26 @@ namespace SQL_prototipo.Services;
 /// it offers table and column names from a <see cref="SqlSchemaSnapshot"/> when the
 /// caret sits in a table- or column-name position.
 /// </summary>
-public sealed class SqlCompletionProvider
+public sealed class SqlCompletionProvider(TSqlGrammarProvider? grammar = null)
 {
     // Grammar rules that indicate the caret is where a table name is expected.
-    private static readonly HashSet<int> TableNameRules = new()
-    {
+    private static readonly HashSet<int> TableNameRules =
+    [
         SqlGrammar.TSqlParser.RULE_table_name,
         SqlGrammar.TSqlParser.RULE_full_table_name,
-    };
+    ];
 
     // Grammar rules that indicate the caret is where a column name is expected.
-    private static readonly HashSet<int> ColumnNameRules = new()
-    {
+    private static readonly HashSet<int> ColumnNameRules =
+    [
         SqlGrammar.TSqlParser.RULE_full_column_name,
         SqlGrammar.TSqlParser.RULE_column_name_list,
         SqlGrammar.TSqlParser.RULE_insert_column_id,
         SqlGrammar.TSqlParser.RULE_column_alias,
         SqlGrammar.TSqlParser.RULE_as_column_alias,
-    };
+    ];
 
-    private readonly TSqlGrammarProvider _grammar;
-
-    public SqlCompletionProvider(TSqlGrammarProvider? grammar = null)
-    {
-        _grammar = grammar ?? new TSqlGrammarProvider();
-    }
+    private readonly TSqlGrammarProvider _grammar = grammar ?? new TSqlGrammarProvider();
 
     /// <summary>
     /// The database schema used to suggest table and column names. Replace it as
@@ -224,23 +219,16 @@ public readonly record struct SqlCompletionItem(string Text, SqlCompletionKind K
 /// auto-completion. Build one from the active connection's schema and assign it
 /// to <see cref="SqlCompletionProvider.Schema"/>.
 /// </summary>
-public sealed class SqlSchemaSnapshot
+public sealed class SqlSchemaSnapshot(IEnumerable<string> tables, IEnumerable<string> columns)
 {
     /// <summary>An empty snapshot that yields no table/column suggestions.</summary>
-    public static readonly SqlSchemaSnapshot Empty =
-        new(Array.Empty<string>(), Array.Empty<string>());
-
-    public SqlSchemaSnapshot(IEnumerable<string> tables, IEnumerable<string> columns)
-    {
-        Tables = Distinct(tables);
-        Columns = Distinct(columns);
-    }
+    public static readonly SqlSchemaSnapshot Empty = new([], []);
 
     /// <summary>Distinct table names (unqualified).</summary>
-    public IReadOnlyList<string> Tables { get; }
+    public IReadOnlyList<string> Tables { get; } = Distinct(tables);
 
     /// <summary>Distinct column names across all known tables.</summary>
-    public IReadOnlyList<string> Columns { get; }
+    public IReadOnlyList<string> Columns { get; } = Distinct(columns);
 
     /// <summary>True when there is nothing to suggest.</summary>
     public bool IsEmpty => Tables.Count == 0 && Columns.Count == 0;
@@ -249,14 +237,17 @@ public sealed class SqlSchemaSnapshot
     {
         if (values == null)
         {
-            return Array.Empty<string>();
+            return [];
         }
 
-        return values
-            .Where(v => !string.IsNullOrWhiteSpace(v))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderBy(v => v, StringComparer.OrdinalIgnoreCase)
-            .ToList();
+        return
+        [
+            .. values
+                .Where(v => !string.IsNullOrWhiteSpace(v))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(v => v, StringComparer.OrdinalIgnoreCase),
+        ];
+
     }
 }
 
