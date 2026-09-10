@@ -27,6 +27,7 @@ public partial class MainForm : Form
         _settingsManager = new SettingsManager();
         _dbService = new DatabaseService(_currentConnectionString, _currentDatabaseType);
         treeView1.NodeMouseDoubleClick += TreeView1_NodeMouseDoubleClick;
+        treeView1.NodeMouseClick += TreeView1_NodeMouseClick;
         treeView1.BeforeExpand += TreeView1_BeforeExpand;
         txtTableFilter.TextChanged += (_, _) => ApplyTableFilter(txtTableFilter.Text);
 
@@ -47,6 +48,64 @@ public partial class MainForm : Form
 
         // Remove design-time placeholder tabs so the right panel starts empty.
         tabControl1.TabPages.Clear();
+    }
+
+    private void TreeView1_NodeMouseClick(object? sender, TreeNodeMouseClickEventArgs e)
+    {
+        if (e.Button != MouseButtons.Right || e.Node?.Tag is not TableRef table)
+        {
+            return;
+        }
+
+        treeView1.SelectedNode = e.Node;
+        var menu = new ContextMenuStrip();
+        var structureItem = new ToolStripMenuItem("View and edit table structure");
+        structureItem.Click += (_, _) => OpenTableStructureTab(table);
+        menu.Items.Add(structureItem);
+        menu.Show(treeView1, e.Location);
+    }
+
+    private void OpenTableStructureTab(TableRef table)
+    {
+        var tabKey = $"{_activeConnection?.Name}|{table.Schema}|{table.Name}";
+        var existing = tabControl1.TabPages.Cast<TabPage>()
+            .FirstOrDefault(page => string.Equals(page.Name, tabKey, StringComparison.OrdinalIgnoreCase));
+        if (existing != null)
+        {
+            tabControl1.SelectedTab = existing;
+            return;
+        }
+
+        var panel = new TableStructurePanel();
+        var tab = new TabPage($"Structure: {table.Name}")
+        {
+            Name = tabKey,
+            Padding = new Padding(3)
+        };
+        tab.Controls.Add(panel);
+        panel.StructureSaved += async (_, _) =>
+        {
+            if (_activeConnection != null)
+            {
+                await LoadTablesForConnection(_activeConnection);
+            }
+        };
+        tabControl1.TabPages.Add(tab);
+        tabControl1.SelectedTab = tab;
+        _ = LoadTableStructureAsync(panel, table);
+    }
+
+    private async Task LoadTableStructureAsync(TableStructurePanel panel, TableRef table)
+    {
+        try
+        {
+            await panel.LoadTableAsync(_dbService, table);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Unable to load table structure: {ex.Message}",
+                "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
     }
 
     private void InitializeAdditionalUi()
