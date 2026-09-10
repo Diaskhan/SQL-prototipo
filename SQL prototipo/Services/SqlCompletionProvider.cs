@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Antlr4.Runtime;
 using Antlr4C3;
 using SqlGrammar = Antlr4C3.Grammars;
@@ -56,6 +53,10 @@ public sealed class SqlCompletionProvider(TSqlGrammarProvider? grammar = null)
 
         int caretTokenIndex = ComputeCaretTokenIndex(tokenStream, caretOffset);
 
+        // The partial word already typed at the caret (e.g. "W"). Used to filter
+        // the suggestions so only matching items (e.g. "WHERE") are returned.
+        string prefix = ComputeCaretPrefix(sql, caretOffset);
+
         var core = new CodeCompletionCore(parser)
         {
             ignoredTokens = _grammar.IgnoredTokens,
@@ -84,7 +85,7 @@ public sealed class SqlCompletionProvider(TSqlGrammarProvider? grammar = null)
 
         foreach (SqlCompletionItem item in GetSchemaCandidates(candidates))
         {
-            if (seen.Add(item.Text))
+            if (MatchesPrefix(item.Text, prefix) && seen.Add(item.Text))
             {
                 ordered.Add(item);
             }
@@ -92,13 +93,41 @@ public sealed class SqlCompletionProvider(TSqlGrammarProvider? grammar = null)
 
         foreach (string keyword in keywords)
         {
-            if (seen.Add(keyword))
+            if (MatchesPrefix(keyword, prefix) && seen.Add(keyword))
             {
                 ordered.Add(new SqlCompletionItem(keyword, SqlCompletionKind.Keyword));
             }
         }
 
         return ordered;
+    }
+
+    // True when the candidate starts with the typed prefix (case-insensitive).
+    // An empty prefix matches everything.
+    private static bool MatchesPrefix(string candidate, string prefix)
+    {
+        return prefix.Length == 0
+            || candidate.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
+    }
+
+    // Extracts the identifier/word characters immediately preceding the caret so
+    // completions can be filtered by what the user has already typed.
+    private static string ComputeCaretPrefix(string sql, int caretOffset)
+    {
+        int start = Math.Clamp(caretOffset, 0, sql.Length);
+        int i = start;
+        while (i > 0)
+        {
+            char c = sql[i - 1];
+            if (!char.IsLetterOrDigit(c) && c != '_')
+            {
+                break;
+            }
+
+            i--;
+        }
+
+        return sql.Substring(i, start - i);
     }
 
     // Yields the table and/or column names (sorted) when the collected rule
