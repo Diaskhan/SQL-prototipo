@@ -63,6 +63,14 @@ public sealed class SqlCompletionProvider(TSqlGrammarProvider? grammar = null)
         // the suggestions so only matching items (e.g. "WHERE") are returned.
         string prefix = ComputeCaretPrefix(sql, caretOffset);
 
+        // A table/alias qualifier before a trailing dot (e.g. "e" in "e.|"), used
+        // to scope column completions to a single table.
+        string? qualifier = ComputeCaretQualifier(sql, caretOffset, prefix);
+
+        // Tables referenced in the query's FROM / JOIN clauses, so column
+        // completions (e.g. in WHERE) come from those tables only.
+        IReadOnlyList<TableReference> referencedTables = _grammar.CollectReferencedTables(sql);
+
         var core = new CodeCompletionCore(parser)
         {
             ignoredTokens = _grammar.IgnoredTokens,
@@ -92,7 +100,7 @@ public sealed class SqlCompletionProvider(TSqlGrammarProvider? grammar = null)
         // A value <= 0 means "no limit"; otherwise cap the result at the top N items.
         int limit = MaxSuggestions > 0 ? MaxSuggestions : int.MaxValue;
 
-        foreach (SqlCompletionItem item in GetSchemaCandidates(candidates))
+        foreach (SqlCompletionItem item in GetSchemaCandidates(candidates, referencedTables, qualifier))
         {
             if (ordered.Count >= limit)
             {
@@ -149,9 +157,41 @@ public sealed class SqlCompletionProvider(TSqlGrammarProvider? grammar = null)
         return sql.Substring(i, start - i);
     }
 
+    // Extracts a table/alias qualifier when the caret word is preceded by a dot,
+    // e.g. returns "e" for "... WHERE e.co|". Returns null when unqualified.
+    private static string? ComputeCaretQualifier(string sql, int caretOffset, string prefix)
+    {
+        int caret = Math.Clamp(caretOffset, 0, sql.Length);
+        int dotIndex = caret - prefix.Length - 1;
+        if (dotIndex < 0 || sql[dotIndex] != '.')
+        {
+            return null;
+        }
+
+        int i = dotIndex - 1;
+        while (i >= 0 && (char.IsLetterOrDigit(sql[i]) || sql[i] == '_'))
+        {
+            i--;
+        }
+
+        int start = i + 1;
+        int length = dotIndex - start;
+        if (length <= 0)
+        {
+            return null;
+        }
+
+        return sql.Substring(start, length).Trim('[', ']', '"', '`');
+    }
+
     // Yields the table and/or column names (sorted) when the collected rule
     // candidates indicate the caret is at a table- or column-name position.
-    private IEnumerable<SqlCompletionItem> GetSchemaCandidates(CodeCompletionCore.CandidatesCollection candidates)
+    // Column suggestions are scoped to the tables referenced by the query (and
+    // to a single table when the caret is qualified with an alias, e.g. "e.").
+    private IEnumerable<SqlCompletionItem> GetSchemaCandidates(
+        CodeCompletionCore.CandidatesCollection candidates,
+        IReadOnlyList<TableReference> referencedTables,
+        string? qualifier)
     {
         SqlSchemaSnapshot schema = Schema;
         if (schema == null || schema.IsEmpty)
@@ -172,11 +212,42 @@ public sealed class SqlCompletionProvider(TSqlGrammarProvider? grammar = null)
 
         if (wantsColumns)
         {
-            foreach (string column in schema.Columns)
+            foreach (string column in GetColumnCandidates(schema, referencedTables, qualifier))
             {
                 yield return new SqlCompletionItem(column, SqlCompletionKind.Column);
             }
         }
+    }
+
+    // Determines which columns to offer at a column position: the columns of the
+    // query's referenced tables (optionally narrowed to a qualifying alias/name).
+    // Falls back to every known column when the query has no parseable tables or
+    // no per-table column information is available.
+    private static IEnumerable<string> GetColumnCandidates(
+        SqlSchemaSnapshot schema,
+        IReadOnlyList<TableReference> referencedTables,
+        string? qualifier)
+    {
+        IEnumerable<TableReference> scope = referencedTables;
+        if (!string.IsNullOrEmpty(qualifier))
+        {
+            scope = referencedTables.Where(t =>
+                string.Equals(t.Alias, qualifier, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(t.Name, qualifier, StringComparison.OrdinalIgnoreCase));
+        }
+
+        var tableNames = scope.Select(t => t.Name).ToList();
+        if (tableNames.Count > 0)
+        {
+            IReadOnlyList<string> scopedColumns = schema.ColumnsFor(tableNames);
+            if (scopedColumns.Count > 0)
+            {
+                return scopedColumns;
+            }
+        }
+
+        // No query tables (yet) or no per-table info: offer all known columns.
+        return string.IsNullOrEmpty(qualifier) ? schema.Columns : [];
     }
 
 
@@ -265,21 +336,82 @@ public readonly record struct SqlCompletionItem(string Text, SqlCompletionKind K
 /// <summary>
 /// An immutable snapshot of the table and column names available for
 /// auto-completion. Build one from the active connection's schema and assign it
-/// to <see cref="SqlCompletionProvider.Schema"/>.
+/// to <see cref="SqlCompletionProvider.Schema"/>. When per-table column
+/// information is supplied, column completions can be scoped to the tables that
+/// actually appear in the query (see <see cref="ColumnsFor"/>).
 /// </summary>
-public sealed class SqlSchemaSnapshot(IEnumerable<string> tables, IEnumerable<string> columns)
+public sealed class SqlSchemaSnapshot
 {
     /// <summary>An empty snapshot that yields no table/column suggestions.</summary>
     public static readonly SqlSchemaSnapshot Empty = new([], []);
 
+    private readonly Dictionary<string, IReadOnlyList<string>> _columnsByTable;
+
+    /// <summary>
+    /// Creates a snapshot with a flat list of columns (not associated with any
+    /// particular table). Column completions cannot be scoped to query tables.
+    /// </summary>
+    public SqlSchemaSnapshot(IEnumerable<string> tables, IEnumerable<string> columns)
+    {
+        Tables = Distinct(tables);
+        Columns = Distinct(columns);
+        _columnsByTable = new Dictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Creates a snapshot that maps each table name to its columns, enabling
+    /// column completions to be scoped to the tables used in a query.
+    /// </summary>
+    public SqlSchemaSnapshot(IReadOnlyDictionary<string, IEnumerable<string>> columnsByTable)
+    {
+        columnsByTable ??= new Dictionary<string, IEnumerable<string>>();
+
+        _columnsByTable = new Dictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var pair in columnsByTable)
+        {
+            if (!string.IsNullOrWhiteSpace(pair.Key))
+            {
+                _columnsByTable[pair.Key] = Distinct(pair.Value);
+            }
+        }
+
+        Tables = Distinct(_columnsByTable.Keys);
+        Columns = Distinct(_columnsByTable.Values.SelectMany(v => v));
+    }
+
     /// <summary>Distinct table names (unqualified).</summary>
-    public IReadOnlyList<string> Tables { get; } = Distinct(tables);
+    public IReadOnlyList<string> Tables { get; }
 
     /// <summary>Distinct column names across all known tables.</summary>
-    public IReadOnlyList<string> Columns { get; } = Distinct(columns);
+    public IReadOnlyList<string> Columns { get; }
 
     /// <summary>True when there is nothing to suggest.</summary>
     public bool IsEmpty => Tables.Count == 0 && Columns.Count == 0;
+
+    /// <summary>
+    /// Returns the distinct, sorted columns belonging to the given tables. Names
+    /// are matched case-insensitively against the known tables; unknown names are
+    /// ignored. When no per-table information is available (flat snapshot) or no
+    /// name matches, an empty list is returned so callers can fall back.
+    /// </summary>
+    public IReadOnlyList<string> ColumnsFor(IEnumerable<string> tableNames)
+    {
+        if (tableNames == null || _columnsByTable.Count == 0)
+        {
+            return [];
+        }
+
+        var result = new List<string>();
+        foreach (string name in tableNames)
+        {
+            if (!string.IsNullOrWhiteSpace(name) && _columnsByTable.TryGetValue(name, out var columns))
+            {
+                result.AddRange(columns);
+            }
+        }
+
+        return Distinct(result);
+    }
 
     private static IReadOnlyList<string> Distinct(IEnumerable<string>? values)
     {

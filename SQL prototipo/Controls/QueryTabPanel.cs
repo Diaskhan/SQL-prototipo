@@ -150,20 +150,15 @@ public partial class QueryTabPanel : UserControl
             var service = provider();
             var tables = await service.GetAllTablesAsync().ConfigureAwait(false);
 
-            var tableNames = new List<string>();
-            var columnNames = new List<string>();
+            var columnsByTable = new Dictionary<string, IEnumerable<string>>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var table in tables)
             {
-                tableNames.Add(table.Name);
                 var columns = await service.GetColumnsAsync(table.Schema, table.Name).ConfigureAwait(false);
-                foreach (var (name, _) in columns)
-                {
-                    columnNames.Add(name);
-                }
+                columnsByTable[table.Name] = columns.Select(c => c.Name).ToList();
             }
 
-            _completion.Schema = new SqlSchemaSnapshot(tableNames, columnNames);
+            _completion.Schema = new SqlSchemaSnapshot(columnsByTable);
         }
         catch
         {

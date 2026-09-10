@@ -1,5 +1,5 @@
-using System.Collections.Generic;
 using Antlr4.Runtime;
+using Antlr4.Runtime.Tree;
 using SqlGrammar = Antlr4C3.Grammars;
 
 namespace SQL_prototipo.Services;
@@ -55,6 +55,29 @@ public sealed class TSqlGrammarProvider
         parser.tsql_file();
 
         return (parser, tokenStream);
+    }
+
+    /// <summary>
+    /// Parses <paramref name="code"/> and returns the tables referenced in its
+    /// FROM / JOIN clauses (with schema and alias). Used to scope column
+    /// completions to the tables actually present in the query.
+    /// </summary>
+    public IReadOnlyList<TableReference> CollectReferencedTables(string code)
+    {
+        var inputStream = new AntlrInputStream(code);
+        var lexer = new SqlGrammar.TSqlLexer(inputStream);
+        lexer.RemoveErrorListeners();
+
+        var tokenStream = new CommonTokenStream(lexer);
+        var parser = new SqlGrammar.TSqlParser(tokenStream);
+        parser.RemoveErrorListeners();
+
+        var tree = parser.tsql_file();
+
+        var collector = new TSqlTableCollector();
+        ParseTreeWalker.Default.Walk(collector, tree);
+
+        return collector.Tables;
     }
 
     // Ignore whitespace/comments, EOF, every operator token (except STAR, still
