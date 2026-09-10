@@ -99,7 +99,7 @@ namespace SQL_prototipo.Controls
             // 
             cmbConnectionType.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbConnectionType.FormattingEnabled = true;
-            cmbConnectionType.Items.AddRange(new object[] { "SQLite", "SqlServer", "LocalDB" });
+            cmbConnectionType.Items.AddRange(new object[] { "SqlServer", "LocalDB" });
             cmbConnectionType.Location = new Point(10, 218);
             cmbConnectionType.Name = "cmbConnectionType";
             cmbConnectionType.Size = new Size(341, 23);
@@ -129,7 +129,7 @@ namespace SQL_prototipo.Controls
             txtConnectionString.Location = new Point(10, 70);
             txtConnectionString.Multiline = true;
             txtConnectionString.Name = "txtConnectionString";
-            txtConnectionString.PlaceholderText = "e.g., Data Source=mydb.sqlite";
+            txtConnectionString.PlaceholderText = "e.g., Server=(localdb)\\MSSQLLocalDB;Integrated Security=true";
             txtConnectionString.Size = new Size(341, 75);
             txtConnectionString.TabIndex = 5;
             // 

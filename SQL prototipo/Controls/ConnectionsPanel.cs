@@ -163,7 +163,7 @@ public partial class ConnectionsPanel : UserControl
         {
             var name = txtConnectionName.Text.Trim();
             var connectionString = txtConnectionString.Text.Trim();
-            var databaseType = cmbConnectionType.SelectedItem?.ToString() ?? "SQLite";
+            var databaseType = cmbConnectionType.SelectedItem?.ToString() ?? "SqlServer";
             var group = txtGroup.Text.Trim();
 
             if (string.IsNullOrEmpty(name))
@@ -288,7 +288,7 @@ public partial class ConnectionsPanel : UserControl
     {
         var name = txtConnectionName.Text.Trim();
         var connectionString = txtConnectionString.Text.Trim();
-        var databaseType = cmbConnectionType.SelectedItem?.ToString() ?? "SQLite";
+        var databaseType = cmbConnectionType.SelectedItem?.ToString() ?? "SqlServer";
 
         if (string.IsNullOrEmpty(connectionString))
         {
@@ -325,7 +325,7 @@ public partial class ConnectionsPanel : UserControl
         {
             var name = txtConnectionName.Text.Trim();
             var connectionString = txtConnectionString.Text.Trim();
-            var databaseType = cmbConnectionType.SelectedItem?.ToString() ?? "SQLite";
+            var databaseType = cmbConnectionType.SelectedItem?.ToString() ?? "SqlServer";
             var group = txtGroup.Text.Trim();
 
             if (string.IsNullOrEmpty(name))

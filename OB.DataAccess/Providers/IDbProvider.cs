@@ -4,18 +4,18 @@ namespace OB.DataAccess.Providers;
 
 /// <summary>
 /// Abstracts database-specific behavior so the application can work with
-/// SQLite and SQL Server through a common interface.
+/// SQL Server variants through a common interface.
 /// </summary>
 public interface IDbProvider
 {
     /// <summary>
-    /// The database type identifier this provider handles (e.g. "SQLite").
+    /// The database type identifier this provider handles (e.g. "SqlServer").
     /// </summary>
     string DatabaseType { get; }
 
     /// <summary>
     /// Indicates whether this database engine organizes tables into schemas
-    /// (e.g. SQL Server "dbo"). SQLite does not.
+    /// (e.g. SQL Server "dbo").
     /// </summary>
     bool SupportsSchemas { get; }
 

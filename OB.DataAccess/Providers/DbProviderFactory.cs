@@ -1,6 +1,5 @@
 using OB.DataAccess.Providers;
 using OB.DataAccess.Providers.mssql;
-using OB.DataAccess.Providers.sqlite;
 
 namespace OB.DataAccess.Providers;
 
@@ -13,10 +12,9 @@ public static class DbProviderFactory
     {
         return (databaseType ?? string.Empty).Trim().ToLowerInvariant() switch
         {
-            "sqlite" => new SqliteProvider(),
             "sqlserver" => new SqlServerProvider(),
             "localdb" => new LocalDbProvider(),
-            _ => new SqliteProvider()
+            _ => new SqlServerProvider()
         };
     }
 }

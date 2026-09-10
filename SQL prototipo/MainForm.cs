@@ -10,8 +10,8 @@ public partial class MainForm : Form
     private readonly ConnectionManager _connectionManager;
     private readonly QueryHistoryManager _historyManager;
     private readonly SettingsManager _settingsManager;
-    private string _currentConnectionString = "Data Source=chinook.sqlite";
-    private string _currentDatabaseType = "SQLite";
+    private string _currentConnectionString = @"Server=(localdb)\MSSQLLocalDB;Integrated Security=true";
+    private string _currentDatabaseType = "SqlServer";
     private ConnectionInfo? _activeConnection;
 
     // Additional UI elements created programmatically

@@ -4,14 +4,14 @@ public class ConnectionInfo
 {
     public string Name { get; set; } = string.Empty;
     public string ConnectionString { get; set; } = string.Empty;
-    public string DatabaseType { get; set; } = "SQLite"; // SQLite, SqlServer, LocalDB, etc.
+    public string DatabaseType { get; set; } = "SqlServer"; // SqlServer, LocalDB, etc.
     public string Group { get; set; } = "Default"; // Folder/Group for categorizing connections
 
     public ConnectionInfo()
     {
     }
 
-    public ConnectionInfo(string name, string connectionString, string databaseType = "SQLite", string group = "Default")
+    public ConnectionInfo(string name, string connectionString, string databaseType = "SqlServer", string group = "Default")
     {
         Name = name;
         ConnectionString = connectionString;

@@ -23,13 +23,11 @@ public static class TreeIconProvider
 
         // Active Icons
         imageList.Images.Add("database_active", CreateDatabaseIcon(Color.FromArgb(43, 87, 151), true));
-        imageList.Images.Add("database_sqlite_active", CreateDatabaseIcon(Color.FromArgb(0, 100, 150), true));
         imageList.Images.Add("database_sqlserver_active", CreateDatabaseIcon(Color.FromArgb(186, 12, 47), true));
         imageList.Images.Add("database_localdb_active", CreateDatabaseIcon(Color.FromArgb(120, 40, 140), true));
 
         // Inactive Icons
         imageList.Images.Add("database_inactive", CreateDatabaseIcon(Color.FromArgb(150, 155, 160), false));
-        imageList.Images.Add("database_sqlite_inactive", CreateDatabaseIcon(Color.FromArgb(150, 155, 160), false));
         imageList.Images.Add("database_sqlserver_inactive", CreateDatabaseIcon(Color.FromArgb(150, 155, 160), false));
         imageList.Images.Add("database_localdb_inactive", CreateDatabaseIcon(Color.FromArgb(150, 155, 160), false));
 
@@ -47,7 +45,6 @@ public static class TreeIconProvider
         string suffix = isActive ? "_active" : "_inactive";
         return databaseType.ToLower() switch
         {
-            "sqlite" => "database_sqlite" + suffix,
             "sqlserver" => "database_sqlserver" + suffix,
             "localdb" => "database_localdb" + suffix,
             _ => "database" + suffix

@@ -222,7 +222,7 @@ public class ConnectionManager
     /// <summary>
     /// Add a new connection
     /// </summary>
-    public void AddConnection(string name, string connectionString, string databaseType = "SQLite", string group = "Default")
+    public void AddConnection(string name, string connectionString, string databaseType = "SqlServer", string group = "Default")
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Connection name cannot be empty.", nameof(name));
@@ -240,7 +240,7 @@ public class ConnectionManager
     /// <summary>
     /// Update an existing connection
     /// </summary>
-    public void UpdateConnection(string name, string connectionString, string databaseType = "SQLite", string group = "Default", string? newName = null)
+    public void UpdateConnection(string name, string connectionString, string databaseType = "SqlServer", string group = "Default", string? newName = null)
     {
         var connection = _connections.FirstOrDefault(c => c.Name == name)
             ?? throw new InvalidOperationException($"Connection '{name}' not found.");
