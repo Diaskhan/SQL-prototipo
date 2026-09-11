@@ -62,7 +62,36 @@ public partial class MainForm : Form
         var structureItem = new ToolStripMenuItem("View and edit table structure");
         structureItem.Click += (_, _) => OpenTableStructureTab(table);
         menu.Items.Add(structureItem);
+
+        var createStatementItem = new ToolStripMenuItem("SQL Create statement");
+        createStatementItem.Click += (_, _) => _ = OpenCreateStatementTabAsync(table);
+        menu.Items.Add(createStatementItem);
+
         menu.Show(treeView1, e.Location);
+    }
+
+    private async Task OpenCreateStatementTabAsync(TableRef table)
+    {
+        if (_dbService == null)
+        {
+            return;
+        }
+
+        try
+        {
+            var columns = await _dbService.GetTableDefinitionAsync(table.Schema, table.Name);
+            var script = new MsSqlStatementGenerator(_dbService).BuildCreateTableScript(table, columns);
+
+            QueryTabPanel.Open(tabControl1, script, $"Create: {table.Name}",
+                () => _dbService, SetStatus, busy => ToggleUiState(!busy), RecordHistory,
+                autoExecute: false,
+                maxAutocompleteSuggestions: _settingsManager.Settings.MaxAutocompleteSuggestions);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Unable to generate CREATE statement: {ex.Message}",
+                "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
     }
 
     private void OpenTableStructureTab(TableRef table)
