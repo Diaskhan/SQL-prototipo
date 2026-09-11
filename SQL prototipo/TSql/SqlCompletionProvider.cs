@@ -107,7 +107,9 @@ public sealed class SqlCompletionProvider(TSqlGrammarProvider? grammar = null)
                 return ordered;
             }
 
-            if (MatchesPrefix(item.Text, prefix) && seen.Add(item.Text))
+            // Match against MatchText (table name only) so the schema shown in the
+            // suggestion is not considered when filtering by the typed prefix.
+            if (MatchesPrefix(item.MatchText, prefix) && seen.Add(item.Text))
             {
                 ordered.Add(item);
             }
@@ -204,9 +206,17 @@ public sealed class SqlCompletionProvider(TSqlGrammarProvider? grammar = null)
 
         if (wantsTables)
         {
-            foreach (string table in schema.Tables)
+            // Prefer the full (name, schema) list so same-named tables from
+            // different schemas are all offered; fall back to the name-only list.
+            IEnumerable<(string Name, string? Schema)> entries = schema.TableEntries.Count > 0
+                ? schema.TableEntries
+                : schema.Tables.Select(t => (Name: t, Schema: schema.SchemaFor(t)));
+
+            foreach (var (name, sch) in entries)
             {
-                yield return new SqlCompletionItem(table, SqlCompletionKind.Table);
+                // Display as [schema].[table] but filter by the table name only.
+                string display = string.IsNullOrEmpty(sch) ? $"[{name}]" : $"[{sch}].[{name}]";
+                yield return new SqlCompletionItem(display, SqlCompletionKind.Table, name);
             }
         }
 
@@ -236,10 +246,12 @@ public sealed class SqlCompletionProvider(TSqlGrammarProvider? grammar = null)
                 || string.Equals(t.Name, qualifier, StringComparison.OrdinalIgnoreCase));
         }
 
-        var tableNames = scope.Select(t => t.Name).ToList();
-        if (tableNames.Count > 0)
+        var scopeList = scope.ToList();
+        if (scopeList.Count > 0)
         {
-            IReadOnlyList<string> scopedColumns = schema.ColumnsFor(tableNames);
+            // Scope columns by the exact schema-qualified table so same-named tables
+            // in different schemas do not leak each other's columns.
+            IReadOnlyList<string> scopedColumns = schema.ColumnsForReferences(scopeList);
             if (scopedColumns.Count > 0)
             {
                 return scopedColumns;
@@ -330,7 +342,17 @@ public enum SqlCompletionKind
 }
 
 /// <summary>A single completion suggestion together with its category.</summary>
-public readonly record struct SqlCompletionItem(string Text, SqlCompletionKind Kind);
+/// <param name="Text">Text shown in the dropdown (and inserted), may be schema-qualified.</param>
+/// <param name="Kind">The suggestion category (keyword/table/column).</param>
+/// <param name="FilterText">
+/// Text used to match what the user typed; when null, <paramref name="Text"/> is used.
+/// For tables this is the bare table name so the schema is ignored while filtering.
+/// </param>
+public readonly record struct SqlCompletionItem(string Text, SqlCompletionKind Kind, string? FilterText = null)
+{
+    /// <summary>The text used for prefix matching (falls back to <see cref="Text"/>).</summary>
+    public string MatchText => FilterText ?? Text;
+}
 
 
 /// <summary>
@@ -381,6 +403,124 @@ public sealed class SqlSchemaSnapshot
 
     /// <summary>Distinct table names (unqualified).</summary>
     public IReadOnlyList<string> Tables { get; }
+
+    // Unqualified table name -> its schema (may be null/empty when unknown).
+    private readonly Dictionary<string, string?> _schemaByTable = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Returns the schema for a table name, or null when unknown/none.</summary>
+    public string? SchemaFor(string table)
+        => table != null && _schemaByTable.TryGetValue(table, out var s) ? s : null;
+
+    /// <summary>Registers the schema associated with each table name.</summary>
+    public void SetSchemas(IReadOnlyDictionary<string, string?> schemaByTable)
+    {
+        _schemaByTable.Clear();
+        if (schemaByTable == null)
+        {
+            return;
+        }
+
+        foreach (var pair in schemaByTable)
+        {
+            if (!string.IsNullOrWhiteSpace(pair.Key))
+            {
+                _schemaByTable[pair.Key] = pair.Value;
+            }
+        }
+    }
+
+    // Full list of (table name, schema) pairs, preserving tables that share a
+    // name across different schemas (e.g. [dbo].[Customers] and [sales].[Customers]).
+    private readonly List<(string Name, string? Schema)> _tableEntries = [];
+
+    // Qualified "schema.name" (case-insensitive) -> that table's columns, so column
+    // completions can be scoped to the exact schema-qualified table in a query.
+    private readonly Dictionary<string, IReadOnlyList<string>> _columnsByQualified =
+        new(StringComparer.OrdinalIgnoreCase);
+
+    private static string Qualify(string? schema, string name) => $"{schema}.{name}";
+
+    /// <summary>
+    /// All known tables as (name, schema) pairs. Unlike <see cref="Tables"/> this
+    /// keeps same-named tables from different schemas as separate entries.
+    /// </summary>
+    public IReadOnlyList<(string Name, string? Schema)> TableEntries => _tableEntries;
+
+    /// <summary>Registers the full set of tables together with their schemas and columns.</summary>
+    public void SetTables(IEnumerable<(string Name, string? Schema, IReadOnlyList<string> Columns)> tables)
+    {
+        _tableEntries.Clear();
+        _columnsByQualified.Clear();
+        if (tables == null)
+        {
+            return;
+        }
+
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var (name, schema, columns) in tables)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                continue;
+            }
+
+            // Deduplicate on schema + name so the same qualified table is not repeated.
+            string key = Qualify(schema, name);
+            if (seen.Add(key))
+            {
+                _tableEntries.Add((name, schema));
+                _columnsByQualified[key] = Distinct(columns);
+            }
+        }
+
+        _tableEntries.Sort((a, b) =>
+        {
+            int byName = string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase);
+            return byName != 0
+                ? byName
+                : string.Compare(a.Schema, b.Schema, StringComparison.OrdinalIgnoreCase);
+        });
+    }
+
+    /// <summary>
+    /// Returns the distinct columns of the referenced tables, scoped by schema.
+    /// When a reference carries a schema, only that schema-qualified table's
+    /// columns are returned; otherwise the columns of every same-named table
+    /// (across schemas) are unioned. Returns empty when nothing matches.
+    /// </summary>
+    public IReadOnlyList<string> ColumnsForReferences(IEnumerable<TableReference> references)
+    {
+        if (references == null || _columnsByQualified.Count == 0)
+        {
+            return [];
+        }
+
+        var result = new List<string>();
+        foreach (TableReference table in references)
+        {
+            if (!string.IsNullOrEmpty(table.Schema))
+            {
+                if (_columnsByQualified.TryGetValue(Qualify(table.Schema, table.Name), out var scoped))
+                {
+                    result.AddRange(scoped);
+                }
+
+                continue;
+            }
+
+            // Unqualified reference: union columns of all tables with this name.
+            foreach (var entry in _tableEntries)
+            {
+                if (string.Equals(entry.Name, table.Name, StringComparison.OrdinalIgnoreCase)
+                    && _columnsByQualified.TryGetValue(Qualify(entry.Schema, entry.Name), out var cols))
+                {
+                    result.AddRange(cols);
+                }
+            }
+        }
+
+        return Distinct(result);
+    }
 
     /// <summary>Distinct column names across all known tables.</summary>
     public IReadOnlyList<string> Columns { get; }

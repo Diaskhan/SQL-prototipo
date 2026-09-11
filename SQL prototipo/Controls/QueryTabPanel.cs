@@ -55,6 +55,10 @@ public partial class QueryTabPanel : UserControl
             // Keep the provider's ordering (tables/columns before keywords) instead
             // of letting Scintilla re-sort the list alphabetically.
             _editor.AutoCOrder = ScintillaNET.Order.Custom;
+            // Table entries are shown schema-qualified (e.g. "[dbo].[table1]") but
+            // filtered by the bare name; the typed prefix does not match the leading
+            // "[dbo]." part, so disable auto-hide to keep the list visible.
+            _editor.AutoCAutoHide = false;
             RegisterCompletionIcons();
             _editor.CharAdded += Editor_CharAdded;
             _editor.KeyDown += Editor_KeyDown;
@@ -152,14 +156,19 @@ public partial class QueryTabPanel : UserControl
             var tables = await service.GetAllTablesAsync().ConfigureAwait(false);
 
             var columnsByTable = new Dictionary<string, IEnumerable<string>>(StringComparer.OrdinalIgnoreCase);
+            var tableEntries = new List<(string Name, string? Schema, IReadOnlyList<string> Columns)>();
 
             foreach (var table in tables)
             {
                 var columns = await service.GetColumnsAsync(table.Schema, table.Name).ConfigureAwait(false);
-                columnsByTable[table.Name] = columns.Select(c => c.Name).ToList();
+                var columnNames = columns.Select(c => c.Name).ToList();
+                columnsByTable[table.Name] = columnNames;
+                tableEntries.Add((table.Name, table.Schema, columnNames));
             }
 
-            _completion.Schema = new SqlSchemaSnapshot(columnsByTable);
+            var snapshot = new SqlSchemaSnapshot(columnsByTable);
+            snapshot.SetTables(tableEntries);
+            _completion.Schema = snapshot;
         }
         catch
         {
