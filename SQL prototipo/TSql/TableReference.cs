@@ -1,4 +1,4 @@
-namespace SQL_prototipo.Services;
+namespace SQL_prototipo.TSql;
 
 /// <summary>
 /// A table referenced in a query's FROM / JOIN clause, together with its

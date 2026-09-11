@@ -1,10 +1,12 @@
 using System.Text;
 using SQL_prototipo.Models;
+using SQL_prototipo.Services;
 
-namespace SQL_prototipo.Services;
+namespace SQL_prototipo.TSql;
 
 /// <summary>
-/// Generates MS SQL Server DDL scripts (e.g. CREATE TABLE) from table metadata.
+/// Generates MS SQL Server (T-SQL) DDL scripts (e.g. CREATE TABLE) from table metadata.
+/// All T-SQL specific script generation lives under the <c>Services.TSql</c> folder/namespace.
 /// </summary>
 public sealed class MsSqlStatementGenerator
 {

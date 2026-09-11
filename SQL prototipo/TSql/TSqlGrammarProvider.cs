@@ -2,7 +2,7 @@ using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 using SqlGrammar = Antlr4C3.Grammars;
 
-namespace SQL_prototipo.Services;
+namespace SQL_prototipo.TSql;
 
 /// <summary>
 /// Encapsulates everything needed to run antlr4-c3 autocomplete against the

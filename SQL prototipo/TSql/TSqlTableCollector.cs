@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using SqlGrammar = Antlr4C3.Grammars;
 
-namespace SQL_prototipo.Services;
+namespace SQL_prototipo.TSql;
 
 /// <summary>
 /// Walks a parsed T-SQL tree and records every table referenced in a
