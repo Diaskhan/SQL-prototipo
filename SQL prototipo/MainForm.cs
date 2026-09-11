@@ -64,7 +64,7 @@ public partial class MainForm : Form
         structureItem.Click += (_, _) => OpenTableStructureTab(table);
         menu.Items.Add(structureItem);
 
-        var createStatementItem = new ToolStripMenuItem("SQL Create statement");
+        var createStatementItem = new ToolStripMenuItem("SQL->Create statement (preview)");
         createStatementItem.Click += (_, _) => _ = OpenCreateStatementTabAsync(table);
         menu.Items.Add(createStatementItem);
 
