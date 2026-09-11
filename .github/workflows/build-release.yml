@@ -3,9 +3,13 @@ name: Build Release
 on:
   push:
     branches: [ master ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ master ]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -14,7 +18,9 @@ jobs:
 
     env:
       SOLUTION: "SQL prototipo.slnx"
+      PROJECT: "SQL prototipo/SQL prototipo.csproj"
       CONFIGURATION: Release
+      RUNTIME: win-x64
 
     steps:
       - name: Checkout
@@ -31,3 +37,28 @@ jobs:
 
       - name: Build
         run: dotnet build "${{ env.SOLUTION }}" --configuration ${{ env.CONFIGURATION }} --no-restore
+
+      - name: Publish
+        run: >
+          dotnet publish "${{ env.PROJECT }}"
+          --configuration ${{ env.CONFIGURATION }}
+          --runtime ${{ env.RUNTIME }}
+          --self-contained true
+          -p:PublishSingleFile=false
+          --output publish
+
+      - name: Package (zip)
+        run: Compress-Archive -Path publish/* -DestinationPath SQL-prototipo-${{ env.RUNTIME }}.zip -Force
+        shell: pwsh
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SQL-prototipo-${{ env.RUNTIME }}
+          path: SQL-prototipo-${{ env.RUNTIME }}.zip
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: SQL-prototipo-${{ env.RUNTIME }}.zip
